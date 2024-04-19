@@ -1,0 +1,43 @@
+{
+  "name": "glycerine-viewer",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "An open-source Vue IIIF viewer optimized for annotations",
+  "keywords": ["iiif", "viewer", "annotations", "vue"],
+  "homepage": "https://github.com/Systemik-Solutions/glycerine-viewer",
+  "license": "MIT",
+  "author": {
+    "name": "Systemik Solutions",
+    "email": "iml@systemiksolutions.com"
+  },
+  "repository": "github:Systemik-Solutions/glycerine-viewer",
+  "files": ["dist", "LICENSE", "README.md"],
+  "main": "./dist/glycerine-viewer.umd.js",
+  "module": "./dist/glycerine-viewer.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/glycerine-viewer.es.js",
+      "require": "./dist/glycerine-viewer.umd.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@recogito/annotorious-openseadragon": "^2.7.15",
+    "axios": "^1.6.0",
+    "moment": "^2.29.4",
+    "openseadragon": "^3.1.0",
+    "primeflex": "^3.3.0",
+    "primeicons": "^6.0.1",
+    "primevue": "3.26.1",
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.8"
+  }
+}

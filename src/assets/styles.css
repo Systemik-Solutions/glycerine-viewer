@@ -1,0 +1,29 @@
+/* Annotorious styles */
+.rdwb-ano-shape .a9s-outer {
+    display: none;
+}
+
+.rdwb-ano-shape.outline-normal .a9s-inner {
+    stroke: #506DAC;
+}
+
+.rdwb-ano-shape.outline-light .a9s-inner {
+    stroke: #A9BCE3;
+}
+
+.rdwb-ano-shape.outline-dark .a9s-inner {
+    stroke: #1E3E82;
+}
+
+.a9s-annotation .a9s-inner:hover, .a9s-selection .a9s-inner:hover {
+    stroke: #fff000;
+}
+
+.a9s-annotation.selected .a9s-inner, .a9s-selection .a9s-inner {
+    stroke: #fff000;
+}
+
+/* Override the PrimeVue dialog mask z-index to fix the dropdown panel issue */
+.p-dialog-mask {
+    z-index: 1000 !important;
+}
