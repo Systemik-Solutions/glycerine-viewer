@@ -33,6 +33,12 @@ For example, in the `main.js` file of the Vue project:
 ```javascript
 import { createApp } from 'vue'
 
+// Import the PrimeVue base styles.
+import 'primevue/resources/primevue.min.css';
+
+// Import the PrimeVue theme. Any PrimeVue compatible theme can be used.
+import 'primevue/resources/themes/lara-light-teal/theme.css';
+
 // Import the Glycerine Viewer styles.
 import 'glycerine-viewer/style.css';
 
@@ -81,7 +87,7 @@ import 'primeicons/primeicons.css';
 import PrimeVue from 'primevue/config';
 
 // Import the PrimeVue theme. Any PrimeVue compatible theme can be used.
-import 'primevue/resources/themes/aura-light-green/theme.css';
+import 'primevue/resources/themes/lara-light-teal/theme.css';
 
 // Import the Glycerine Viewer styles.
 import 'glycerine-viewer/style.css';
