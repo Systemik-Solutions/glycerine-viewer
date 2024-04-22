@@ -50,8 +50,13 @@ export default class AnnotationCropper {
                 return cropper.cropEllipse([cx, cy], rx, ry);
             }
         } else if (selector.type === 'FragmentSelector') {
-            if (selector.value.match(/^xywh=([0-9\-.,]+)$/)) {
-                const matches = [...selector.value.matchAll(/^xywh=([0-9\-.,]+)$/g)];
+            let selectorValue = selector.value;
+            // Remove the "pixel:" from the selector value.
+            if (selectorValue.match(/=pixel:/)) {
+                selectorValue = selectorValue.replace(/=pixel:/, '=');
+            }
+            if (selectorValue.match(/^xywh=([0-9\-.,]+)$/)) {
+                const matches = [...selectorValue.matchAll(/^xywh=([0-9\-.,]+)$/g)];
                 const values = matches[0][1].split(',');
                 const x = parseFloat(values[0]) * ratio;
                 const y = parseFloat(values[1]) * ratio;
