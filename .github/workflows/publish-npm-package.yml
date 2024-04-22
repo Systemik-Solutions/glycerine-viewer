@@ -1,6 +1,8 @@
 name: publish-npm-package
 run-name: Publishing NPM package
-on: [release]
+on:
+  release:
+    types: [ published ]
 jobs:
   publish:
     name: Build and Publish
