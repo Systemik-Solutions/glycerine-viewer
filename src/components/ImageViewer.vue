@@ -76,6 +76,11 @@ export default {
             type: String,
             required: true,
         },
+        // Whether the image is a plain image.
+        plainImage: {
+            type: Boolean,
+            default: false,
+        },
         // The annotations.
         annotations: {
             type: Array,
@@ -186,16 +191,25 @@ export default {
          */
         initViewer() {
             // Initialize the OpenSeadragon viewer.
-            this.osdViewer = OpenSeadragon({
+            const osdConfig = {
                 element: this.$refs.container,
                 visibilityRatio: 1,
                 crossOriginPolicy: false,
-                tileSources: [this.image + '/info.json'],
                 prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
                 showZoomControl: false,
                 showHomeControl: false,
                 showFullPageControl: false,
-            });
+            };
+            if (this.plainImage) {
+                osdConfig.tileSources = {
+                    type: 'image',
+                    url:  this.image,
+                    buildPyramid: false,
+                };
+            } else {
+                osdConfig.tileSources = [this.image + '/info.json'];
+            }
+            this.osdViewer = OpenSeadragon(osdConfig);
             // Initialize Annotorious.
             this.annotorious = Annotorious(this.osdViewer, {
                 disableEditor: true,

@@ -11,6 +11,11 @@ export default class ImageLoader {
     #iiifSize;
 
     /**
+     * Whether the image is IIIF.
+     */
+    #isIiif;
+
+    /**
      * The image base URL.
      */
     #image;
@@ -35,15 +40,20 @@ export default class ImageLoader {
      *
      * @param {string} image
      *   The image base URL.
+     * @param {boolean} isIiif
+     *   Whether the image is an IIIF image.
      * @param {string|number|null} width
-     *   The width of the image. If not specified, the max size will be used.
+     *   The width of the image. If not specified, the max size will be used. Only relevant for IIIF images.
      */
-    constructor(image, width = null) {
-        let size = 'max';
-        if (width) {
-            size = `${width},`;
+    constructor(image, width = null, isIiif = true) {
+        this.#isIiif = isIiif;
+        if (isIiif) {
+            let size = 'max';
+            if (width) {
+                size = `${width},`;
+            }
+            this.#iiifSize = size;
         }
-        this.#iiifSize = size;
         this.#image = image;
         this.#loaded = false;
     }
@@ -55,17 +65,32 @@ export default class ImageLoader {
         if (this.#loaded) {
             return;
         }
-        const imageURL = `${this.#image}/full/${this.#iiifSize}/0/default.jpg`;
-        // Get the original image width from info.json.
-        const infoURL = `${this.#image}/info.json`;
-        const info = await axios.get(infoURL);
-        const imageWidth = info.data.width;
-        this.#imageElement = new Image();
-        this.#imageElement.crossOrigin="anonymous";
-        this.#imageElement.src = imageURL;
-        await this.#imageElement.decode();
-        this.#ratio = this.#imageElement.width / imageWidth;
-        this.#loaded = true;
+        let imageURL;
+        let imageWidth;
+        if (this.#isIiif) {
+            imageURL = `${this.#image}/full/${this.#iiifSize}/0/default.jpg`;
+            // Get the original image width from info.json.
+            const infoURL = `${this.#image}/info.json`;
+            const info = await axios.get(infoURL);
+            imageWidth = info.data.width;
+        } else {
+            imageURL = this.#image;
+        }
+        try {
+            this.#imageElement = new Image();
+            this.#imageElement.crossOrigin="anonymous";
+            this.#imageElement.src = imageURL;
+            await this.#imageElement.decode();
+            if (this.#isIiif) {
+                this.#ratio = this.#imageElement.width / imageWidth;
+            } else {
+                this.#ratio = 1;
+            }
+            this.#loaded = true;
+        } catch (error) {
+            // If the image is not CORS-enabled, the error will be caught here.
+            console.error(error);
+        }
     }
 
     /**

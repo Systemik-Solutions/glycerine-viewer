@@ -4,9 +4,12 @@
             <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
                 <template v-for="(canvas, index) in canvases">
                     <div class="h-full" v-show="activeIndex === index">
-                        <TableViewer v-if="viewMode === 'table'" :image="canvas.iiifImage"
+                        <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
+                                     :plain-image="canvas.image.type === 'image'"
                                      :annotations="annotations[canvas.id]" :table-columns="tableColumns"></TableViewer>
-                        <ImageViewer v-else :image="canvas.iiifImage" :annotations="annotations[canvas.id]"
+                        <ImageViewer v-else :image="canvas.image.url"
+                                     :plain-image="canvas.image.type === 'image'"
+                                     :annotations="annotations[canvas.id]"
                                      :light="settings.light"
                                      :default-language="this.settings.filters.language"></ImageViewer>
                     </div>
@@ -187,7 +190,7 @@ export default {
             const canvases = [];
             if (this.manifestData && this.manifestParser) {
                 this.manifestParser.getCanvases().forEach(canvas => {
-                    if (canvas.iiifImage) {
+                    if (canvas.image) {
                         canvases.push(canvas);
                     }
                 });

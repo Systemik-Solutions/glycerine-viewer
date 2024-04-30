@@ -20,7 +20,7 @@ export default class ManifestParser {
      * Get the canvases data from the manifest.
      *
      * @returns {*[]}
-     *   A list of canvases. Each element contains the canvas `id`, `label`, `description`, `iiifImage`, `thumbnail`,
+     *   A list of canvases. Each element contains the canvas `id`, `label`, `description`, `image`, `thumbnail`,
      *   and `annotations`.
      */
     getCanvases() {
@@ -37,9 +37,9 @@ export default class ManifestParser {
                     if (typeof item.summary !== 'undefined') {
                         canvas.description = this.getPropertyDisplayValue(item, 'summary');
                     }
-                    const iiifImage = this.getCanvasIIIFImage(item);
-                    if (iiifImage) {
-                        canvas.iiifImage = iiifImage;
+                    const image = this.getCanvasImage(item);
+                    if (image) {
+                        canvas.image = image;
                     }
                     const thumbnail = this.getCanvasThumbnail(item);
                     if (thumbnail) {
@@ -57,15 +57,15 @@ export default class ManifestParser {
     }
 
     /**
-     * Get the IIIF image URL from the canvas.
+     * Get the image object from the canvas.
      *
      * @param {Object} canvas
      *   The canvas data from the manifest.
-     * @returns {string|null}
-     *   The IIIF image URL.
+     * @returns {Object|null}
+     *   The IIIF image object containing the `type`("image" or "iiif") and `url`.
      */
-    getCanvasIIIFImage(canvas) {
-        let iiifImage = null;
+    getCanvasImage(canvas) {
+        let image = null;
         if (Array.isArray(canvas.items)) {
             canvas.items.forEach(anoPage => {
                 if (anoPage.type === 'AnnotationPage') {
@@ -75,23 +75,34 @@ export default class ManifestParser {
                                 anno.type === 'Annotation' &&
                                 anno.motivation === 'painting' &&
                                 typeof anno.body !== 'undefined' &&
-                                anno.body.type === 'Image' &&
-                                typeof anno.body.service !== 'undefined'
+                                anno.body.type === 'Image'
                             ) {
-                                const service = anno.body.service[0];
-                                if (
-                                    service['@context'] === 'http://iiif.io/api/image/2/context.json' ||
-                                    service['type'] === 'ImageService2' ||
-                                    service['@type'] === 'ImageService2' ||
-                                    service['type'] === 'ImageService3' ||
-                                    service['@type'] === 'ImageService3'
-                                ) {
-                                    if (typeof service.id !== 'undefined') {
-                                        iiifImage = service.id;
+                                if (typeof anno.body.service !== 'undefined') {
+                                    // Handle IIIF image.
+                                    const service = anno.body.service[0];
+                                    if (
+                                        service['@context'] === 'http://iiif.io/api/image/2/context.json' ||
+                                        service['type'] === 'ImageService2' ||
+                                        service['@type'] === 'ImageService2' ||
+                                        service['type'] === 'ImageService3' ||
+                                        service['@type'] === 'ImageService3'
+                                    ) {
+                                        image = {
+                                            type: 'iiif',
+                                        };
+                                        if (typeof service.id !== 'undefined') {
+                                            image.url = service.id;
+                                        }
+                                        if (typeof service['@id'] !== 'undefined') {
+                                            image.url = service['@id'];
+                                        }
                                     }
-                                    if (typeof service['@id'] !== 'undefined') {
-                                        iiifImage = service['@id'];
-                                    }
+                                } else {
+                                    // Handle plain image.
+                                    image = {
+                                        type: 'image',
+                                        url: anno.body.id,
+                                    };
                                 }
                             }
                         });
@@ -99,7 +110,7 @@ export default class ManifestParser {
                 }
             });
         }
-        return iiifImage;
+        return image;
     }
 
     /**
@@ -117,9 +128,13 @@ export default class ManifestParser {
                 return thumbnail.id;
             }
         }
-        const iiifImage = this.getCanvasIIIFImage(canvas);
-        if (iiifImage !== null) {
-            return `${iiifImage}/full/80,/0/default.jpg`;
+        const image = this.getCanvasImage(canvas);
+        if (image !== null) {
+            if (image.type === 'iiif') {
+                return `${image.url}/full/80,/0/default.jpg`;
+            } else {
+                return image.url;
+            }
         }
         return null;
     }

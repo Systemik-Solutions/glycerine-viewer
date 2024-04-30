@@ -121,6 +121,11 @@ export default {
             type: String,
             required: true,
         },
+        // Whether the image is a plain image.
+        plainImage: {
+            type: Boolean,
+            default: false,
+        },
         // The annotations.
         annotations: {
             type: Array,
@@ -165,13 +170,13 @@ export default {
         // Load the image when the image changes.
         image(newValue, oldValue) {
             if (newValue && newValue !== oldValue) {
-                this.loadImage(newValue, this.srcImageSize);
+                this.loadImage(newValue);
             }
         }
     },
     created() {
         // Load the image.
-        this.loadImage(this.image, this.srcImageSize);
+        this.loadImage(this.image);
     },
     methods: {
         /**
@@ -198,12 +203,15 @@ export default {
          *
          * @param {string} image
          *   The image base URL.
-         * @param {number} width
-         *   The width of the image to load. Default to 'max' for the IIIF image API.
          */
-        async loadImage(image, width = null) {
+        async loadImage(image) {
             this.imageLoader = null;
-            const imageLoader = new ImageLoader(image, width);
+            let imageLoader;
+            if (this.plainImage) {
+                imageLoader = new ImageLoader(image, null, false);
+            } else {
+                imageLoader = new ImageLoader(image, this.srcImageSize);
+            }
             await imageLoader.load();
             this.imageLoader = imageLoader;
         },
