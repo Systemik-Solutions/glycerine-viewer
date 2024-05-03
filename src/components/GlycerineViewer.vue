@@ -189,6 +189,17 @@
                         </template>
                     </div>
                 </div>
+                <div v-if="manifestInfo.rights" class="gv-field">
+                    <div class="gv-field-label">Rights</div>
+                    <div class="gv-field-value">
+                        <template v-if="Helper.isURL(manifestInfo.rights)">
+                             <a :href="manifestInfo.rights">{{ manifestInfo.rights }}</a>
+                        </template>
+                        <template v-else>
+                            {{ manifestInfo.rights }}
+                        </template>
+                    </div>
+                </div>
                 <template v-if="manifestInfo.metadata">
                     <div class="gv-field" v-for="metadata in manifestInfo.metadata">
                         <div class="gv-field-label">{{ metadata.label }}</div>
@@ -227,6 +238,17 @@
                                     {{ currentCanvasInfo.requiredStatement.value }}
                                 </template>
                             </div>
+                        </div>
+                    </div>
+                    <div v-if="currentCanvasInfo.rights" class="gv-field">
+                        <div class="gv-field-label">Rights</div>
+                        <div class="gv-field-value">
+                            <template v-if="Helper.isURL(currentCanvasInfo.rights)">
+                                <a :href="currentCanvasInfo.rights">{{ currentCanvasInfo.rights }}</a>
+                            </template>
+                            <template v-else>
+                                {{ currentCanvasInfo.rights }}
+                            </template>
                         </div>
                     </div>
                     <template v-if="currentCanvasInfo.metadata">
@@ -271,6 +293,7 @@ import {toRaw} from "vue";
 import TableViewer from "@/components/TableViewer.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
+import Helper from "@/libraries/helper.js";
 
 export default {
     name: "GlycerineViewer",
@@ -327,6 +350,7 @@ export default {
                 label: null,
                 summary: null,
                 requiredStatement: null,
+                rights: null,
                 metadata: null,
             },
         };
@@ -362,6 +386,7 @@ export default {
                     label: parser.getPrefLabel(),
                     summary: parser.getSummary(),
                     requiredStatement: parser.getRequiredStatement(),
+                    rights: parser.getRights(),
                     metadata: parser.getMetadata(),
                 };
                 // Check whether canvasInfo has valid data.
@@ -503,7 +528,7 @@ export default {
     setup() {
         // Set up the manifest parser property.
         const manifestParser = null;
-        return { manifestParser, HtmlUtility };
+        return { manifestParser, HtmlUtility, Helper };
     },
     mounted() {
         // Load the manifest data.
@@ -544,6 +569,7 @@ export default {
                 this.manifestInfo.label = this.manifestParser.getPrefLabel();
                 this.manifestInfo.summary = this.manifestParser.getSummary();
                 this.manifestInfo.requiredStatement = this.manifestParser.getRequiredStatement();
+                this.manifestInfo.rights = this.manifestParser.getRights();
                 this.manifestInfo.metadata = this.manifestParser.getMetadata();
             }
         },

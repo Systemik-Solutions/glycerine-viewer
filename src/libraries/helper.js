@@ -73,4 +73,14 @@ export default class Helper {
             };
         };
     }
+
+    /**
+     * Check if the text is a URL.
+     *
+     * @param {string} text
+     * @returns {boolean}
+     */
+    static isURL(text) {
+        return text.match(/^https?:\/\/\S*$/i);
+    }
 }

@@ -71,6 +71,15 @@ export default class ResourceParser {
     }
 
     /**
+     * Get the rights.
+     *
+     * @returns {string|null}
+     */
+    getRights() {
+        return this.data.rights ? this.data.rights : null;
+    }
+
+    /**
      * Get the resource metadata.
      *
      * @returns {{label: string, value: string}[]|null}
