@@ -35,87 +35,171 @@
                 </div>
             </div>
         </div>
+        <div v-if="infoPanelVisibility" class="gv-info-pane">
+            <div class="gv-info-header">
+                <div class="gv-info-tools">
+                    <span @click="this.settings.showInfoPanel = false"><i class="pi pi-times-circle"></i></span>
+                </div>
+                <div class="gv-info-title">{{ manifestInfo.label }}</div>
+            </div>
+            <div class="gv-info-body">
+                <div v-if="currentCanvasInfo?.label" class="gv-field">
+                    <div class="gv-field-label">Currently Viewing</div>
+                    <div class="gv-field-value">{{ currentCanvasInfo.label }}</div>
+                </div>
+                <div v-if="manifestInfo.requiredStatement" class="gv-field">
+                    <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
+                    <div class="gv-field-value">{{ manifestInfo.requiredStatement.value }}</div>
+                </div>
+            </div>
+        </div>
         <div class="absolute" style="top:1rem;right:1rem">
             <Button rounded class="mr-2"
                     :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-table'"
                     :title="viewMode === 'table' ? 'Image View' : 'Table View'" @click="toggleViewMode" />
-            <Button rounded icon="pi pi-cog" title="Settings" @click="showSidebar = true" />
+            <Button rounded icon="pi pi-info-circle" class="mr-2" title="About" @click="showAboutPanel = true" />
+            <Button rounded icon="pi pi-cog" title="Settings" @click="showSettingsPanel = true" />
         </div>
         <Transition name="slide">
-            <div v-if="showSidebar" class="gv-sidebar">
+            <div v-if="showSettingsPanel" class="gv-sidebar">
                 <div class="text-right">
                     <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
-                            @click="showSidebar = false" />
+                            @click="showSettingsPanel = false" />
                 </div>
-                <h4>Settings</h4>
+                <h3><i class="pi pi-cog"></i> Settings</h3>
                 <div class="p-fluid formgrid grid">
-                    <div class="field col-12">
-                        <label for="filterSet">Show</label>
-                        <Dropdown id="filterSet" v-model="settings.filters.set" :options="filterSetOptions"
-                                  option-label="label" option-value="value" />
-                    </div>
-                    <div class="field col-12">
-                        <label for="filterLang">Language</label>
-                        <Dropdown id="filterLang" v-model="settings.filters.language" :options="filterLanguageOptions"
-                                  option-label="label" option-value="value" />
-                    </div>
-                    <div class="field col-12">
-                        <label for="filterLine">Line Color</label>
-                        <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
-                                  option-label="label" option-value="value" />
-                    </div>
-                    <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
-                        <div><i class="pi pi-sun"></i> Light</div>
-                        <InputSwitch v-model="settings.light" />
-                    </div>
-                    <div v-if="viewMode === 'table'" class="field col-12">
-                        <div class="mb-2">Table Columns</div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
-                                      :binary="true" />
-                            <label for="tcTitle">Title</label>
+                    <div class="w-full">
+                        <h4 class="pl-2">Annotation Filters</h4>
+                        <div class="field col-12">
+                            <label for="filterSet">Show</label>
+                            <Dropdown id="filterSet" v-model="settings.filters.set" :options="filterSetOptions"
+                                      option-label="label" option-value="value" />
                         </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Description" input-id="tcDescription"
-                                      :binary="true" />
-                            <label for="tcDescription">Description</label>
+                        <div class="field col-12">
+                            <label for="filterLang">Language</label>
+                            <Dropdown id="filterLang" v-model="settings.filters.language" :options="filterLanguageOptions"
+                                      option-label="label" option-value="value" />
                         </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Links" input-id="tcLinks"
-                                      :binary="true" />
-                            <label for="tcLinks">Links</label>
-                        </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Tags" input-id="tcTags"
-                                      :binary="true" />
-                            <label for="tcTags">Tags</label>
-                        </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Notes" input-id="tcNotes"
-                                      :binary="true" />
-                            <label for="tcNotes">Notes</label>
-                        </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Attribution" input-id="tcAttribution"
-                                      :binary="true" />
-                            <label for="tcAttribution">Attribution</label>
-                        </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Date" input-id="tcDate"
-                                      :binary="true" />
-                            <label for="tcDate">Date</label>
-                        </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
-                                      :binary="true" />
-                            <label for="tcLineColor">Line Color</label>
-                        </div>
-                        <div class="mb-1">
-                            <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
-                                      :binary="true" />
-                            <label for="tcComments">Comments</label>
+                        <div class="field col-12">
+                            <label for="filterLine">Line Color</label>
+                            <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
+                                      option-label="label" option-value="value" />
                         </div>
                     </div>
+                    <div class="w-full">
+                        <h4 class="pl-2">Display</h4>
+                        <div v-if="viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
+                            <div><i class="pi pi-sun"></i> Light</div>
+                            <InputSwitch v-model="settings.light" />
+                        </div>
+                        <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
+                            <div><i class="pi pi-info-circle"></i> Information Panel</div>
+                            <InputSwitch v-model="settings.showInfoPanel" />
+                        </div>
+                        <div v-if="viewMode === 'table'" class="field col-12">
+                            <div class="mb-2">Table Columns</div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
+                                          :binary="true" />
+                                <label for="tcTitle">Title</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Description" input-id="tcDescription"
+                                          :binary="true" />
+                                <label for="tcDescription">Description</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Links" input-id="tcLinks"
+                                          :binary="true" />
+                                <label for="tcLinks">Links</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Tags" input-id="tcTags"
+                                          :binary="true" />
+                                <label for="tcTags">Tags</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Notes" input-id="tcNotes"
+                                          :binary="true" />
+                                <label for="tcNotes">Notes</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Attribution" input-id="tcAttribution"
+                                          :binary="true" />
+                                <label for="tcAttribution">Attribution</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Date" input-id="tcDate"
+                                          :binary="true" />
+                                <label for="tcDate">Date</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
+                                          :binary="true" />
+                                <label for="tcLineColor">Line Color</label>
+                            </div>
+                            <div class="mb-1">
+                                <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
+                                          :binary="true" />
+                                <label for="tcComments">Comments</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+        <Transition name="slide">
+            <div v-if="showAboutPanel" class="gv-sidebar">
+                <div class="text-right">
+                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                            @click="showAboutPanel = false" />
+                </div>
+                <h3><i class="pi pi-info-circle"></i> About</h3>
+                <h4 v-if="manifestInfo.label">{{ manifestInfo.label }}</h4>
+                <div v-if="manifestUrl" class="gv-field">
+                    <div class="gv-field-label">IIIF Manifest</div>
+                    <div class="gv-field-value"><a target="_blank" :href="manifestUrl">{{ manifestUrl }}</a></div>
+                </div>
+                <div v-if="manifestInfo.summary" class="gv-field">
+                    <div class="gv-field-label">Summary</div>
+                    <div class="gv-field-value">{{ manifestInfo.summary }}</div>
+                </div>
+                <div v-if="manifestInfo.requiredStatement" class="gv-field">
+                    <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
+                    <div class="gv-field-value">{{ manifestInfo.requiredStatement.value }}</div>
+                </div>
+                <template v-if="manifestInfo.metadata">
+                    <div class="gv-field" v-for="metadata in manifestInfo.metadata">
+                        <div class="gv-field-label">{{ metadata.label }}</div>
+                        <div class="gv-field-value">{{ metadata.value }}</div>
+                    </div>
+                </template>
+                <div class="mt-6" v-if="currentCanvasInfo">
+                    <h3><i class="pi pi-info-circle"></i> Canvas Information</h3>
+                    <h4 v-if="currentCanvasInfo.label">{{ currentCanvasInfo.label }}</h4>
+                    <div v-if="currentCanvasInfo.summary" class="gv-field">
+                        <div class="gv-field-label">Summary</div>
+                        <div class="gv-field-value">{{ currentCanvasInfo.summary }}</div>
+                    </div>
+                    <div v-if="currentCanvasInfo.requiredStatement" class="gv-field">
+                        <div class="gv-field-label">{{ currentCanvasInfo.requiredStatement.label }}</div>
+                        <div class="gv-field-value">{{ currentCanvasInfo.requiredStatement.value }}</div>
+                    </div>
+                    <template v-if="currentCanvasInfo.metadata">
+                        <div class="gv-field" v-for="metadata in currentCanvasInfo.metadata">
+                            <div class="gv-field-label">{{ metadata.label }}</div>
+                            <div class="gv-field-value">{{ metadata.value }}</div>
+                        </div>
+                    </template>
+                </div>
+                <div class="text-center mt-8 gv-powered-by">
+                    <span class="mr-2">Powered by Glycerine</span>
+                    <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io">
+                        <i class="pi pi-globe"></i>
+                    </a>
+                    <a target="_blank" title="GitHub" href="https://github.com/Systemik-Solutions/glycerine-viewer">
+                        <i class="pi pi-github"></i>
+                    </a>
                 </div>
             </div>
         </Transition>
@@ -130,7 +214,7 @@ import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
 
 import axios from "axios";
-import ManifestParser from "@/libraries/manifest-parser";
+import ManifestParser from "@/libraries/iiif/manifest-parser.js";
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
 import TableViewer from "@/components/TableViewer.vue";
@@ -154,8 +238,10 @@ export default {
             manifestData: null,
             // The view mode. Can be 'image' or 'table'.
             viewMode: 'image',
-            // Whether to show the sidebar.
-            showSidebar: false,
+            // Whether to show the "About" panel.
+            showAboutPanel: false,
+            // Whether to show the "Settings" panel.
+            showSettingsPanel: false,
             // The settings.
             settings: {
                 // Filters data.
@@ -169,6 +255,8 @@ export default {
                 },
                 // Whether to turn on the light.
                 light: true,
+                // Whether to show the info panel.
+                showInfoPanel: true,
                 // The display of table columns.
                 tableColumns: {
                     Title: true,
@@ -181,10 +269,27 @@ export default {
                     "Line Color": false,
                     Comments: false,
                 }
-            }
+            },
+            // Manifest information.
+            manifestInfo: {
+                label: null,
+                summary: null,
+                requiredStatement: null,
+                metadata: null,
+            },
         };
     },
     computed: {
+        // The URL of the manifest.
+        manifestUrl() {
+            if (typeof this.manifest === 'string') {
+                return this.manifest;
+            }
+            if (typeof this.manifest === 'object' && this.manifest.id) {
+                return this.manifest.id;
+            }
+            return null;
+        },
         // The canvases from the manifest.
         canvases() {
             const canvases = [];
@@ -196,6 +301,30 @@ export default {
                 });
             }
             return canvases;
+        },
+        // The information of the current canvas.
+        currentCanvasInfo() {
+            if (this.manifestData) {
+                const parser = toRaw(this.canvases[this.activeIndex].parser);
+                const canvasInfo = {
+                    label: parser.getPrefLabel(),
+                    summary: parser.getSummary(),
+                    requiredStatement: parser.getRequiredStatement(),
+                    metadata: parser.getMetadata(),
+                };
+                // Check whether canvasInfo has valid data.
+                let hasData = false;
+                for (const key in canvasInfo) {
+                    if (canvasInfo[key]) {
+                        hasData = true;
+                        break;
+                    }
+                }
+                if (hasData) {
+                    return canvasInfo;
+                }
+            }
+            return null;
         },
         // The table columns to display.
         tableColumns() {
@@ -314,6 +443,10 @@ export default {
             }
             return options;
         },
+        // Whether to show the info panel.
+        infoPanelVisibility() {
+            return this.manifestData && this.settings.showInfoPanel && this.viewMode === 'image';
+        },
     },
     setup() {
         // Set up the manifest parser property.
@@ -347,6 +480,19 @@ export default {
             } else if (typeof this.manifest === "object") {
                 this.manifestData = this.manifest;
                 this.manifestParser = new ManifestParser(toRaw(this.manifestData));
+            }
+            // Load Info Panel.
+            this.loadManifestInfo();
+        },
+        /**
+         * Load data to the information panel.
+         */
+        loadManifestInfo() {
+            if (this.manifestData) {
+                this.manifestInfo.label = this.manifestParser.getPrefLabel();
+                this.manifestInfo.summary = this.manifestParser.getSummary();
+                this.manifestInfo.requiredStatement = this.manifestParser.getRequiredStatement();
+                this.manifestInfo.metadata = this.manifestParser.getMetadata();
             }
         },
         /**
@@ -438,5 +584,61 @@ export default {
 }
 .slide-leave-to {
     transform: translate(100%, 0);
+}
+
+/* Info Pane */
+.gv-info-pane {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 400px;
+    background-color: rgba(0,0,0,0.4);
+    color: white;
+    max-height: 50%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.gv-info-header {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: rgba(0,0,0,0.8);
+}
+
+.gv-info-tools {
+    text-align: right;
+    margin-bottom: 0.5rem;
+}
+
+.gv-info-tools span {
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+.gv-info-title {
+    font-weight: bold;
+}
+
+.gv-info-body {
+    padding: 0.8rem;
+}
+
+.gv-field {
+    margin-bottom: 1rem;
+}
+
+.gv-field-label {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.gv-powered-by {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: #757575;
+}
+
+.gv-powered-by a {
+    color: #757575;
 }
 </style>

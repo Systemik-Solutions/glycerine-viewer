@@ -9,7 +9,8 @@ import Helper from "@/libraries/helper.js";
 import ImageCropper from "@/libraries/image-cropper.js";
 import ImageLoader from "@/libraries/image-loader.js";
 import Language from "@/libraries/languages.js";
-import ManifestParser from "@/libraries/manifest-parser.js";
+import ManifestParser from "@/libraries/iiif/manifest-parser.js";
+import ResourceParser from "@/libraries/iiif/resource-parser.js";
 
 export {
     GlycerineViewerPlugin,
@@ -22,5 +23,6 @@ export {
     ImageCropper,
     ImageLoader,
     Language,
+    ResourceParser,
     ManifestParser,
 }

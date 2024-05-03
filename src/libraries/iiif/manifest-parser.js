@@ -1,41 +1,32 @@
+import ResourceParser from "@/libraries/iiif/resource-parser.js";
+
 /**
  * A class to parse IIIF manifest data.
  */
-export default class ManifestParser {
-
-    // The manifest data.
-    #data;
-
-    /**
-     * Constructor
-     *
-     * @param {Object} data
-     *   The manifest data.
-     */
-    constructor(data) {
-        this.#data = data;
-    }
+export default class ManifestParser extends ResourceParser {
 
     /**
      * Get the canvases data from the manifest.
      *
      * @returns {*[]}
-     *   A list of canvases. Each element contains the canvas `id`, `label`, `description`, `image`, `thumbnail`,
+     *   A list of canvases. Each element contains the canvas `id`, `parser`, `label`, `description`, `image`, `thumbnail`,
      *   and `annotations`.
      */
     getCanvases() {
         const canvases = [];
-        if (Array.isArray(this.#data.items)) {
-            this.#data.items.forEach(item => {
+        if (Array.isArray(this.data.items)) {
+            this.data.items.forEach(item => {
                 if (item.type === 'Canvas') {
+                    const canvasParser = ResourceParser.create(item);
                     const canvas = {
                         id: item.id,
+                        parser: canvasParser,
                     }
                     if (typeof item.label !== 'undefined') {
-                        canvas.label = this.getPropertyDisplayValue(item, 'label');
+                        canvas.label = ResourceParser.displayLangPropertyAuto(item.label);
                     }
                     if (typeof item.summary !== 'undefined') {
-                        canvas.description = this.getPropertyDisplayValue(item, 'summary');
+                        canvas.description = ResourceParser.displayLangPropertyAuto(item.summary);
                     }
                     const image = this.getCanvasImage(item);
                     if (image) {
@@ -140,69 +131,6 @@ export default class ManifestParser {
     }
 
     /**
-     * Get the property display value.
-     *
-     * @param {Object} data
-     *   The data object from the manifest.
-     * @param {string} property
-     *   The property name.
-     * @param {string} language
-     *   The language code. If it is set to `null`, the function will use its own judgement to get the value.
-     * @returns {*|null}
-     *   The display value of the property.
-     */
-    getPropertyDisplayValue(data, property, language = null) {
-        if (typeof data[property] !== 'undefined') {
-            if (language) {
-                if (typeof data[property][language] !== 'undefined') {
-                    return data[property][language][0];
-                }
-            } else {
-                if (typeof data[property] === 'string') {
-                    return data[property];
-                }
-                if (Array.isArray(data[property])) {
-                    return data[property][0];
-                }
-                if (typeof data[property].en !== 'undefined') {
-                    return data[property].en[0];
-                }
-                if (typeof data[property].none !== 'undefined') {
-                    return data[property].none[0];
-                }
-                if (Object.keys(data[property]).length > 0) {
-                    return data[property][Object.keys(data.label)[0]][0];
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get the metadata value from the entity.
-     *
-     * @param {Object} entity
-     *   The entity object from the manifest.
-     * @param {string} property
-     *   The property name.
-     * @param {string} language
-     *   The language code. If it is set to `null`, the function will use its own judgement to get the value.
-     * @returns {*|null}
-     *   The metadata value.
-     */
-    getMetadataValue(entity, property, language = null) {
-        if (Array.isArray(entity.metadata)) {
-            for (const item of entity.metadata) {
-                const label = this.getPropertyDisplayValue(item, 'label', language);
-                if (label === property) {
-                    return this.getPropertyDisplayValue(item, 'value', language);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Get the canvas annotations.
      *
      * @param {Object} canvas
@@ -217,7 +145,8 @@ export default class ManifestParser {
         if (Array.isArray(canvas.annotations)) {
             for (const anoPage of canvas.annotations) {
                 if (anoPage.type === 'AnnotationPage') {
-                    const identifier = this.getMetadataValue(anoPage, 'Identifier');
+                    const anoPageParser = ResourceParser.create(anoPage);
+                    const identifier = anoPageParser.getMetadataValue('Identifier');
                     if (Array.isArray(anoPage.items)) {
                         for (const anno of anoPage.items) {
                             if (anno.type === 'Annotation' && anno.target) {
@@ -363,13 +292,14 @@ export default class ManifestParser {
      */
     getAnnotationSets() {
         const sets = [];
-        if (Array.isArray(this.#data.items)) {
-            this.#data.items.forEach(item => {
+        if (Array.isArray(this.data.items)) {
+            this.data.items.forEach(item => {
                 if (item.type === 'Canvas' && Array.isArray(item.annotations)) {
                     item.annotations.forEach(anoPage => {
                         if (anoPage.type === 'AnnotationPage') {
+                            const anoPageParser = ResourceParser.create(anoPage);
                             const set = {};
-                            const identifier = this.getMetadataValue(anoPage, 'Identifier');
+                            const identifier =  anoPageParser.getMetadataValue('Identifier');
                             set.id = identifier || anoPage.id;
                             // Find whether the set has been already added.
                             const existingSet = sets.find(s => s.id === set.id);
@@ -377,12 +307,12 @@ export default class ManifestParser {
                                 return;
                             }
                             if (typeof anoPage.label !== 'undefined') {
-                                set.label = this.getPropertyDisplayValue(anoPage, 'label');
+                                set.label = ResourceParser.displayLangPropertyAuto(anoPage.label);
                             }
                             if (typeof anoPage.summary !== 'undefined') {
-                                set.description = this.getPropertyDisplayValue(anoPage, 'summary');
+                                set.description = ResourceParser.displayLangPropertyAuto(anoPage.summary);
                             }
-                            const creator = this.getMetadataValue(anoPage, 'Creator');
+                            const creator = anoPageParser.getMetadataValue('Creator');
                             if (creator) {
                                 set.creator = creator;
                             }
