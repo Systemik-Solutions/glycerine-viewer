@@ -49,7 +49,14 @@
                 </div>
                 <div v-if="manifestInfo.requiredStatement" class="gv-field">
                     <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
-                    <div class="gv-field-value">{{ manifestInfo.requiredStatement.value }}</div>
+                    <div class="gv-field-value">
+                        <div v-if="HtmlUtility.detectHtml(manifestInfo.requiredStatement.value)"
+                                  v-html="HtmlUtility.sanitizeHtml(manifestInfo.requiredStatement.value)">
+                        </div>
+                        <template v-else>
+                            {{ manifestInfo.requiredStatement.value }}
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
@@ -162,16 +169,37 @@
                 </div>
                 <div v-if="manifestInfo.summary" class="gv-field">
                     <div class="gv-field-label">Summary</div>
-                    <div class="gv-field-value">{{ manifestInfo.summary }}</div>
+                    <div class="gv-field-value">
+                        <div v-if="HtmlUtility.detectHtml(manifestInfo.summary)"
+                             v-html="HtmlUtility.sanitizeHtml(manifestInfo.summary)">
+                        </div>
+                        <template v-else>
+                            {{ manifestInfo.summary }}
+                        </template>
+                    </div>
                 </div>
                 <div v-if="manifestInfo.requiredStatement" class="gv-field">
                     <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
-                    <div class="gv-field-value">{{ manifestInfo.requiredStatement.value }}</div>
+                    <div class="gv-field-value">
+                        <div v-if="HtmlUtility.detectHtml(manifestInfo.requiredStatement.value)"
+                             v-html="HtmlUtility.sanitizeHtml(manifestInfo.requiredStatement.value)">
+                        </div>
+                        <template v-else>
+                            {{ manifestInfo.requiredStatement.value }}
+                        </template>
+                    </div>
                 </div>
                 <template v-if="manifestInfo.metadata">
                     <div class="gv-field" v-for="metadata in manifestInfo.metadata">
                         <div class="gv-field-label">{{ metadata.label }}</div>
-                        <div class="gv-field-value">{{ metadata.value }}</div>
+                        <div class="gv-field-value">
+                            <div v-if="HtmlUtility.detectHtml(metadata.value)"
+                                 v-html="HtmlUtility.sanitizeHtml(metadata.value)">
+                            </div>
+                            <template v-else>
+                                {{ metadata.value }}
+                            </template>
+                        </div>
                     </div>
                 </template>
                 <div class="mt-6" v-if="currentCanvasInfo">
@@ -179,16 +207,39 @@
                     <h4 v-if="currentCanvasInfo.label">{{ currentCanvasInfo.label }}</h4>
                     <div v-if="currentCanvasInfo.summary" class="gv-field">
                         <div class="gv-field-label">Summary</div>
-                        <div class="gv-field-value">{{ currentCanvasInfo.summary }}</div>
+                        <div class="gv-field-value">
+                            <div v-if="HtmlUtility.detectHtml(currentCanvasInfo.summary)"
+                                 v-html="HtmlUtility.sanitizeHtml(currentCanvasInfo.summary)">
+                            </div>
+                            <template v-else>
+                                {{ currentCanvasInfo.summary }}
+                            </template>
+                        </div>
                     </div>
                     <div v-if="currentCanvasInfo.requiredStatement" class="gv-field">
                         <div class="gv-field-label">{{ currentCanvasInfo.requiredStatement.label }}</div>
-                        <div class="gv-field-value">{{ currentCanvasInfo.requiredStatement.value }}</div>
+                        <div class="gv-field-value">
+                            <div class="gv-field-value">
+                                <div v-if="HtmlUtility.detectHtml(currentCanvasInfo.requiredStatement.value)"
+                                     v-html="HtmlUtility.sanitizeHtml(currentCanvasInfo.requiredStatement.value)">
+                                </div>
+                                <template v-else>
+                                    {{ currentCanvasInfo.requiredStatement.value }}
+                                </template>
+                            </div>
+                        </div>
                     </div>
                     <template v-if="currentCanvasInfo.metadata">
                         <div class="gv-field" v-for="metadata in currentCanvasInfo.metadata">
                             <div class="gv-field-label">{{ metadata.label }}</div>
-                            <div class="gv-field-value">{{ metadata.value }}</div>
+                            <div class="gv-field-value">
+                                <div v-if="HtmlUtility.detectHtml(metadata.value)"
+                                     v-html="HtmlUtility.sanitizeHtml(metadata.value)">
+                                </div>
+                                <template v-else>
+                                    {{ metadata.value }}
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -219,6 +270,7 @@ import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
 import TableViewer from "@/components/TableViewer.vue";
 import Language from "@/libraries/languages";
+import HtmlUtility from "@/libraries/html-utility.js";
 
 export default {
     name: "GlycerineViewer",
@@ -451,7 +503,7 @@ export default {
     setup() {
         // Set up the manifest parser property.
         const manifestParser = null;
-        return { manifestParser };
+        return { manifestParser, HtmlUtility };
     },
     mounted() {
         // Load the manifest data.
@@ -575,6 +627,10 @@ export default {
     box-shadow: -2px 2px 4px rgba(0,0,0,0.15);
 }
 
+.gv-sidebar :deep(img) {
+    max-width: 100% !important;
+}
+
 .slide-leave-active,
 .slide-enter-active {
     transition: 0.5s;
@@ -597,6 +653,14 @@ export default {
     max-height: 50%;
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+.gv-info-pane :deep(a) {
+    color: inherit !important;
+}
+
+.gv-info-pane :deep(img) {
+    max-width: 100% !important;
 }
 
 .gv-info-header {
