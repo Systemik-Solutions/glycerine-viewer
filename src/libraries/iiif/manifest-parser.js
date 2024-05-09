@@ -168,6 +168,17 @@ export default class ManifestParser extends ResourceParser {
         return annotations;
     }
 
+    /**
+     * Get the annotation target.
+     *
+     * This will process the original annotation target and make it compatible with Annotorious.
+     *
+     * @param {Object} annotation
+     *   The annotation object from the manifest.
+     *
+     * @returns {Object}
+     *   The processed annotation target object.
+     */
     getAnnotationTarget(annotation) {
         if (annotation.target) {
             const target = annotation.target;
