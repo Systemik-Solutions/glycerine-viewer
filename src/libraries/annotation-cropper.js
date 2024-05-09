@@ -62,13 +62,19 @@ export default class AnnotationCropper {
                 const y = parseFloat(values[1]) * ratio;
                 const w = parseFloat(values[2]) * ratio;
                 const h = parseFloat(values[3]) * ratio;
-                const points = [
-                    [x, y],
-                    [x + w, y],
-                    [x + w, y + h],
-                    [x, y + h],
-                ];
-                return cropper.crop(points);
+                if (w > 0 && h > 0) {
+                    // Rectangles.
+                    const points = [
+                        [x, y],
+                        [x + w, y],
+                        [x + w, y + h],
+                        [x, y + h],
+                    ];
+                    return cropper.crop(points);
+                } else if (w === 0 && h === 0) {
+                    // Points.
+                    return cropper.cropCircle([x, y], 50);
+                }
             }
         }
         return null;
