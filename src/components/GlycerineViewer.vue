@@ -560,6 +560,8 @@ export default {
             }
             // Load Info Panel.
             this.loadManifestInfo();
+            // Load column visibility.
+            this.loadTableColumnVisibility();
         },
         /**
          * Load data to the information panel.
@@ -571,6 +573,42 @@ export default {
                 this.manifestInfo.requiredStatement = this.manifestParser.getRequiredStatement();
                 this.manifestInfo.rights = this.manifestParser.getRights();
                 this.manifestInfo.metadata = this.manifestParser.getMetadata();
+            }
+        },
+        /**
+         * Load the table column visibility based on the annotation content.
+         */
+        loadTableColumnVisibility() {
+            const usedColNames = [];
+            // Always set these invisible by default.
+            const excludeColNames = ['Attribution', 'Date', 'Line Color'];
+            if (this.canvases.length > 0) {
+                this.canvases.forEach(canvas => {
+                    if (canvas.annotations && canvas.annotations.length > 0) {
+                        canvas.annotations.forEach(annotation => {
+                            if (annotation.fields) {
+                                for (const fieldName in annotation.fields) {
+                                    let colName = fieldName;
+                                    if (fieldName === 'Comment') {
+                                        colName = 'Comments';
+                                    } else if (fieldName === 'Note') {
+                                        colName = 'Notes';
+                                    } else if (fieldName === 'Link') {
+                                        colName = 'Links';
+                                    } else if (fieldName === 'Tag') {
+                                        colName = 'Tags';
+                                    }
+                                    if (usedColNames.indexOf(colName) < 0) {
+                                        usedColNames.push(colName);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            for (const colName in this.settings.tableColumns) {
+                this.settings.tableColumns[colName] = (usedColNames.indexOf(colName) > -1 && excludeColNames.indexOf(colName) < 0);
             }
         },
         /**
