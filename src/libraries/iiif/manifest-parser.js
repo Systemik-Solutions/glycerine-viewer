@@ -149,10 +149,10 @@ export default class ManifestParser extends ResourceParser {
                     const identifier = anoPageParser.getMetadataValue('Identifier');
                     if (Array.isArray(anoPage.items)) {
                         for (const anno of anoPage.items) {
-                            if (anno.type === 'Annotation' && anno.target) {
+                            if (anno.type === 'Annotation') {
                                 const annotation = {
                                     id: anno.id,
-                                    target: anno.target,
+                                    target: this.getAnnotationTarget(anno),
                                     group: identifier || anoPage.id,
                                 }
                                 if (anno.body) {
@@ -166,6 +166,33 @@ export default class ManifestParser extends ResourceParser {
             }
         }
         return annotations;
+    }
+
+    getAnnotationTarget(annotation) {
+        if (annotation.target) {
+            const target = annotation.target;
+            if (target.type === 'SpecificResource') {
+                if (target.selector) {
+                    const selector = target.selector;
+                    if (selector.type === 'PointSelector') {
+                        // Convert the point selector to the supported media fragment.
+                        return {
+                            source: target.source,
+                            selector: {
+                                type: 'FragmentSelector',
+                                conformsTo: 'http://www.w3.org/TR/media-frags/',
+                                value: `xywh=pixel:${selector.x},${selector.y},0,0`,
+                            },
+                            renderedVia: {
+                                name: 'point',
+                            }
+                        }
+                    }
+                }
+            }
+            return target;
+        }
+        return null;
     }
 
     /**

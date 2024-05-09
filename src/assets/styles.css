@@ -23,6 +23,35 @@
     stroke: #fff000;
 }
 
+/* Point Annotation styles */
+.rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer {
+    display: inline;
+}
+
+.rdwb-ano-shape.a9s-annotation.a9s-point.outline-normal .a9s-outer {
+    fill: #506DAC;
+}
+
+.rdwb-ano-shape.a9s-annotation.a9s-point.outline-light .a9s-outer {
+    fill: #A9BCE3;
+}
+
+.rdwb-ano-shape.a9s-annotation.a9s-point.outline-dark .a9s-outer {
+    fill: #1E3E82;
+}
+
+.rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer {
+    stroke: #ffffff;
+}
+
+.rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer:hover {
+    fill: #fff000;
+}
+
+.rdwb-ano-shape.a9s-annotation.a9s-point.selected .a9s-outer {
+    fill: #fff000;
+}
+
 /* Override the PrimeVue dialog mask z-index to fix the dropdown panel issue */
 .p-dialog-mask {
     z-index: 1000 !important;
