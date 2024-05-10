@@ -128,21 +128,24 @@ export default {
     computed: {
         // The annotations in web annotation format.
         webAnnotations() {
+            const webAnnotations = [];
             if (this.annotations) {
-                return this.annotations.map((annotation) => {
-                    return {
-                        context: 'http://www.w3.org/ns/anno.jsonld',
-                        id: annotation.id,
-                        type: 'Annotation',
-                        body: [{
-                            type: 'TextualBody',
-                            value: annotation,
-                        }],
-                        target: annotation.target,
-                    };
-                });
+                for (const annotation of this.annotations) {
+                    if (annotation.target?.selector) {
+                        webAnnotations.push({
+                            context: 'http://www.w3.org/ns/anno.jsonld',
+                            id: annotation.id,
+                            type: 'Annotation',
+                            body: [{
+                                type: 'TextualBody',
+                                value: annotation,
+                            }],
+                            target: annotation.target,
+                        });
+                    }
+                }
             }
-            return [];
+            return webAnnotations;
         },
         // Whether the popup has valid data.
         popupHasData() {

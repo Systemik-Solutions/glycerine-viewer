@@ -13,11 +13,16 @@ export default class AnnotationCropper {
      * @param {ImageLoader} imageLoader
      *   The image loader.
      * @returns {string|null}
-     *   The image content (base64) of the annotation image or null if it cannot be cropped.
+     *   The image content (base64) of the annotation image, or the URL of the image when there is no selector,
+     *   or null if it cannot be cropped.
      */
     static cropAnnotationImage(annotation, imageLoader) {
         if (!imageLoader.hasLoaded()) {
             return null;
+        }
+        if (!annotation.target.selector) {
+            // When the selector is not available, return the URL of the whole image.
+            return imageLoader.getImageElement().src;
         }
         const ratio = imageLoader.getRatio();
         const cropper = new ImageCropper(imageLoader.getImageElement());

@@ -62,8 +62,8 @@
         </div>
         <div class="absolute" style="top:1rem;right:1rem">
             <Button rounded class="mr-2"
-                    :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-table'"
-                    :title="viewMode === 'table' ? 'Image View' : 'Table View'" @click="toggleViewMode" />
+                    :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
+                    :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
             <Button rounded icon="pi pi-info-circle" class="mr-2" title="About" @click="showAboutPanel = true" />
             <Button rounded icon="pi pi-cog" title="Settings" @click="showSettingsPanel = true" />
         </div>

@@ -200,6 +200,11 @@ export default class ManifestParser extends ResourceParser {
                         }
                     }
                 }
+            } else if (typeof target === 'string') {
+                // The annotation target is the whole canvas.
+                return {
+                    source: target,
+                }
             }
             return target;
         }
