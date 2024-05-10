@@ -8,7 +8,8 @@
                       @click="removeTag(term)"></span>
             </div>
         </div>
-        <div v-if="activeTerm" class="text-sm flex flex-wrap gap-2 mt-4">
+        <div v-if="activeTerm && activeTerm.data && (activeTerm.data.vocabTitle || activeTerm.data.trace)"
+             class="text-sm flex flex-wrap gap-2 mt-4">
             <span>{{ activeTerm.data.vocabTitle }}</span>
             <template v-if="activeTerm.data.trace">
                 <template v-for="parentTerm in activeTerm.data.trace">
@@ -19,7 +20,7 @@
             <span>&gt;</span>
             <span>{{ activeTerm.label }}</span>
         </div>
-        <div v-if="activeTerm" class="mt-5">
+        <div v-if="activeTerm && activeTerm.data?.description" class="mt-5">
             {{ activeTerm.data.description }}
         </div>
     </div>

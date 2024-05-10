@@ -196,11 +196,13 @@ export default {
          */
         getAnnotationTags(annotation) {
             const tags = [];
-            if (typeof annotation.fields?.Tag?.en !== "undefined") {
-                annotation.fields.Tag.en.forEach((termValue) => {
-                    const term = Helper.createTermObject(termValue);
-                    tags.push(term);
-                });
+            if (typeof annotation.fields?.Tag !== "undefined") {
+                for (const lang in annotation.fields.Tag) {
+                    annotation.fields.Tag[lang].forEach((termValue) => {
+                        const term = Helper.createTermObject(termValue);
+                        tags.push(term);
+                    });
+                }
             }
             return tags;
         },

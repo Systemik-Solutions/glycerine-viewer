@@ -313,11 +313,13 @@ export default {
                         this.popupData.notes = annotationData.fields.Note.en;
                     }
                     // Load tags.
-                    if (typeof annotationData.fields.Tag?.en !== "undefined") {
-                        annotationData.fields.Tag.en.forEach((termValue) => {
-                            const term = Helper.createTermObject(termValue);
-                            this.popupData.tags.push(term);
-                        });
+                    if (typeof annotationData.fields.Tag !== "undefined") {
+                        for (const lang in annotationData.fields.Tag) {
+                            annotationData.fields.Tag[lang].forEach((termValue) => {
+                                const term = Helper.createTermObject(termValue);
+                                this.popupData.tags.push(term);
+                            });
+                        }
                     }
                     // Load comments.
                     if (typeof annotationData.fields.Comment !== "undefined") {

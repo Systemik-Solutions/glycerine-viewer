@@ -1,4 +1,5 @@
 import ResourceParser from "@/libraries/iiif/resource-parser.js";
+import Helper from "@/libraries/helper.js";
 
 /**
  * A class to parse IIIF manifest data.
@@ -156,7 +157,7 @@ export default class ManifestParser extends ResourceParser {
                                     group: identifier || anoPage.id,
                                 }
                                 if (anno.body) {
-                                    annotation.fields = this.createAnnotationFieldsData(anno.body);
+                                    annotation.fields = this.createAnnotationFieldsData(anno.body, anno.motivation);
                                 }
                                 annotations.push(annotation);
                             }
@@ -229,19 +230,25 @@ export default class ManifestParser extends ResourceParser {
      *
      * @param {Object|Array} annoBody
      *   The `body` of the annotation from the manifest.
+     * @param {string|null} motivation
+     *   The motivation of the annotation.
      * @returns {{}}
      *   The annotation fields data. The key of the object is the field label. The value of the object is another object
      *   contains the language code and the field value. The language code is the key of the object and the field value
      *   is an array of the field values.
      */
-    createAnnotationFieldsData(annoBody) {
+    createAnnotationFieldsData(annoBody, motivation = null) {
         if (typeof annoBody === 'object' && !Array.isArray(annoBody)) {
             annoBody = [annoBody];
         }
         const fields = {};
         for (const body of annoBody) {
             if (body.type === 'TextualBody') {
-                const value = this.#parseAnnotationValue(body.value);
+                let purpose = motivation;
+                if (body.purpose) {
+                    purpose = body.purpose;
+                }
+                const value = this.#parseAnnotationValue(body.value, purpose);
                 const lang = body.language || 'none';
                 // Process the comment value.
                 if (value.label === 'Comment') {
@@ -272,10 +279,12 @@ export default class ManifestParser extends ResourceParser {
      *
      * @param {string} value
      *   The annotation value string.
+     * @param {string|null} purpose
+     *   The purpose of the annotation.
      * @returns {*}
      *   The parsed annotation value object. The object contains the `value` and the `label`.
      */
-    #parseAnnotationValue(value) {
+    #parseAnnotationValue(value, purpose = null) {
         // Set the default annotation type as 'Comment'.
         const parsedValue = {
             label: 'Comment',
@@ -321,6 +330,13 @@ export default class ManifestParser extends ResourceParser {
                 }
                 parsedValue.value = tagValue;
             }
+        } else if (purpose === 'tagging') {
+            // Handle generic comment with the tagging purpose.
+            parsedValue.label = 'Tag';
+            parsedValue.value = {
+                term_id: Helper.generateUUID(),
+                term_label: value,
+            };
         }
         return parsedValue;
     }

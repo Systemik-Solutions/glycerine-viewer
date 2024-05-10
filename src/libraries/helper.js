@@ -28,10 +28,14 @@ export default class Helper {
             label: termValue.term_label,
             data: {
                 label: termValue.term_label,
-                vocabId: termValue.vocabulary_id,
-                vocabTitle: termValue.vocabulary_name,
             },
         };
+        if (termValue.vocabulary_id) {
+            term.data.vocabId = termValue.vocabulary_id;
+        }
+        if (termValue.vocabulary_name) {
+            term.data.vocabTitle = termValue.vocabulary_name;
+        }
         if (termValue.data) {
             if (termValue.data.description) {
                 term.data.description = termValue.data.description;
@@ -82,5 +86,16 @@ export default class Helper {
      */
     static isURL(text) {
         return text.match(/^https?:\/\/\S*$/i);
+    }
+
+    /**
+     * Generate a UUID (v4).
+     *
+     * @returns {string}
+     */
+    static generateUUID() {
+        return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+            (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+        );
     }
 }
