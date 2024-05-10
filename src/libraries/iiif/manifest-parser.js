@@ -201,7 +201,20 @@ export default class ManifestParser extends ResourceParser {
                     }
                 }
             } else if (typeof target === 'string') {
-                // The annotation target is the whole canvas.
+                const regex = /#xywh=(\d+,\d+,\d+,\d+)$/i
+                const match = target.match(regex);
+                if (match) {
+                    // Convert the inline xywh selector to the supported media fragment.
+                    return {
+                        source: target.replace(regex, ''),
+                        selector: {
+                            type: 'FragmentSelector',
+                            conformsTo: 'http://www.w3.org/TR/media-frags/',
+                            value: `xywh=pixel:${match[1]}`,
+                        },
+                    }
+                }
+                // Treat the annotation target is the whole canvas by default.
                 return {
                     source: target,
                 }
