@@ -89,7 +89,11 @@
                     <template #body="slotProps">
                         <template v-if="slotProps.data.fields?.Comment">
                             <div class="mb-2" v-for="(item, lang) in slotProps.data.fields.Comment">
-                                <div class="mb-2" v-for="value in item">{{ value }}</div>
+                                <div class="mb-2" v-for="value in item">
+                                    <div v-if="value.format === 'text/html'"
+                                         v-html="HtmlUtility.sanitizeHtml(value.value)"></div>
+                                    <template v-else>{{ value.value }}</template>
+                                </div>
                             </div>
                         </template>
                     </template>
@@ -111,6 +115,7 @@ import TermTagGroup from "@/components/TermTagGroup.vue";
 import AnnotationCropper from "@/libraries/annotation-cropper";
 import ImageLoader from "@/libraries/image-loader";
 import Helper from "@/libraries/helper";
+import HtmlUtility from "@/libraries/html-utility.js";
 
 export default {
     name: "TableViewer",
@@ -173,6 +178,9 @@ export default {
                 this.loadImage(newValue);
             }
         }
+    },
+    setup() {
+        return { HtmlUtility }
     },
     created() {
         // Load the image.

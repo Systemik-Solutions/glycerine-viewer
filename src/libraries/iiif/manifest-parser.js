@@ -230,8 +230,15 @@ export default class ManifestParser extends ResourceParser {
             if (body.type === 'TextualBody') {
                 const value = this.#parseAnnotationValue(body.value);
                 const lang = body.language || 'none';
-                if (!value.label) {
-                    value.label = 'Comment';
+                // Process the comment value.
+                if (value.label === 'Comment') {
+                    // Convert the value to an object containing the 'format' and 'value'.
+                    value.value = {
+                        value: value.value,
+                    }
+                    if (body.format) {
+                        value.value.format = body.format;
+                    }
                 }
                 if (typeof fields[value.label] === 'undefined') {
                     fields[value.label] = {};
@@ -253,10 +260,12 @@ export default class ManifestParser extends ResourceParser {
      * @param {string} value
      *   The annotation value string.
      * @returns {*}
-     *   The parsed annotation value object. The object contains the `value` and the optional `label`.
+     *   The parsed annotation value object. The object contains the `value` and the `label`.
      */
     #parseAnnotationValue(value) {
+        // Set the default annotation type as 'Comment'.
         const parsedValue = {
+            label: 'Comment',
             value: value,
         };
         const match = value.match(/^([^:]+):(.*)$/s);

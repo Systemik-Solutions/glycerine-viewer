@@ -325,7 +325,8 @@ export default {
                             annotationData.fields.Comment[code].forEach((comment) => {
                                 this.popupData.comments.push({
                                     language: code,
-                                    text: comment,
+                                    text: comment.value,
+                                    format: comment.format,
                                 });
                             });
                         }
