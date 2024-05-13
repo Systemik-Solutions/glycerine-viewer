@@ -133,7 +133,7 @@ export default {
                 for (const annotation of this.annotations) {
                     if (annotation.target?.selector) {
                         webAnnotations.push({
-                            context: 'http://www.w3.org/ns/anno.jsonld',
+                            '@context': 'http://www.w3.org/ns/anno.jsonld',
                             id: annotation.id,
                             type: 'Annotation',
                             body: [{

@@ -220,6 +220,19 @@ export default class ManifestParser extends ResourceParser {
                     source: target,
                 }
             }
+
+            // Normalise the svg selector.
+            if (target.selector?.type === 'SvgSelector') {
+                // Remove the '<g>' element.
+                target.selector.value = target.selector.value.replace(/<\/?g[^>]*>/g, '');
+                // Remove the attributes of the '<svg>' element.
+                target.selector.value = target.selector.value.replace(/<svg[^>]*>/g, '<svg>');
+                // Replace the coordinates separators from comma to space in the `<path>` element.
+                target.selector.value = target.selector.value.replace(
+                    /(<path[^>]+d=['"])([^>]+)(['"])/g, (match, p1, p2, p3) => {
+                        return p1 + p2.replace(/,/g, ' ') + p3;
+                });
+            }
             return target;
         }
         return null;
