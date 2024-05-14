@@ -304,6 +304,19 @@ export default class ManifestParser extends ResourceParser {
                     fields[value.label][lang] = [];
                 }
                 fields[value.label][lang].push(value.value);
+            } else if (body.type === 'Image') {
+                // Handle the image type annotation and make it as a value of the 'Comment' field.
+                if (typeof fields['Comment'] === 'undefined') {
+                    fields['Comment'] = {};
+                }
+                if (typeof fields['Comment']['none'] === 'undefined') {
+                    fields['Comment']['none'] = [];
+                }
+                const imageParser = ResourceParserFactory.create(body);
+                fields['Comment']['none'].push({
+                    value: `<img src="${imageParser.getUrl()}" alt="Annotation Image">`,
+                    format: 'text/html',
+                });
             }
         }
         return fields;

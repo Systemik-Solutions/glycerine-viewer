@@ -42,7 +42,11 @@
                 </TabPanel>
                 <TabPanel v-if="popupData.comments.length > 0" header="Comments">
                     <div class="mb-4" v-if="popupData.comments.length > 0">
-                        <div class="mb-4" v-for="comment in popupData.comments">{{ comment.text }}</div>
+                        <div class="mb-4" v-for="comment in popupData.comments">
+                            <div v-if="comment.format === 'text/html'"
+                                 v-html="HtmlUtility.sanitizeHtml(comment.text)"></div>
+                            <template v-else>{{ comment.text }}</template>
+                        </div>
                     </div>
                 </TabPanel>
             </TabView>
@@ -66,6 +70,7 @@ import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
 import Languages from "@/libraries/languages";
 import Helper from "@/libraries/helper";
 import TermTagGroup from "@/components/TermTagGroup.vue";
+import HtmlUtility from "@/libraries/html-utility.js";
 
 export default {
     name: "ImageViewer",
@@ -183,6 +188,7 @@ export default {
             osdViewer: null,
             // The Annotorious instance.
             annotorious: null,
+            HtmlUtility,
         };
     },
     mounted() {
