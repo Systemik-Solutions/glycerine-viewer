@@ -4,14 +4,20 @@
             <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
                 <template v-for="(canvas, index) in canvases">
                     <div class="h-full" v-show="activeIndex === index">
-                        <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
-                                     :plain-image="canvas.image.type === 'image'"
-                                     :annotations="annotations[canvas.id]" :table-columns="tableColumns"></TableViewer>
-                        <ImageViewer v-else :image="canvas.image.url"
-                                     :plain-image="canvas.image.type === 'image'"
-                                     :annotations="annotations[canvas.id]"
-                                     :light="settings.light"
-                                     :default-language="this.settings.filters.language"></ImageViewer>
+                        <template v-if="canvas.image">
+                            <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
+                                         :plain-image="canvas.image.type === 'image'"
+                                         :annotations="annotations[canvas.id]" :table-columns="tableColumns"></TableViewer>
+                            <ImageViewer v-else :image="canvas.image.url"
+                                         :plain-image="canvas.image.type === 'image'"
+                                         :annotations="annotations[canvas.id]"
+                                         :light="settings.light"
+                                         :default-language="this.settings.filters.language"></ImageViewer>
+                        </template>
+                        <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
+                            <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
+                            <div>Missing/Unsupported Image</div>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -22,9 +28,10 @@
                 </div>
                 <div class="flex align-items-center justify-content-center flex-wrap gap-3">
                     <div class="w-7rem" v-for="(canvas, index) in canvases">
-                        <div class="thumbnail-container">
+                        <div class="thumbnail-container bg-gray-900">
                             <a href="#" @click.prevent="activate(index)">
-                                <img :src="canvas.thumbnail" :alt="canvas.label" />
+                                <img v-if="canvas.thumbnail" :src="canvas.thumbnail" :alt="canvas.label" />
+                                <i v-else class="pi pi-image text-color-secondary" style="font-size: 3rem"></i>
                             </a>
                         </div>
                     </div>
@@ -368,13 +375,9 @@ export default {
         },
         // The canvases from the manifest.
         canvases() {
-            const canvases = [];
+            let canvases = [];
             if (this.manifestData && this.manifestParser) {
-                this.manifestParser.getCanvases().forEach(canvas => {
-                    if (canvas.image) {
-                        canvases.push(canvas);
-                    }
-                });
+                canvases = this.manifestParser.getCanvases();
             }
             return canvases;
         },

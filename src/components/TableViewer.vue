@@ -1,6 +1,6 @@
 <template>
-    <div class="w-full h-full bg-gray-900" style="overflow-y:auto">
-        <div class="p-4 my-7" v-if="annotations && annotations.length > 0">
+    <div class="w-full h-full bg-gray-900" style="overflow-y:auto" v-if="annotations && annotations.length > 0">
+        <div class="p-4 my-7">
             <div ref="tableTop"></div>
             <DataTable :value="annotations" tableClass="w-full" paginator :rows="10" @page="onTablePageChange">
                 <Column header="Image">
@@ -100,9 +100,10 @@
                 </Column>
             </DataTable>
         </div>
-        <div v-else class="p-4 mt-8 text-3xl text-center">
-            There's no annotation available.
-        </div>
+    </div>
+    <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
+        <div><i class="pi pi-comment" style="font-size: 7rem"></i></div>
+        <div>No annotation available</div>
     </div>
 </template>
 
