@@ -1,5 +1,4 @@
 import Language from "@/libraries/languages.js";
-import ManifestParser from "@/libraries/iiif/manifest-parser.js";
 
 /**
  * IIIF resource parser.
@@ -193,21 +192,5 @@ export default class ResourceParser {
         }
         // Use the first language value as a fallback.
         return this.displayLangProperty(propValue, Object.keys(propValue)[0]);
-    }
-
-    /**
-     * Factory method to create a parser instance.
-     *
-     * @param {Object} data
-     *   The resource data.
-     * @returns {ResourceParser}
-     */
-    static create(data) {
-        switch (data.type) {
-            case 'Manifest':
-                return new ManifestParser(data);
-            default:
-                return new ResourceParser(data);
-        }
     }
 }

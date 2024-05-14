@@ -1,5 +1,8 @@
 import ResourceParser from "@/libraries/iiif/resource-parser.js";
 import Helper from "@/libraries/helper.js";
+import ImageParser from "@/libraries/iiif/image-parser.js";
+import ResourceParserFactory from "@/libraries/iiif/resource-parser-factory.js";
+import SpecificResourceParser from "@/libraries/iiif/specific-resource-parser.js";
 
 /**
  * A class to parse IIIF manifest data.
@@ -18,7 +21,7 @@ export default class ManifestParser extends ResourceParser {
         if (Array.isArray(this.data.items)) {
             this.data.items.forEach(item => {
                 if (item.type === 'Canvas') {
-                    const canvasParser = ResourceParser.create(item);
+                    const canvasParser = ResourceParserFactory.create(item);
                     const canvas = {
                         id: item.id,
                         parser: canvasParser,
@@ -66,35 +69,56 @@ export default class ManifestParser extends ResourceParser {
                             if (
                                 anno.type === 'Annotation' &&
                                 anno.motivation === 'painting' &&
-                                typeof anno.body !== 'undefined' &&
-                                anno.body.type === 'Image'
+                                typeof anno.body !== 'undefined'
                             ) {
-                                if (typeof anno.body.service !== 'undefined') {
-                                    // Handle IIIF image.
-                                    const service = anno.body.service[0];
-                                    if (
-                                        service['@context'] === 'http://iiif.io/api/image/2/context.json' ||
-                                        service['type'] === 'ImageService2' ||
-                                        service['@type'] === 'ImageService2' ||
-                                        service['type'] === 'ImageService3' ||
-                                        service['@type'] === 'ImageService3'
-                                    ) {
+                                const parser = ResourceParserFactory.create(anno.body);
+                                if (parser instanceof ImageParser) {
+                                    if (parser.isIIIF()) {
                                         image = {
                                             type: 'iiif',
+                                            url: parser.getIIIFUrl(),
                                         };
-                                        if (typeof service.id !== 'undefined') {
-                                            image.url = service.id;
-                                        }
-                                        if (typeof service['@id'] !== 'undefined') {
-                                            image.url = service['@id'];
-                                        }
+                                    } else {
+                                        // Handle plain image.
+                                        image = {
+                                            type: 'image',
+                                            url: anno.body.id,
+                                        };
                                     }
-                                } else {
-                                    // Handle plain image.
-                                    image = {
-                                        type: 'image',
-                                        url: anno.body.id,
-                                    };
+                                } else if (parser instanceof SpecificResourceParser) {
+                                    // Handle when image is a specific resource with selector.
+                                    const source = parser.getSource();
+                                    if (source && source.type === 'Image') {
+                                        const imageParser = ResourceParserFactory.create(source);
+                                        let imageIIIFUrl = imageParser.getIIIFUrl();
+                                        let imageUrl;
+                                        if (imageIIIFUrl) {
+                                            imageUrl = imageIIIFUrl;
+                                            const params = {
+                                                region: 'full',
+                                                size: 'max',
+                                                rotation: 0,
+                                                quality: 'default',
+                                                format: 'jpg',
+                                            };
+                                            const selector = parser.getSelector();
+                                            if (selector && selector.type === 'iiif:ImageApiSelector') {
+                                                // Apply the selector parameters.
+                                                for (const param in params) {
+                                                    if (typeof selector[param] !== 'undefined') {
+                                                        params[param] = selector[param];
+                                                    }
+                                                }
+                                            }
+                                            imageUrl += `/${params.region}/${params.size}/${params.rotation}/${params.quality}.${params.format}`;
+                                        } else {
+                                            imageUrl = imageParser.getUrl();
+                                        }
+                                        image = {
+                                            type: 'image',
+                                            url: imageUrl,
+                                        };
+                                    }
                                 }
                             }
                         });
@@ -146,7 +170,7 @@ export default class ManifestParser extends ResourceParser {
         if (Array.isArray(canvas.annotations)) {
             for (const anoPage of canvas.annotations) {
                 if (anoPage.type === 'AnnotationPage') {
-                    const anoPageParser = ResourceParser.create(anoPage);
+                    const anoPageParser = ResourceParserFactory.create(anoPage);
                     const identifier = anoPageParser.getMetadataValue('Identifier');
                     if (Array.isArray(anoPage.items)) {
                         for (const anno of anoPage.items) {
@@ -391,7 +415,7 @@ export default class ManifestParser extends ResourceParser {
                 if (item.type === 'Canvas' && Array.isArray(item.annotations)) {
                     item.annotations.forEach(anoPage => {
                         if (anoPage.type === 'AnnotationPage') {
-                            const anoPageParser = ResourceParser.create(anoPage);
+                            const anoPageParser = ResourceParserFactory.create(anoPage);
                             const set = {};
                             const identifier =  anoPageParser.getMetadataValue('Identifier');
                             set.id = identifier || anoPage.id;
