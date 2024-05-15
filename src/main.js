@@ -9,6 +9,7 @@ import Helper from "@/libraries/helper.js";
 import ImageCropper from "@/libraries/image-cropper.js";
 import ImageLoader from "@/libraries/image-loader.js";
 import Language from "@/libraries/languages.js";
+import ManifestLoader from "@/libraries/iiif/manifest-loader.js";
 import ResourceParser from "@/libraries/iiif/resource-parser.js";
 import ImageParser from "@/libraries/iiif/image-parser.js";
 import ManifestParser from "@/libraries/iiif/manifest-parser.js";
@@ -25,6 +26,7 @@ export {
     ImageCropper,
     ImageLoader,
     Language,
+    ManifestLoader,
     ResourceParser,
     ManifestParser,
     ImageParser,

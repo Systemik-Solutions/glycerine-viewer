@@ -293,14 +293,13 @@ import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
 
-import axios from "axios";
-import ManifestParser from "@/libraries/iiif/manifest-parser.js";
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
 import TableViewer from "@/components/TableViewer.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
+import ManifestLoader from "@/libraries/iiif/manifest-loader.js";
 
 export default {
     name: "GlycerineViewer",
@@ -314,10 +313,12 @@ export default {
     },
     data() {
         return {
+            // The status of the manifest. Can be 'initial', 'loading', 'loaded', or 'error'.
+            manifestStatus: 'initial',
+            // The manifest error messages.
+            manifestErrors: [],
             // The active index of the canvas.
             activeIndex: 0,
-            // The manifest data.
-            manifestData: null,
             // The view mode. Can be 'image' or 'table'.
             viewMode: 'image',
             // Whether to show the "About" panel.
@@ -373,17 +374,29 @@ export default {
             }
             return null;
         },
+        // Status: whether the manifest is loading.
+        manifestIsLoading() {
+            return this.manifestStatus === 'loading';
+        },
+        // Status: whether the manifest has loaded.
+        manifestHasLoaded() {
+            return this.manifestStatus === 'loaded';
+        },
+        // Status: whether the manifest had errors.
+        manifestHadErrors() {
+            return this.manifestStatus === 'error';
+        },
         // The canvases from the manifest.
         canvases() {
             let canvases = [];
-            if (this.manifestData && this.manifestParser) {
-                canvases = this.manifestParser.getCanvases();
+            if (this.manifestHasLoaded) {
+                canvases = this.manifestLoader.getParser().getCanvases();
             }
             return canvases;
         },
         // The information of the current canvas.
         currentCanvasInfo() {
-            if (this.manifestData) {
+            if (this.manifestHasLoaded) {
                 const parser = toRaw(this.canvases[this.activeIndex].parser);
                 const canvasInfo = {
                     label: parser.getPrefLabel(),
@@ -450,8 +463,8 @@ export default {
             const options = [
                 { label: 'All annotations', value: 'all' },
             ];
-            if (this.manifestData && this.manifestParser) {
-                const annoSets = this.manifestParser.getAnnotationSets();
+            if (this.manifestHasLoaded) {
+                const annoSets = this.manifestLoader.getParser().getAnnotationSets();
                 for (const annoSet of annoSets) {
                     let label = annoSet.label ?? 'Untitled';
                     if (annoSet.creator) {
@@ -525,13 +538,15 @@ export default {
         },
         // Whether to show the info panel.
         infoPanelVisibility() {
-            return this.manifestData && this.settings.showInfoPanel && this.viewMode === 'image';
+            return this.manifestHasLoaded && this.settings.showInfoPanel && this.viewMode === 'image';
         },
     },
     setup() {
-        // Set up the manifest parser property.
-        const manifestParser = null;
-        return { manifestParser, HtmlUtility, Helper };
+        return {
+            HtmlUtility,
+            Helper,
+            manifestLoader: null
+        };
     },
     mounted() {
         // Load the manifest data.
@@ -544,38 +559,31 @@ export default {
          * @returns {Promise<void>}
          */
         async loadManifest() {
-            if (typeof this.manifest === "string") {
-                try {
-                    const response = await axios.get(this.manifest, {
-                        withCredentials: false,
-                        headers: {
-                            Accept: "application/json",
-                        },
-                    });
-                    this.manifestData = response.data;
-                    this.manifestParser = new ManifestParser(toRaw(this.manifestData));
-                } catch (error) {
-                    console.error(error);
-                }
-            } else if (typeof this.manifest === "object") {
-                this.manifestData = this.manifest;
-                this.manifestParser = new ManifestParser(toRaw(this.manifestData));
+            this.manifestLoader = new ManifestLoader(this.manifest);
+            this.manifestStatus = 'loading';
+            await this.manifestLoader.load();
+            if (this.manifestLoader.hasErrors()) {
+                this.manifestStatus = 'error';
+                this.manifestErrors = this.manifestLoader.getErrors();
+            } else if (this.manifestLoader.hasLoaded()) {
+                this.manifestStatus = 'loaded';
+                // Load Info Panel.
+                this.loadManifestInfo();
+                // Load column visibility.
+                this.loadTableColumnVisibility();
             }
-            // Load Info Panel.
-            this.loadManifestInfo();
-            // Load column visibility.
-            this.loadTableColumnVisibility();
         },
         /**
          * Load data to the information panel.
          */
         loadManifestInfo() {
-            if (this.manifestData) {
-                this.manifestInfo.label = this.manifestParser.getPrefLabel();
-                this.manifestInfo.summary = this.manifestParser.getSummary();
-                this.manifestInfo.requiredStatement = this.manifestParser.getRequiredStatement();
-                this.manifestInfo.rights = this.manifestParser.getRights();
-                this.manifestInfo.metadata = this.manifestParser.getMetadata();
+            if (this.manifestHasLoaded) {
+                const parser = this.manifestLoader.getParser();
+                this.manifestInfo.label = parser.getPrefLabel();
+                this.manifestInfo.summary = parser.getSummary();
+                this.manifestInfo.requiredStatement = parser.getRequiredStatement();
+                this.manifestInfo.rights = parser.getRights();
+                this.manifestInfo.metadata = parser.getMetadata();
             }
         },
         /**
