@@ -23,10 +23,15 @@
         <div v-if="activeTerm && activeTerm.data?.description" class="mt-5">
             {{ activeTerm.data.description }}
         </div>
+        <div v-if="activeTermUrl" class="text-sm mt-5">
+            <a :href="activeTermUrl" target="_blank">Tag Details</a>
+        </div>
     </div>
 </template>
 
 <script>
+import Helper from "@/libraries/helper.js";
+
 export default {
     name: "TermTagGroup",
     props: {
@@ -49,6 +54,22 @@ export default {
         return {
             // The currently selected term.
             activeTerm: null,
+        }
+    },
+    computed: {
+        // The URL of the active term.
+        activeTermUrl() {
+            if (this.activeTerm) {
+                if (this.activeTerm.data?.link) {
+                    // Use the term link.
+                    return this.activeTerm.data.link;
+                }
+                if (Helper.isURL(this.activeTerm.key)) {
+                    // Use the term ID if it is a URI.
+                    return this.activeTerm.key;
+                }
+            }
+            return null;
         }
     },
     methods: {

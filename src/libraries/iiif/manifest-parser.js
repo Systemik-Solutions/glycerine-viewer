@@ -279,6 +279,7 @@ export default class ManifestParser extends ResourceParser {
             annoBody = [annoBody];
         }
         const fields = {};
+        let tagLinkedSource = null;
         for (const body of annoBody) {
             if (body.type === 'TextualBody') {
                 let purpose = motivation;
@@ -317,6 +318,24 @@ export default class ManifestParser extends ResourceParser {
                     value: `<img src="${imageParser.getUrl()}" alt="Annotation Image">`,
                     format: 'text/html',
                 });
+            } else if (body.type === 'SpecificResource' && motivation === 'tagging') {
+                // Handle the tagging annotation with the linked `SpecificResource`.
+                if (body.source && Helper.isURL(body.source)) {
+                    tagLinkedSource = body.source;
+                }
+            }
+        }
+        // Add the linked source to the tag value.
+        if (tagLinkedSource) {
+            if (fields.Tag) {
+                for (const lang in fields.Tag) {
+                    for (const tag of fields.Tag[lang]) {
+                        if (!tag.data) {
+                            tag.data = {};
+                        }
+                        tag.data.link = tagLinkedSource;
+                    }
+                }
             }
         }
         return fields;

@@ -43,6 +43,9 @@ export default class Helper {
             if (termValue.data.trace) {
                 term.data.trace = termValue.data.trace;
             }
+            if (termValue.data.link) {
+                term.data.link = termValue.data.link;
+            }
         }
         return term;
     }
