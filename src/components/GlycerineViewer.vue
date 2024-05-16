@@ -220,6 +220,14 @@
                         </div>
                     </div>
                 </template>
+                <div v-if="manifestInfo.rendering" class="gv-field">
+                    <div class="gv-field-label">Alternative Representation</div>
+                    <div class="gv-field-value">
+                        <div v-for="rendering in manifestInfo.rendering">
+                            <a target="_blank" :href="rendering.value">{{ rendering.label }}</a>
+                        </div>
+                    </div>
+                </div>
                 <div class="mt-6" v-if="currentCanvasInfo">
                     <h3><i class="pi pi-info-circle"></i> Canvas Information</h3>
                     <h4 v-if="currentCanvasInfo.label">{{ currentCanvasInfo.label }}</h4>
@@ -271,6 +279,14 @@
                             </div>
                         </div>
                     </template>
+                    <div v-if="currentCanvasInfo.rendering" class="gv-field">
+                        <div class="gv-field-label">Alternative Representation</div>
+                        <div class="gv-field-value">
+                            <div v-for="rendering in currentCanvasInfo.rendering">
+                                <a target="_blank" :href="rendering.value">{{ rendering.label }}</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="text-center mt-8 gv-powered-by">
                     <span class="mr-2">Powered by Glycerine</span>
@@ -371,6 +387,7 @@ export default {
                 requiredStatement: null,
                 rights: null,
                 metadata: null,
+                rendering: null,
             },
         };
     },
@@ -415,6 +432,7 @@ export default {
                     requiredStatement: parser.getRequiredStatement(),
                     rights: parser.getRights(),
                     metadata: parser.getMetadata(),
+                    rendering: parser.getRendering(),
                 };
                 // Check whether canvasInfo has valid data.
                 let hasData = false;
@@ -596,6 +614,7 @@ export default {
                 this.manifestInfo.requiredStatement = parser.getRequiredStatement();
                 this.manifestInfo.rights = parser.getRights();
                 this.manifestInfo.metadata = parser.getMetadata();
+                this.manifestInfo.rendering = parser.getRendering();
             }
         },
         /**

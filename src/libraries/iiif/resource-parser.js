@@ -132,6 +132,34 @@ export default class ResourceParser {
     }
 
     /**
+     * Get the list of renderings.
+     *
+     * @returns {null|{label: string, value: string, format: string, type: string}[]}
+     *   A list of rendering objects.
+     */
+    getRendering() {
+        if (this.data.rendering) {
+            const renderings = [];
+            for (const rendering of this.data.rendering) {
+                const label = ResourceParser.displayLangPropertyAuto(rendering.label);
+                const item = {
+                    label: label ?? 'Alternative Representation',
+                    value: rendering.id,
+                };
+                if (rendering.format) {
+                    item.format = rendering.format;
+                }
+                if (rendering.type) {
+                    item.type = rendering.type;
+                }
+                renderings.push(item);
+            }
+            return renderings;
+        }
+        return null;
+    }
+
+    /**
      * Get the value display for a multi-language property value.
      *
      * @param {Object} propValue
