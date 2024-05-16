@@ -160,6 +160,34 @@ export default class ResourceParser {
     }
 
     /**
+     * Get the list of homepages.
+     *
+     * @returns {null|{label: string, value: string, format: string, type: string}[]}
+     *   A list of homepage objects.
+     */
+    getHomePage() {
+        if (this.data.homepage) {
+            const homepages = [];
+            for (const homepage of this.data.homepage) {
+                const label = ResourceParser.displayLangPropertyAuto(homepage.label);
+                const item = {
+                    label: label ?? 'Home Page',
+                    value: homepage.id,
+                };
+                if (homepage.format) {
+                    item.format = homepage.format;
+                }
+                if (homepage.type) {
+                    item.type = homepage.type;
+                }
+                homepages.push(item);
+            }
+            return homepages;
+        }
+        return null;
+    }
+
+    /**
      * Get the value display for a multi-language property value.
      *
      * @param {Object} propValue

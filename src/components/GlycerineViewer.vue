@@ -273,6 +273,7 @@ export default {
                 rights: null,
                 metadata: null,
                 rendering: null,
+                homepage: null,
             },
         };
     },
@@ -308,6 +309,7 @@ export default {
                     rights: parser.getRights(),
                     metadata: parser.getMetadata(),
                     rendering: parser.getRendering(),
+                    homepage: parser.getHomePage(),
                 };
                 // Check whether canvasInfo has valid data.
                 let hasData = false;
@@ -504,6 +506,7 @@ export default {
                 this.manifestInfo.rights = parser.getRights();
                 this.manifestInfo.metadata = parser.getMetadata();
                 this.manifestInfo.rendering = parser.getRendering();
+                this.manifestInfo.homepage = parser.getHomePage();
             }
         },
         /**

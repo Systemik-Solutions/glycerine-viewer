@@ -62,6 +62,14 @@
             </div>
         </div>
     </div>
+    <div v-if="resourceInfo.homepage" class="gv-field">
+        <div class="gv-field-label">Homepage</div>
+        <div class="gv-field-value">
+            <div v-for="homepage in resourceInfo.homepage">
+                <a target="_blank" :href="homepage.value">{{ homepage.label }}</a>
+            </div>
+        </div>
+    </div>
 </div>
 </template>
 
