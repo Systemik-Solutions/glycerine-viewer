@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-full relative overflow-hidden">
+    <div v-if="manifestHasLoaded" v-bind="$attrs" class="w-full h-full relative overflow-hidden">
         <div class="gv-gallery flex flex-column justify-content-end h-full">
             <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
                 <template v-for="(canvas, index) in canvases">
@@ -284,14 +284,25 @@
             </div>
         </Transition>
     </div>
+    <div v-else class="w-full h-full bg-gray-900 overflow-hidden flex flex-column align-items-center justify-content-center gap-4">
+        <img :class="{ 'gv-start-logo': true, animation: manifestIsLoading }" :src="logoPath" alt="Glycerine" />
+        <div v-if="manifestHadErrors">
+            <Message v-for="error in manifestErrors" style="max-width: 400px" severity="error" :closable="false">
+                {{ error }}
+            </Message>
+        </div>
+    </div>
 
 </template>
 
 <script>
+import logoPath from '@/assets/logo.png';
+
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
+import Message from 'primevue/message';
 
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
@@ -303,7 +314,7 @@ import ManifestLoader from "@/libraries/iiif/manifest-loader.js";
 
 export default {
     name: "GlycerineViewer",
-    components: {TableViewer, ImageViewer, Button, Dropdown, InputSwitch, Checkbox},
+    components: {TableViewer, ImageViewer, Button, Dropdown, InputSwitch, Checkbox, Message},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -543,6 +554,7 @@ export default {
     },
     setup() {
         return {
+            logoPath,
             HtmlUtility,
             Helper,
             manifestLoader: null
@@ -779,5 +791,25 @@ export default {
 
 .gv-powered-by a {
     color: #757575;
+}
+
+/* Start up */
+.gv-start-logo {
+    max-width: 200px;
+    filter: grayscale(1);
+}
+
+.gv-start-logo.animation {
+    transition: filter .23s ease-in-out;
+    animation: pulse 4s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        filter: grayscale(1);
+    }
+    100% {
+        filter: grayscale(0);
+    }
 }
 </style>
