@@ -70,6 +70,14 @@
             </div>
         </div>
     </div>
+    <div v-if="resourceInfo.seeAlso" class="gv-field">
+        <div class="gv-field-label">See Also</div>
+        <div class="gv-field-value">
+            <div v-for="seeAlsoLink in resourceInfo.seeAlso">
+                <a target="_blank" :href="seeAlsoLink.value">{{ seeAlsoLink.label }}</a>
+            </div>
+        </div>
+    </div>
 </div>
 </template>
 

@@ -138,25 +138,7 @@ export default class ResourceParser {
      *   A list of rendering objects.
      */
     getRendering() {
-        if (this.data.rendering) {
-            const renderings = [];
-            for (const rendering of this.data.rendering) {
-                const label = ResourceParser.displayLangPropertyAuto(rendering.label);
-                const item = {
-                    label: label ?? 'Alternative Representation',
-                    value: rendering.id,
-                };
-                if (rendering.format) {
-                    item.format = rendering.format;
-                }
-                if (rendering.type) {
-                    item.type = rendering.type;
-                }
-                renderings.push(item);
-            }
-            return renderings;
-        }
-        return null;
+        return this.#getLinkingPropertyValue('rendering', 'Alternative Representation');
     }
 
     /**
@@ -166,23 +148,51 @@ export default class ResourceParser {
      *   A list of homepage objects.
      */
     getHomePage() {
-        if (this.data.homepage) {
-            const homepages = [];
-            for (const homepage of this.data.homepage) {
-                const label = ResourceParser.displayLangPropertyAuto(homepage.label);
+        return this.#getLinkingPropertyValue('homepage', 'Homepage');
+    }
+
+    /**
+     * Get the list of see also links.
+     *
+     * @returns {{label: string, value: string, format: string, type: string}[]|null}
+     *   A list of see also objects.
+     */
+    getSeeAlsoLinks() {
+        return this.#getLinkingPropertyValue('seeAlso', 'See Also');
+    }
+
+    /**
+     * Get the value of a linking property such as "seeAlso", "rendering", "homepage".
+     *
+     * @param {string} propName
+     *   The property name.
+     * @param {string} defaultLabel
+     *   The default label if the value has no label.
+     *
+     * @returns {null|{label: string, value: string, format: string, type: string}[]}
+     *   A list of value objects.
+     */
+    #getLinkingPropertyValue(propName, defaultLabel) {
+        if (this.data[propName]) {
+            const items = [];
+            for (const value of this.data[propName]) {
+                let label = null;
+                if (value.label) {
+                    label = ResourceParser.displayLangPropertyAuto(value.label);
+                }
                 const item = {
-                    label: label ?? 'Home Page',
-                    value: homepage.id,
+                    label: label ?? defaultLabel,
+                    value: value.id,
                 };
-                if (homepage.format) {
-                    item.format = homepage.format;
+                if (value.format) {
+                    item.format = value.format;
                 }
-                if (homepage.type) {
-                    item.type = homepage.type;
+                if (value.type) {
+                    item.type = value.type;
                 }
-                homepages.push(item);
+                items.push(item);
             }
-            return homepages;
+            return items;
         }
         return null;
     }
