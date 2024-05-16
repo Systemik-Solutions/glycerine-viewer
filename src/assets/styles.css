@@ -1,3 +1,13 @@
+/* Global Glycerine Viewer styles */
+.gv-field {
+    margin-bottom: 1rem;
+}
+
+.gv-field-label {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
 /* Annotorious styles */
 .rdwb-ano-shape .a9s-outer {
     display: none;

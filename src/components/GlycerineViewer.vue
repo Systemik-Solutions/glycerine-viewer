@@ -168,126 +168,9 @@
                     <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
                             @click="showAboutPanel = false" />
                 </div>
-                <h3><i class="pi pi-info-circle"></i> About</h3>
-                <h4 v-if="manifestInfo.label">{{ manifestInfo.label }}</h4>
-                <div v-if="manifestUrl" class="gv-field">
-                    <div class="gv-field-label">IIIF Manifest</div>
-                    <div class="gv-field-value"><a target="_blank" :href="manifestUrl">{{ manifestUrl }}</a></div>
-                </div>
-                <div v-if="manifestInfo.summary" class="gv-field">
-                    <div class="gv-field-label">Summary</div>
-                    <div class="gv-field-value">
-                        <div v-if="HtmlUtility.detectHtml(manifestInfo.summary)"
-                             v-html="HtmlUtility.sanitizeHtml(manifestInfo.summary)">
-                        </div>
-                        <template v-else>
-                            {{ manifestInfo.summary }}
-                        </template>
-                    </div>
-                </div>
-                <div v-if="manifestInfo.requiredStatement" class="gv-field">
-                    <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
-                    <div class="gv-field-value">
-                        <div v-if="HtmlUtility.detectHtml(manifestInfo.requiredStatement.value)"
-                             v-html="HtmlUtility.sanitizeHtml(manifestInfo.requiredStatement.value)">
-                        </div>
-                        <template v-else>
-                            {{ manifestInfo.requiredStatement.value }}
-                        </template>
-                    </div>
-                </div>
-                <div v-if="manifestInfo.rights" class="gv-field">
-                    <div class="gv-field-label">Rights</div>
-                    <div class="gv-field-value">
-                        <template v-if="Helper.isURL(manifestInfo.rights)">
-                             <a :href="manifestInfo.rights">{{ manifestInfo.rights }}</a>
-                        </template>
-                        <template v-else>
-                            {{ manifestInfo.rights }}
-                        </template>
-                    </div>
-                </div>
-                <template v-if="manifestInfo.metadata">
-                    <div class="gv-field" v-for="metadata in manifestInfo.metadata">
-                        <div class="gv-field-label">{{ metadata.label }}</div>
-                        <div class="gv-field-value">
-                            <div v-if="HtmlUtility.detectHtml(metadata.value)"
-                                 v-html="HtmlUtility.sanitizeHtml(metadata.value)">
-                            </div>
-                            <template v-else>
-                                {{ metadata.value }}
-                            </template>
-                        </div>
-                    </div>
-                </template>
-                <div v-if="manifestInfo.rendering" class="gv-field">
-                    <div class="gv-field-label">Alternative Representation</div>
-                    <div class="gv-field-value">
-                        <div v-for="rendering in manifestInfo.rendering">
-                            <a target="_blank" :href="rendering.value">{{ rendering.label }}</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6" v-if="currentCanvasInfo">
-                    <h3><i class="pi pi-info-circle"></i> Canvas Information</h3>
-                    <h4 v-if="currentCanvasInfo.label">{{ currentCanvasInfo.label }}</h4>
-                    <div v-if="currentCanvasInfo.summary" class="gv-field">
-                        <div class="gv-field-label">Summary</div>
-                        <div class="gv-field-value">
-                            <div v-if="HtmlUtility.detectHtml(currentCanvasInfo.summary)"
-                                 v-html="HtmlUtility.sanitizeHtml(currentCanvasInfo.summary)">
-                            </div>
-                            <template v-else>
-                                {{ currentCanvasInfo.summary }}
-                            </template>
-                        </div>
-                    </div>
-                    <div v-if="currentCanvasInfo.requiredStatement" class="gv-field">
-                        <div class="gv-field-label">{{ currentCanvasInfo.requiredStatement.label }}</div>
-                        <div class="gv-field-value">
-                            <div class="gv-field-value">
-                                <div v-if="HtmlUtility.detectHtml(currentCanvasInfo.requiredStatement.value)"
-                                     v-html="HtmlUtility.sanitizeHtml(currentCanvasInfo.requiredStatement.value)">
-                                </div>
-                                <template v-else>
-                                    {{ currentCanvasInfo.requiredStatement.value }}
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="currentCanvasInfo.rights" class="gv-field">
-                        <div class="gv-field-label">Rights</div>
-                        <div class="gv-field-value">
-                            <template v-if="Helper.isURL(currentCanvasInfo.rights)">
-                                <a :href="currentCanvasInfo.rights">{{ currentCanvasInfo.rights }}</a>
-                            </template>
-                            <template v-else>
-                                {{ currentCanvasInfo.rights }}
-                            </template>
-                        </div>
-                    </div>
-                    <template v-if="currentCanvasInfo.metadata">
-                        <div class="gv-field" v-for="metadata in currentCanvasInfo.metadata">
-                            <div class="gv-field-label">{{ metadata.label }}</div>
-                            <div class="gv-field-value">
-                                <div v-if="HtmlUtility.detectHtml(metadata.value)"
-                                     v-html="HtmlUtility.sanitizeHtml(metadata.value)">
-                                </div>
-                                <template v-else>
-                                    {{ metadata.value }}
-                                </template>
-                            </div>
-                        </div>
-                    </template>
-                    <div v-if="currentCanvasInfo.rendering" class="gv-field">
-                        <div class="gv-field-label">Alternative Representation</div>
-                        <div class="gv-field-value">
-                            <div v-for="rendering in currentCanvasInfo.rendering">
-                                <a target="_blank" :href="rendering.value">{{ rendering.label }}</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ResourceInfoCard :resource-info="manifestInfo" card-title="About" />
+                <ResourceInfoCard v-if="currentCanvasInfo" :resource-info="currentCanvasInfo"
+                                  card-title="Canvas Information" />
                 <div class="text-center mt-8 gv-powered-by">
                     <span class="mr-2">Powered by Glycerine</span>
                     <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io">
@@ -323,6 +206,7 @@ import Message from 'primevue/message';
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
 import TableViewer from "@/components/TableViewer.vue";
+import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
@@ -330,7 +214,7 @@ import ManifestLoader from "@/libraries/iiif/manifest-loader.js";
 
 export default {
     name: "GlycerineViewer",
-    components: {TableViewer, ImageViewer, Button, Dropdown, InputSwitch, Checkbox, Message},
+    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -382,6 +266,7 @@ export default {
             },
             // Manifest information.
             manifestInfo: {
+                link: null,
                 label: null,
                 summary: null,
                 requiredStatement: null,
@@ -392,16 +277,6 @@ export default {
         };
     },
     computed: {
-        // The URL of the manifest.
-        manifestUrl() {
-            if (typeof this.manifest === 'string') {
-                return this.manifest;
-            }
-            if (typeof this.manifest === 'object' && this.manifest.id) {
-                return this.manifest.id;
-            }
-            return null;
-        },
         // Status: whether the manifest is loading.
         manifestIsLoading() {
             return this.manifestStatus === 'loading';
@@ -608,6 +483,20 @@ export default {
          */
         loadManifestInfo() {
             if (this.manifestHasLoaded) {
+                // Get the manifest link.
+                let linkURL = null;
+                if (typeof this.manifest === 'string') {
+                    linkURL = this.manifest;
+                }
+                if (typeof this.manifest === 'object' && this.manifest.id) {
+                    linkURL = this.manifest.id;
+                }
+                if (linkURL) {
+                    this.manifestInfo.link = {
+                        text: 'IIIF Manifest',
+                        url: linkURL,
+                    };
+                }
                 const parser = this.manifestLoader.getParser();
                 this.manifestInfo.label = parser.getPrefLabel();
                 this.manifestInfo.summary = parser.getSummary();
@@ -791,15 +680,6 @@ export default {
 
 .gv-info-body {
     padding: 0.8rem;
-}
-
-.gv-field {
-    margin-bottom: 1rem;
-}
-
-.gv-field-label {
-    font-size: 0.8em;
-    font-weight: bold;
 }
 
 .gv-powered-by {
