@@ -1,9 +1,9 @@
-import ResourceParser from "@/libraries/iiif/resource-parser.js";
+import { ResourceParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * Class to parse specific resources.
  */
-export default class SpecificResourceParser extends ResourceParser {
+export class SpecificResourceParser extends ResourceParser {
 
     /**
      * Get the source.

@@ -1,13 +1,10 @@
-import ResourceParser from "@/libraries/iiif/resource-parser.js";
+import { ResourceParser, ImageParser, ResourceParserFactory, SpecificResourceParser} from "@/libraries/iiif/dependency-manager.js";
 import Helper from "@/libraries/helper.js";
-import ImageParser from "@/libraries/iiif/image-parser.js";
-import ResourceParserFactory from "@/libraries/iiif/resource-parser-factory.js";
-import SpecificResourceParser from "@/libraries/iiif/specific-resource-parser.js";
 
 /**
  * A class to parse IIIF manifest data.
  */
-export default class ManifestParser extends ResourceParser {
+export class ManifestParser extends ResourceParser {
 
     /**
      * Get the canvases data from the manifest.
@@ -138,11 +135,10 @@ export default class ManifestParser extends ResourceParser {
      *   The thumbnail URL.
      */
     getCanvasThumbnail(canvas) {
-        if (Array.isArray(canvas.thumbnail)) {
-            const thumbnail = canvas.thumbnail[0];
-            if (thumbnail.type === 'Image' && typeof thumbnail.id !== 'undefined') {
-                return thumbnail.id;
-            }
+        const canvasParser = ResourceParserFactory.create(canvas);
+        const thumbnail = canvasParser.getThumbnail();
+        if (thumbnail) {
+            return thumbnail;
         }
         const image = this.getCanvasImage(canvas);
         if (image !== null) {

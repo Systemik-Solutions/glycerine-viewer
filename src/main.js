@@ -10,11 +10,9 @@ import Helper from "@/libraries/helper.js";
 import ImageCropper from "@/libraries/image-cropper.js";
 import ImageLoader from "@/libraries/image-loader.js";
 import Language from "@/libraries/languages.js";
-import ManifestLoader from "@/libraries/iiif/manifest-loader.js";
-import ResourceParser from "@/libraries/iiif/resource-parser.js";
-import ImageParser from "@/libraries/iiif/image-parser.js";
-import ManifestParser from "@/libraries/iiif/manifest-parser.js";
-import SpecificResourceParser from "@/libraries/iiif/specific-resource-parser.js";
+
+// Import IIIF libraries from the dependency manager.
+import { ManifestLoader, ResourceParser, ImageParser, ManifestParser, SpecificResourceParser } from "@/libraries/iiif/dependency-manager.js";
 
 export {
     GlycerineViewerPlugin,

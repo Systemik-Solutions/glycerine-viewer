@@ -1,9 +1,9 @@
-import ResourceParser from "@/libraries/iiif/resource-parser.js";
+import { ResourceParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * Class to parse image resources.
  */
-export default class ImageParser extends ResourceParser {
+export class ImageParser extends ResourceParser {
 
     /**
      * Get the static image URL.

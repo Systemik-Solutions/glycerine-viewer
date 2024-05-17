@@ -1,12 +1,9 @@
-import ResourceParser from "@/libraries/iiif/resource-parser.js";
-import ManifestParser from "@/libraries/iiif/manifest-parser.js";
-import ImageParser from "@/libraries/iiif/image-parser.js";
-import SpecificResourceParser from "@/libraries/iiif/specific-resource-parser.js";
+import { ResourceParser, ManifestParser, ImageParser, SpecificResourceParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * Factory class to create a parser instance.
  */
-export default class ResourceParserFactory {
+export class ResourceParserFactory {
 
     /**
      * Factory method to create a parser instance.

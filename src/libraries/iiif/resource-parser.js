@@ -1,9 +1,10 @@
 import Language from "@/libraries/languages.js";
+import { ResourceParserFactory, ImageParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * IIIF resource parser.
  */
-export default class ResourceParser {
+export class ResourceParser {
 
     // The resource data.
     data;
@@ -124,6 +125,31 @@ export default class ResourceParser {
                         }
                     } else {
                         return ResourceParser.displayLangPropertyCombined(metadata.value);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the thumbnail URL.
+     *
+     * @param {number} width
+     *   The thumbnail width. Only used for IIIF images.
+     * @returns {null|string}
+     */
+    getThumbnail(width = 80) {
+        if (this.data.thumbnail) {
+            for (const thumbnail of this.data.thumbnail) {
+                const thumbnailParser = ResourceParserFactory.create(thumbnail);
+                if (thumbnailParser instanceof ImageParser) {
+                    if (thumbnailParser.isIIIF()) {
+                        // Use the IIIF image service and set the width.
+                        return `${thumbnailParser.getIIIFUrl()}/full/${width},/0/default.jpg`
+                    } else {
+                        // Use the static image URL.
+                        return thumbnailParser.getUrl();
                     }
                 }
             }

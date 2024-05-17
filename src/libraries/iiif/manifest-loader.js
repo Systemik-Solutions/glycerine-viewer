@@ -1,10 +1,10 @@
 import axios from "axios";
-import ManifestParser from "@/libraries/iiif/manifest-parser.js";
+import { ManifestParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * Class to load a IIIF manifest.
  */
-export default class ManifestLoader {
+export class ManifestLoader {
 
     // The manifest URL or data object.
     #manifest;

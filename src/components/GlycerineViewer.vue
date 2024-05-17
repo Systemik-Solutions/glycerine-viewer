@@ -47,7 +47,12 @@
                 <div class="gv-info-tools">
                     <span @click="this.settings.showInfoPanel = false"><i class="pi pi-times-circle"></i></span>
                 </div>
-                <div class="gv-info-title">{{ manifestInfo.label }}</div>
+                <div class="flex justify-content-between align-items-center w-full gap-2">
+                    <div v-if="manifestInfo.thumbnail" class="gv-info-thumbnail">
+                        <img :src="manifestInfo.thumbnail" :alt="manifestInfo.label" />
+                    </div>
+                    <div class="gv-info-title">{{ manifestInfo.label }}</div>
+                </div>
             </div>
             <div class="gv-info-body">
                 <div v-if="currentCanvasInfo?.label" class="gv-field">
@@ -210,7 +215,7 @@ import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
-import ManifestLoader from "@/libraries/iiif/manifest-loader.js";
+import { ManifestLoader } from "@/libraries/iiif/dependency-manager.js";
 
 export default {
     name: "GlycerineViewer",
@@ -275,6 +280,7 @@ export default {
                 rendering: null,
                 homepage: null,
                 seeAlso: null,
+                thumbnail: null,
             },
         };
     },
@@ -510,6 +516,7 @@ export default {
                 this.manifestInfo.rendering = parser.getRendering();
                 this.manifestInfo.homepage = parser.getHomePage();
                 this.manifestInfo.seeAlso = parser.getSeeAlsoLinks();
+                this.manifestInfo.thumbnail = parser.getThumbnail();
             }
         },
         /**
@@ -678,6 +685,14 @@ export default {
 .gv-info-tools span {
     cursor: pointer;
     margin-left: 0.5rem;
+}
+
+.gv-info-thumbnail {
+    width: 80px;
+}
+
+.gv-info-thumbnail img {
+    width: 100%;
 }
 
 .gv-info-title {
