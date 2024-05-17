@@ -1,6 +1,6 @@
 <template>
     <Panel v-if="label" :header="label" toggleable collapsed>
-        <img class="w-full mb-3" v-if="logo" :src="logo" :alt="label" />
+        <img class="max-w-full mb-3" v-if="logo" :src="logo" :alt="label" />
         <div v-if="homepage">
             <div class="mb-2" v-for="link in homepage">
                 <a :href="link.value" target="_blank">{{ link.label }}</a>
