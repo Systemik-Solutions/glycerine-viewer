@@ -48,7 +48,7 @@
                     <span @click="this.settings.showInfoPanel = false"><i class="pi pi-times-circle"></i></span>
                 </div>
                 <div class="flex justify-content-between align-items-center w-full gap-2">
-                    <div v-if="manifestInfo.thumbnail" class="gv-info-thumbnail">
+                    <div v-if="manifestInfo.thumbnail" class="gv-info-thumbnail flex-shrink-0">
                         <img :src="manifestInfo.thumbnail" :alt="manifestInfo.label" />
                     </div>
                     <div class="gv-info-title">{{ manifestInfo.label }}</div>
