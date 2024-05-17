@@ -85,10 +85,15 @@ export class ManifestLoader {
                 return;
             }
             // Validate the version.
-            if (this.#data['@context'] === 'http://iiif.io/api/presentation/2/context.json') {
+            let context = this.#data['@context'];
+            if (Array.isArray(context)) {
+                // Get the last item.
+                context = context[context.length - 1];
+            }
+            if (context === 'http://iiif.io/api/presentation/2/context.json') {
                 this.#addError('Invalid manifest: unsupported version (v2)');
                 return;
-            } else if (this.#data['@context'] !== 'http://iiif.io/api/presentation/3/context.json') {
+            } else if (context !== 'http://iiif.io/api/presentation/3/context.json') {
                 this.#addError(`Invalid manifest: invalid context ${this.#data['@context']}`);
                 return;
             }
