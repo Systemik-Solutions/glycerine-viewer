@@ -78,15 +78,25 @@
             </div>
         </div>
     </div>
+    <div v-if="resourceInfo.provider" class="gv-field">
+        <div class="gv-field-label mb-1">Provider</div>
+        <div class="gv-field-value">
+            <div v-for="provider in resourceInfo.provider" class="mb-3">
+                <AgentCard class="w-full" :agent="provider"></AgentCard>
+            </div>
+        </div>
+    </div>
 </div>
 </template>
 
 <script>
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
+import AgentCard from "@/components/AgentCard.vue";
 
 export default {
     name: "ResourceInfoCard",
+    components: {AgentCard},
     props: {
         // The information about the resource to display.
         resourceInfo: {

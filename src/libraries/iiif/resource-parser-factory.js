@@ -1,4 +1,4 @@
-import { ResourceParser, ManifestParser, ImageParser, SpecificResourceParser } from "@/libraries/iiif/dependency-manager.js";
+import { ResourceParser, ManifestParser, ImageParser, SpecificResourceParser, AgentParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * Factory class to create a parser instance.
@@ -20,6 +20,8 @@ export class ResourceParserFactory {
                 return new ImageParser(data);
             case 'SpecificResource':
                 return new SpecificResourceParser(data);
+            case 'Agent':
+                return new AgentParser(data);
             default:
                 return new ResourceParser(data);
         }

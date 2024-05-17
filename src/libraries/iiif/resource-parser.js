@@ -138,18 +138,33 @@ export class ResourceParser {
      * @param {number} width
      *   The thumbnail width. Only used for IIIF images.
      * @returns {null|string}
+     *   The thumbnail URL.
      */
     getThumbnail(width = 80) {
-        if (this.data.thumbnail) {
-            for (const thumbnail of this.data.thumbnail) {
-                const thumbnailParser = ResourceParserFactory.create(thumbnail);
-                if (thumbnailParser instanceof ImageParser) {
-                    if (thumbnailParser.isIIIF()) {
+        return this.getImagePropertyValue('thumbnail', width);
+    }
+
+    /**
+     * Get the URL of an image type property such as "logo" and "thumbnail".
+     *
+     * @param {string} propName
+     *   The property name.
+     * @param {number} width
+     *   The image width. Only used for IIIF images.
+     * @returns {null|string}
+     *   The image URL.
+     */
+    getImagePropertyValue(propName, width = 80) {
+        if (this.data[propName]) {
+            for (const image of this.data[propName]) {
+                const imageParser = ResourceParserFactory.create(image);
+                if (imageParser instanceof ImageParser) {
+                    if (imageParser.isIIIF()) {
                         // Use the IIIF image service and set the width.
-                        return `${thumbnailParser.getIIIFUrl()}/full/${width},/0/default.jpg`
+                        return `${imageParser.getIIIFUrl()}/full/${width},/0/default.jpg`
                     } else {
                         // Use the static image URL.
-                        return thumbnailParser.getUrl();
+                        return imageParser.getUrl();
                     }
                 }
             }
@@ -221,6 +236,16 @@ export class ResourceParser {
             return items;
         }
         return null;
+    }
+
+    /**
+     * Get the list of providers.
+     *
+     * @returns {Array|null}
+     *   The list of providers.
+     */
+    getProvider() {
+        return this.data.provider ? this.data.provider : null;
     }
 
     /**

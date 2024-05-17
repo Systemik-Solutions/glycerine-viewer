@@ -281,6 +281,7 @@ export default {
                 homepage: null,
                 seeAlso: null,
                 thumbnail: null,
+                provider: null,
             },
         };
     },
@@ -318,6 +319,7 @@ export default {
                     rendering: parser.getRendering(),
                     homepage: parser.getHomePage(),
                     seeAlso: parser.getSeeAlsoLinks(),
+                    provider: parser.getProvider(),
                 };
                 // Check whether canvasInfo has valid data.
                 let hasData = false;
@@ -517,6 +519,7 @@ export default {
                 this.manifestInfo.homepage = parser.getHomePage();
                 this.manifestInfo.seeAlso = parser.getSeeAlsoLinks();
                 this.manifestInfo.thumbnail = parser.getThumbnail();
+                this.manifestInfo.provider = parser.getProvider();
             }
         },
         /**
