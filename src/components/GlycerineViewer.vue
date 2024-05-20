@@ -488,6 +488,15 @@ export default {
                 this.loadManifestInfo();
                 // Load column visibility.
                 this.loadTableColumnVisibility();
+                // Set the start index.
+                const startCanvas = this.manifestLoader.getParser().getStartCanvas();
+                if (startCanvas) {
+                    this.manifestLoader.getParser().getCanvases().forEach((canvas, index) => {
+                        if (canvas.id === startCanvas) {
+                            this.activeIndex = index;
+                        }
+                    });
+                }
             }
         },
         /**

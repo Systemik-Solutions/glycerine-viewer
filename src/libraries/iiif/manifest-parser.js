@@ -470,4 +470,20 @@ export class ManifestParser extends ResourceParser {
         }
         return sets;
     }
+
+    /**
+     * Get the ID of the start canvas.
+     *
+     * @returns {string|null}
+     */
+    getStartCanvas() {
+        if (this.data.start) {
+            if (this.data.start.type === 'Canvas') {
+                return this.data.start.id;
+            } else if (this.data.start.type === 'SpecificResource' && this.data.start.source) {
+                return this.data.start.source;
+            }
+        }
+        return null;
+    }
 }
