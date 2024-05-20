@@ -3,6 +3,7 @@
     <Dialog v-model:visible="showPopup" @hide="onPopupClose" modal
             :header="popupData.title[popupData.language] ?? 'Annotation'" :style="{ width: '50rem' }"
             :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+            append-to="self"
             :pt="{
                 mask: (options) => ({
                     style: {
@@ -16,7 +17,7 @@
                           header="About">
                     <div v-if="popupData.languages.length > 0" class="p-fluid formgrid grid">
                         <div class="field col-12 flex justify-content-end">
-                            <Dropdown id="anoLanguage" class="w-5 lg:w-3" v-model="popupData.language"
+                            <Dropdown id="anoLanguage" class="w-5 lg:w-3" v-model="popupData.language" append-to="self"
                                       :options="popupData.languages" option-label="name" option-value="code" />
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 <template>
-    <div v-if="manifestHasLoaded" v-bind="$attrs" class="w-full h-full relative overflow-hidden">
+    <div ref="gViewer" v-if="manifestHasLoaded" v-bind="$attrs" class="w-full h-full relative overflow-hidden">
         <div class="gv-gallery flex flex-column justify-content-end h-full">
             <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
                 <template v-for="(canvas, index) in canvases">
@@ -73,6 +73,10 @@
             </div>
         </div>
         <div class="absolute" style="top:1rem;right:1rem">
+            <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" title="Fullscreen"
+                    @click="toggleFullscreen" />
+            <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" title="Exit Fullscreen"
+                    @click="toggleFullscreen" />
             <Button rounded class="mr-2"
                     :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
                     :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
@@ -92,17 +96,17 @@
                         <div class="field col-12">
                             <label for="filterSet">Show</label>
                             <Dropdown id="filterSet" v-model="settings.filters.set" :options="filterSetOptions"
-                                      option-label="label" option-value="value" />
+                                      option-label="label" option-value="value" append-to="self" />
                         </div>
                         <div class="field col-12">
                             <label for="filterLang">Language</label>
                             <Dropdown id="filterLang" v-model="settings.filters.language" :options="filterLanguageOptions"
-                                      option-label="label" option-value="value" />
+                                      option-label="label" option-value="value" append-to="self" />
                         </div>
                         <div class="field col-12">
                             <label for="filterLine">Line Color</label>
                             <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
-                                      option-label="label" option-value="value" />
+                                      option-label="label" option-value="value" append-to="self" />
                         </div>
                     </div>
                     <div class="w-full">
@@ -283,6 +287,11 @@ export default {
                 thumbnail: null,
                 provider: null,
             },
+            // Whether the viewer is in fullscreen mode.
+            isInFullscreen: false,
+            // Whether the fullscreen listener has been added to the element.
+            // This is to prevent adding the same listener multiple times.
+            hasAddedFullscreenListener: false,
         };
     },
     computed: {
@@ -602,6 +611,41 @@ export default {
                 }
             }
             return langCodes;
+        },
+        /**
+         * Toggle the fullscreen mode.
+         */
+        toggleFullscreen() {
+            const elem = this.$refs.gViewer;
+            if (this.isInFullscreen) {
+                // Exit the fullscreen mode.
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.msExitFullscreen();
+                }
+            } else {
+                // Enter the fullscreen mode.
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.mozRequestFullScreen) { /* Firefox */
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                    elem.msRequestFullscreen();
+                }
+            }
+            if (!this.hasAddedFullscreenListener) {
+                elem.addEventListener('fullscreenchange', () => {
+                    this.isInFullscreen = document.fullscreenElement !== null;
+                });
+                this.hasAddedFullscreenListener = true;
+            }
         }
     }
 }
