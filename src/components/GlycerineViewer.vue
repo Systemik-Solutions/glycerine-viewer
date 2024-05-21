@@ -530,7 +530,55 @@ export default {
         // Load the manifest data.
         this.loadManifest();
     },
+    watch: {
+        // Watch the manifest change to reset the viewer.
+        manifest() {
+            this.reset();
+        }
+    },
     methods: {
+        /**
+         * Resets the viewer.
+         *
+         * @returns {Promise<void>}
+         */
+        async reset() {
+            // Reset the state.
+            this.manifestStatus = 'initial';
+            this.manifestErrors = [];
+            this.activeIndex = 0;
+            this.viewMode = 'image';
+            this.showAboutPanel = false;
+            this.showSettingsPanel = false;
+            this.settings = {
+                language: {
+                    default: null,
+                    options: [],
+                },
+                filters: {
+                    set: 'all',
+                    language: 'all',
+                    line: 'all',
+                },
+                light: true,
+                showInfoPanel: true,
+                tableColumns: {
+                    Title: true,
+                    Description: true,
+                    Links: true,
+                    Tags: true,
+                    Notes: true,
+                    Attribution: false,
+                    Date: false,
+                    "Line Color": false,
+                    Comments: false,
+                }
+            };
+            this.isInFullscreen = false;
+            this.hasAddedFullscreenListener = false;
+            // Load the manifest data.
+            await this.loadManifest();
+        },
         /**
          * Loads the manifest data.
          *
