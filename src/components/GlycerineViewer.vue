@@ -12,7 +12,7 @@
                                          :plain-image="canvas.image.type === 'image'"
                                          :annotations="annotations[canvas.id]"
                                          :light="settings.light"
-                                         :default-language="this.settings.filters.language"></ImageViewer>
+                                         :default-language="annotationDefaultLanguage"></ImageViewer>
                         </template>
                         <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
                             <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
@@ -91,7 +91,15 @@
                 </div>
                 <h3><i class="pi pi-cog"></i> Settings</h3>
                 <div class="p-fluid formgrid grid">
-                    <div class="w-full">
+                    <div class="w-full mb-2">
+                        <h4 class="pl-2">Preference</h4>
+                        <div class="field col-12">
+                            <label for="filterLang">Language</label>
+                            <Dropdown id="filterLang" v-model="settings.language.default" :options="settings.language.options"
+                                      option-label="label" option-value="value" append-to="self" />
+                        </div>
+                    </div>
+                    <div class="w-full mb-2">
                         <h4 class="pl-2">Annotation Filters</h4>
                         <div class="field col-12">
                             <label for="filterSet">Show</label>
@@ -247,6 +255,13 @@ export default {
             showSettingsPanel: false,
             // The settings.
             settings: {
+                // Language settings.
+                language: {
+                    // The current selected language code.
+                    default: null,
+                    // The language options. Each item is an object with 'label' and 'value'.
+                    options: [],
+                },
                 // Filters data.
                 filters: {
                     // The annotation set filter.
@@ -272,20 +287,6 @@ export default {
                     "Line Color": false,
                     Comments: false,
                 }
-            },
-            // Manifest information.
-            manifestInfo: {
-                link: null,
-                label: null,
-                summary: null,
-                requiredStatement: null,
-                rights: null,
-                metadata: null,
-                rendering: null,
-                homepage: null,
-                seeAlso: null,
-                thumbnail: null,
-                provider: null,
             },
             // Whether the viewer is in fullscreen mode.
             isInFullscreen: false,
@@ -315,19 +316,51 @@ export default {
             }
             return canvases;
         },
+        // Manifest information.
+        manifestInfo() {
+            const manifestInfo = {};
+            if (this.manifestHasLoaded) {
+                // Get the manifest link.
+                let linkURL = null;
+                if (typeof this.manifest === 'string') {
+                    linkURL = this.manifest;
+                }
+                if (typeof this.manifest === 'object' && this.manifest.id) {
+                    linkURL = this.manifest.id;
+                }
+                if (linkURL) {
+                    manifestInfo.link = {
+                        text: 'IIIF Manifest',
+                        url: linkURL,
+                    };
+                }
+                const parser = this.manifestLoader.getParser();
+                manifestInfo.label = parser.getPrefLabel(this.settings.language.default);
+                manifestInfo.summary = parser.getSummary(this.settings.language.default);
+                manifestInfo.requiredStatement = parser.getRequiredStatement(this.settings.language.default);
+                manifestInfo.rights = parser.getRights();
+                manifestInfo.metadata = parser.getMetadata(this.settings.language.default);
+                manifestInfo.rendering = parser.getRendering(this.settings.language.default);
+                manifestInfo.homepage = parser.getHomePage(this.settings.language.default);
+                manifestInfo.seeAlso = parser.getSeeAlsoLinks(this.settings.language.default);
+                manifestInfo.thumbnail = parser.getThumbnail();
+                manifestInfo.provider = parser.getProvider();
+            }
+            return manifestInfo;
+        },
         // The information of the current canvas.
         currentCanvasInfo() {
             if (this.manifestHasLoaded) {
                 const parser = toRaw(this.canvases[this.activeIndex].parser);
                 const canvasInfo = {
-                    label: parser.getPrefLabel(),
-                    summary: parser.getSummary(),
-                    requiredStatement: parser.getRequiredStatement(),
+                    label: parser.getPrefLabel(this.settings.language.default),
+                    summary: parser.getSummary(this.settings.language.default),
+                    requiredStatement: parser.getRequiredStatement(this.settings.language.default),
                     rights: parser.getRights(),
-                    metadata: parser.getMetadata(),
-                    rendering: parser.getRendering(),
-                    homepage: parser.getHomePage(),
-                    seeAlso: parser.getSeeAlsoLinks(),
+                    metadata: parser.getMetadata(this.settings.language.default),
+                    rendering: parser.getRendering(this.settings.language.default),
+                    homepage: parser.getHomePage(this.settings.language.default),
+                    seeAlso: parser.getSeeAlsoLinks(this.settings.language.default),
                     provider: parser.getProvider(),
                 };
                 // Check whether canvasInfo has valid data.
@@ -465,6 +498,13 @@ export default {
         infoPanelVisibility() {
             return this.manifestHasLoaded && this.settings.showInfoPanel && this.viewMode === 'image';
         },
+        // The default language code for annotations.
+        annotationDefaultLanguage() {
+            if (this.settings.filters.language !== 'all') {
+                return this.settings.filters.language;
+            }
+            return this.settings.language.default;
+        }
     },
     setup() {
         return {
@@ -493,10 +533,20 @@ export default {
                 this.manifestErrors = this.manifestLoader.getErrors();
             } else if (this.manifestLoader.hasLoaded()) {
                 this.manifestStatus = 'loaded';
-                // Load Info Panel.
-                this.loadManifestInfo();
                 // Load column visibility.
                 this.loadTableColumnVisibility();
+                // Load languages.
+                const languages = this.manifestLoader.getParser().getLanguages();
+                this.settings.language.options = languages.map((lang) => {
+                    return {label: lang.name, value: lang.code}
+                });
+                // Set the default language.
+                const langCodes = languages.map((lang) => lang.code);
+                if (langCodes.indexOf('en') > -1) {
+                    this.settings.language.default = 'en';
+                } else {
+                    this.settings.language.default = langCodes[0];
+                }
                 // Set the start index.
                 const startCanvas = this.manifestLoader.getParser().getStartCanvas();
                 if (startCanvas) {
@@ -506,38 +556,6 @@ export default {
                         }
                     });
                 }
-            }
-        },
-        /**
-         * Load data to the information panel.
-         */
-        loadManifestInfo() {
-            if (this.manifestHasLoaded) {
-                // Get the manifest link.
-                let linkURL = null;
-                if (typeof this.manifest === 'string') {
-                    linkURL = this.manifest;
-                }
-                if (typeof this.manifest === 'object' && this.manifest.id) {
-                    linkURL = this.manifest.id;
-                }
-                if (linkURL) {
-                    this.manifestInfo.link = {
-                        text: 'IIIF Manifest',
-                        url: linkURL,
-                    };
-                }
-                const parser = this.manifestLoader.getParser();
-                this.manifestInfo.label = parser.getPrefLabel();
-                this.manifestInfo.summary = parser.getSummary();
-                this.manifestInfo.requiredStatement = parser.getRequiredStatement();
-                this.manifestInfo.rights = parser.getRights();
-                this.manifestInfo.metadata = parser.getMetadata();
-                this.manifestInfo.rendering = parser.getRendering();
-                this.manifestInfo.homepage = parser.getHomePage();
-                this.manifestInfo.seeAlso = parser.getSeeAlsoLinks();
-                this.manifestInfo.thumbnail = parser.getThumbnail();
-                this.manifestInfo.provider = parser.getProvider();
             }
         },
         /**

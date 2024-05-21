@@ -1,5 +1,6 @@
 import { ResourceParser, ImageParser, ResourceParserFactory, SpecificResourceParser} from "@/libraries/iiif/dependency-manager.js";
 import Helper from "@/libraries/helper.js";
+import Language from "@/libraries/languages.js";
 
 /**
  * A class to parse IIIF manifest data.
@@ -9,11 +10,14 @@ export class ManifestParser extends ResourceParser {
     /**
      * Get the canvases data from the manifest.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code to display the label and description of the canvases.
+     *
      * @returns {*[]}
      *   A list of canvases. Each element contains the canvas `id`, `parser`, `label`, `description`, `image`, `thumbnail`,
      *   and `annotations`.
      */
-    getCanvases() {
+    getCanvases(prefLangCode = null) {
         const canvases = [];
         if (Array.isArray(this.data.items)) {
             this.data.items.forEach(item => {
@@ -24,10 +28,10 @@ export class ManifestParser extends ResourceParser {
                         parser: canvasParser,
                     }
                     if (typeof item.label !== 'undefined') {
-                        canvas.label = ResourceParser.displayLangPropertyAuto(item.label);
+                        canvas.label = ResourceParser.displayLangPropertyAuto(item.label, prefLangCode);
                     }
                     if (typeof item.summary !== 'undefined') {
-                        canvas.description = ResourceParser.displayLangPropertyAuto(item.summary);
+                        canvas.description = ResourceParser.displayLangPropertyAuto(item.summary, prefLangCode);
                     }
                     const image = this.getCanvasImage(item);
                     if (image) {
@@ -433,10 +437,13 @@ export class ManifestParser extends ResourceParser {
     /**
      * Get the annotation sets from the manifest.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code to display the label and description of the annotation sets.
+     *
      * @returns {*[]}
      *   A list of annotation sets. Each element contains the set `id`, `label`, `description`, and `creator`.
      */
-    getAnnotationSets() {
+    getAnnotationSets(prefLangCode = null) {
         const sets = [];
         if (Array.isArray(this.data.items)) {
             this.data.items.forEach(item => {
@@ -453,10 +460,10 @@ export class ManifestParser extends ResourceParser {
                                 return;
                             }
                             if (typeof anoPage.label !== 'undefined') {
-                                set.label = ResourceParser.displayLangPropertyAuto(anoPage.label);
+                                set.label = ResourceParser.displayLangPropertyAuto(anoPage.label, prefLangCode);
                             }
                             if (typeof anoPage.summary !== 'undefined') {
-                                set.description = ResourceParser.displayLangPropertyAuto(anoPage.summary);
+                                set.description = ResourceParser.displayLangPropertyAuto(anoPage.summary, prefLangCode);
                             }
                             const creator = anoPageParser.getMetadataValue('Creator');
                             if (creator) {
@@ -485,5 +492,41 @@ export class ManifestParser extends ResourceParser {
             }
         }
         return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    getLanguages() {
+        const langSets = [super.getLanguages()];
+        this.getCanvases().forEach(canvas => {
+            langSets.push(canvas.parser.getLanguages());
+            // Get annotation languages.
+            if (canvas.annotations) {
+                canvas.annotations.forEach(annotation => {
+                    if (annotation.fields) {
+                        for (const label in annotation.fields) {
+                            const fieldLangCodes = Object.keys(annotation.fields[label]);
+                            const fieldLanguages = [];
+                            for (const langCode of fieldLangCodes) {
+                                let langName = Language.getLanguageName(langCode);
+                                if (langName) {
+                                    fieldLanguages.push({ code: langCode, name: langName });
+                                }
+                            }
+                            langSets.push(fieldLanguages);
+                        }
+                    }
+                });
+            }
+        });
+        // Consolidate the languages.
+        const languages = {};
+        langSets.forEach(langSet => {
+            langSet.forEach(lang => {
+                languages[lang.code] = lang;
+            });
+        });
+        return Object.values(languages);
     }
 }

@@ -40,31 +40,40 @@ export class ResourceParser {
     /**
      * Get the resource label.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {string|null}
      */
-    getPrefLabel() {
-        return this.data.label ? ResourceParser.displayLangPropertyAuto(this.data.label) : null;
+    getPrefLabel(prefLangCode = null) {
+        return this.data.label ? ResourceParser.displayLangPropertyAuto(this.data.label, prefLangCode) : null;
     }
 
     /**
      * Get the resource summary.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {string|null}
      */
-    getSummary() {
-        return this.data.summary ? ResourceParser.displayLangPropertyAuto(this.data.summary) : null;
+    getSummary(prefLangCode = null) {
+        return this.data.summary ? ResourceParser.displayLangPropertyAuto(this.data.summary, prefLangCode) : null;
     }
 
     /**
      * Get the required statement.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {null|{label: string, value: string}}
      */
-    getRequiredStatement() {
+    getRequiredStatement(prefLangCode = null) {
         if (this.data.requiredStatement && this.data.requiredStatement.label && this.data.requiredStatement.value) {
             return {
-                label: ResourceParser.displayLangPropertyAuto(this.data.requiredStatement.label),
-                value: ResourceParser.displayLangPropertyAuto(this.data.requiredStatement.value),
+                label: ResourceParser.displayLangPropertyAuto(this.data.requiredStatement.label, prefLangCode),
+                value: ResourceParser.displayLangPropertyAuto(this.data.requiredStatement.value, prefLangCode),
             };
         }
         return null;
@@ -82,15 +91,18 @@ export class ResourceParser {
     /**
      * Get the resource metadata.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {{label: string, value: string}[]|null}
      *   A list of objects with `label` and `value` properties.
      */
-    getMetadata() {
+    getMetadata(prefLangCode = null) {
         const metadata = [];
         if (this.data.metadata) {
             for (const meta of this.data.metadata) {
-                const label = ResourceParser.displayLangPropertyAuto(meta.label);
-                const value = ResourceParser.displayLangPropertyAuto(meta.value);
+                const label = ResourceParser.displayLangPropertyAuto(meta.label, prefLangCode);
+                const value = ResourceParser.displayLangPropertyAuto(meta.value, prefLangCode);
                 metadata.push({ label, value });
             }
         }
@@ -175,31 +187,40 @@ export class ResourceParser {
     /**
      * Get the list of renderings.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {null|{label: string, value: string, format: string, type: string}[]}
      *   A list of rendering objects.
      */
-    getRendering() {
-        return this.#getLinkingPropertyValue('rendering', 'Alternative Representation');
+    getRendering(prefLangCode = null) {
+        return this.#getLinkingPropertyValue('rendering', 'Alternative Representation', prefLangCode);
     }
 
     /**
      * Get the list of homepages.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {null|{label: string, value: string, format: string, type: string}[]}
      *   A list of homepage objects.
      */
-    getHomePage() {
-        return this.#getLinkingPropertyValue('homepage', 'Homepage');
+    getHomePage(prefLangCode = null) {
+        return this.#getLinkingPropertyValue('homepage', 'Homepage', prefLangCode);
     }
 
     /**
      * Get the list of see also links.
      *
+     * @param {string|null} prefLangCode
+     *   The preferred language code.
+     *
      * @returns {{label: string, value: string, format: string, type: string}[]|null}
      *   A list of see also objects.
      */
-    getSeeAlsoLinks() {
-        return this.#getLinkingPropertyValue('seeAlso', 'See Also');
+    getSeeAlsoLinks(prefLangCode = null) {
+        return this.#getLinkingPropertyValue('seeAlso', 'See Also', prefLangCode);
     }
 
     /**
@@ -209,17 +230,19 @@ export class ResourceParser {
      *   The property name.
      * @param {string} defaultLabel
      *   The default label if the value has no label.
+     * @param prefLangCode
+     *   The preferred language code.
      *
      * @returns {null|{label: string, value: string, format: string, type: string}[]}
      *   A list of value objects.
      */
-    #getLinkingPropertyValue(propName, defaultLabel) {
+    #getLinkingPropertyValue(propName, defaultLabel, prefLangCode = null) {
         if (this.data[propName]) {
             const items = [];
             for (const value of this.data[propName]) {
                 let label = null;
                 if (value.label) {
-                    label = ResourceParser.displayLangPropertyAuto(value.label);
+                    label = ResourceParser.displayLangPropertyAuto(value.label, prefLangCode);
                 }
                 const item = {
                     label: label ?? defaultLabel,
@@ -246,6 +269,81 @@ export class ResourceParser {
      */
     getProvider() {
         return this.data.provider ? this.data.provider : null;
+    }
+
+    /**
+     * Get the list of languages from the resource.
+     *
+     * The languages are extracted from the resource properties such as label and summary.
+     *
+     * @returns {{name: string, code: string}[]}
+     *   List of language object.
+     */
+    getLanguages() {
+        const langCodeSets = [];
+        // Label.
+        if (this.data.label) {
+            langCodeSets.push(Object.keys(this.data.label));
+        }
+        // Summary.
+        if (this.data.summary) {
+            langCodeSets.push(Object.keys(this.data.summary));
+        }
+        // Required statement.
+        if (this.data.requiredStatement) {
+            if (this.data.requiredStatement.label) {
+                langCodeSets.push(Object.keys(this.data.requiredStatement.label));
+            }
+            if (this.data.requiredStatement.value) {
+                langCodeSets.push(Object.keys(this.data.requiredStatement.value));
+            }
+        }
+        // Metadata.
+        if (this.data.metadata) {
+            for (const meta of this.data.metadata) {
+                if (meta.label) {
+                    langCodeSets.push(Object.keys(meta.label));
+                }
+                if (meta.value) {
+                    langCodeSets.push(Object.keys(meta.value));
+                }
+            }
+        }
+        // Rendering.
+        if (this.data.rendering) {
+            for (const rendering of this.data.rendering) {
+                if (rendering.label) {
+                    langCodeSets.push(Object.keys(rendering.label));
+                }
+            }
+        }
+        // Homepage.
+        if (this.data.homepage) {
+            for (const homepage of this.data.homepage) {
+                if (homepage.label) {
+                    langCodeSets.push(Object.keys(homepage.label));
+                }
+            }
+        }
+        // See also.
+        if (this.data.seeAlso) {
+            for (const seeAlso of this.data.seeAlso) {
+                if (seeAlso.label) {
+                    langCodeSets.push(Object.keys(seeAlso.label));
+                }
+            }
+        }
+        // Deduplicate all language codes.
+        const langCodes = [...new Set([].concat(...langCodeSets))];
+        // Create the language list.
+        const languages = [];
+        for (const langCode of langCodes) {
+            let langName = Language.getLanguageName(langCode);
+            if (langName) {
+                languages.push({ code: langCode, name: langName });
+            }
+        }
+        return languages;
     }
 
     /**
@@ -299,8 +397,12 @@ export class ResourceParser {
         if (prefLangCode) {
             processLanguages.push(prefLangCode);
         }
-        processLanguages.push('en');
-        processLanguages.push('none');
+        if (processLanguages.indexOf('en') < 0) {
+            processLanguages.push('en');
+        }
+        if (processLanguages.indexOf('none') < 0) {
+            processLanguages.push('none');
+        }
         for (const langCode of processLanguages) {
             const prefLangValue = this.displayLangProperty(propValue, langCode);
             if (prefLangValue) {
