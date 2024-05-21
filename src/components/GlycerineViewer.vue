@@ -99,7 +99,7 @@
                                       option-label="label" option-value="value" append-to="self" />
                         </div>
                     </div>
-                    <div class="w-full mb-2">
+                    <div v-if="hasAnnotation" class="w-full mb-2">
                         <h4 class="pl-2">Annotation Filters</h4>
                         <div class="field col-12">
                             <label for="filterSet">Show</label>
@@ -127,7 +127,7 @@
                             <div><i class="pi pi-info-circle"></i> Information Panel</div>
                             <InputSwitch v-model="settings.showInfoPanel" />
                         </div>
-                        <div v-if="viewMode === 'table'" class="field col-12">
+                        <div v-if="viewMode === 'table' && hasAnnotation" class="field col-12">
                             <div class="mb-2">Table Columns</div>
                             <div class="mb-1">
                                 <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
@@ -415,6 +415,18 @@ export default {
                 });
             }
             return annotations;
+        },
+        // Whether the manifest has annotation data.
+        hasAnnotation() {
+            let hasAnnotation = false;
+            if (this.canvases.length > 0) {
+                this.canvases.forEach(canvas => {
+                    if (canvas.annotations && canvas.annotations.length > 0) {
+                        hasAnnotation = true;
+                    }
+                });
+            }
+            return hasAnnotation;
         },
         // The annotation set filter options.
         filterSetOptions() {
