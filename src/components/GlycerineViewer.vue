@@ -77,7 +77,7 @@
                     @click="toggleFullscreen" />
             <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" title="Exit Fullscreen"
                     @click="toggleFullscreen" />
-            <Button rounded class="mr-2"
+            <Button v-if="hasAnnotation" rounded class="mr-2"
                     :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
                     :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
             <Button rounded icon="pi pi-info-circle" class="mr-2" title="About" @click="showAboutPanel = true" />
