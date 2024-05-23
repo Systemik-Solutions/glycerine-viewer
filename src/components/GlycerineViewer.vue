@@ -51,7 +51,12 @@
                     <div v-if="manifestInfo.thumbnail" class="gv-info-thumbnail flex-shrink-0">
                         <img :src="manifestInfo.thumbnail" :alt="manifestInfo.label" />
                     </div>
-                    <div class="gv-info-title">{{ manifestInfo.label }}</div>
+                    <div>
+                        <div class="gv-info-title">{{ manifestInfo.label }}</div>
+                        <div class="mt-2" v-if="collectionInfo">
+                            Part of <a @click.prevent="showCollectionPanel = true" href="#">{{ collectionInfo.label }}</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="gv-info-body">
@@ -77,6 +82,8 @@
                     @click="toggleFullscreen" />
             <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" title="Exit Fullscreen"
                     @click="toggleFullscreen" />
+            <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" title="Collection"
+                    @click="showCollectionPanel = true" />
             <Button v-if="hasAnnotation" rounded class="mr-2"
                     :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
                     :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
@@ -199,6 +206,26 @@
                 </div>
             </div>
         </Transition>
+        <Transition name="slide">
+            <div v-if="showCollectionPanel" class="gv-sidebar">
+                <div class="text-right">
+                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                            @click="showCollectionPanel = false" />
+                </div>
+                <ResourceInfoCard :resource-info="collectionInfo" card-title="Collection" title-icon="book" />
+                <div v-if="collectionInfo.items.length > 0">
+                    <Listbox :modelValue="collectionActiveManifest" :options="collectionInfo.items" optionLabel="label"
+                             optionValue="id" @change="switchCollectionItem" class="w-full">
+                        <template #option="slotProps">
+                            <span v-if="slotProps.option.type === 'Collection'"><i class="pi pi-book"></i></span>
+                            <span v-else><i class="pi pi-file"></i></span>
+                            {{ slotProps.option.label }}
+                        </template>
+                    </Listbox>
+                </div>
+
+            </div>
+        </Transition>
     </div>
     <div v-else class="w-full h-full bg-gray-900 overflow-hidden flex flex-column align-items-center justify-content-center gap-4">
         <img :class="{ 'gv-start-logo': true, animation: manifestIsLoading }" :src="logoPath" alt="Glycerine" />
@@ -219,6 +246,8 @@ import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
 import Message from 'primevue/message';
+import Listbox from 'primevue/listbox';
+import Chip from 'primevue/chip';
 
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
@@ -227,11 +256,11 @@ import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
-import { ManifestLoader } from "@/libraries/iiif/dependency-manager.js";
+import { ManifestLoader, CollectionParser, ResourceParserFactory } from "@/libraries/iiif/dependency-manager.js";
 
 export default {
     name: "GlycerineViewer",
-    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message},
+    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -241,6 +270,8 @@ export default {
     },
     data() {
         return {
+            // The IIIF manifest URL or object of the current viewing manifest.
+            currentManifest: this.manifest,
             // The status of the manifest. Can be 'initial', 'loading', 'loaded', or 'error'.
             manifestStatus: 'initial',
             // The manifest error messages.
@@ -251,6 +282,8 @@ export default {
             viewMode: 'image',
             // Whether to show the "About" panel.
             showAboutPanel: false,
+            // Whether to show the "Collection" panel.
+            showCollectionPanel: false,
             // Whether to show the "Settings" panel.
             showSettingsPanel: false,
             // The settings.
@@ -293,6 +326,8 @@ export default {
             // Whether the fullscreen listener has been added to the element.
             // This is to prevent adding the same listener multiple times.
             hasAddedFullscreenListener: false,
+            // The active manifest id of the current collection.
+            collectionActiveManifest: null,
         };
     },
     computed: {
@@ -322,11 +357,11 @@ export default {
             if (this.manifestHasLoaded) {
                 // Get the manifest link.
                 let linkURL = null;
-                if (typeof this.manifest === 'string') {
-                    linkURL = this.manifest;
+                if (typeof this.currentManifest === 'string') {
+                    linkURL = this.currentManifest;
                 }
-                if (typeof this.manifest === 'object' && this.manifest.id) {
-                    linkURL = this.manifest.id;
+                if (typeof this.currentManifest === 'object' && this.currentManifest.id) {
+                    linkURL = this.currentManifest.id;
                 }
                 if (linkURL) {
                     manifestInfo.link = {
@@ -374,6 +409,41 @@ export default {
                 if (hasData) {
                     return canvasInfo;
                 }
+            }
+            return null;
+        },
+        // The information of the collection.
+        collectionInfo() {
+            if (this.manifestHasLoaded && this.collectionLoader) {
+                const collectionParser = this.collectionLoader.getParser();
+                const collectionInfo = {
+                    link: {
+                        text: 'IIIF Manifest',
+                        url: collectionParser.getID(),
+                    },
+                    label: collectionParser.getPrefLabel(this.settings.language.default),
+                    summary: collectionParser.getSummary(this.settings.language.default),
+                    requiredStatement: collectionParser.getRequiredStatement(this.settings.language.default),
+                    rights: collectionParser.getRights(),
+                    metadata: collectionParser.getMetadata(this.settings.language.default),
+                    rendering: collectionParser.getRendering(this.settings.language.default),
+                    homepage: collectionParser.getHomePage(this.settings.language.default),
+                    seeAlso: collectionParser.getSeeAlsoLinks(this.settings.language.default),
+                    provider: collectionParser.getProvider(),
+                };
+                // Get items.
+                collectionInfo.items = [];
+                const items = collectionParser.getItems();
+                for (const item of items) {
+                    const itemParser = ResourceParserFactory.create(item);
+                    collectionInfo.items.push({
+                        id: itemParser.getID(),
+                        label: itemParser.getPrefLabel(this.settings.language.default),
+                        type: itemParser.getType(),
+                        thumbnail: itemParser.getThumbnail(),
+                    });
+                }
+                return collectionInfo;
             }
             return null;
         },
@@ -523,7 +593,8 @@ export default {
             logoPath,
             HtmlUtility,
             Helper,
-            manifestLoader: null
+            manifestLoader: null,
+            collectionLoader: null,
         };
     },
     mounted() {
@@ -533,6 +604,7 @@ export default {
     watch: {
         // Watch the manifest change to reset the viewer.
         manifest() {
+            this.collectionLoader = null;
             this.reset();
         }
     },
@@ -540,15 +612,20 @@ export default {
         /**
          * Resets the viewer.
          *
+         * @param {string|null} manifest
+         *   The manifest URL or object to reset to. If it is set to null, it will reset to the original manifest.
+         *
          * @returns {Promise<void>}
          */
-        async reset() {
+        async reset(manifest = null) {
             // Reset the state.
+            this.currentManifest = manifest ?? this.manifest;
             this.manifestStatus = 'initial';
             this.manifestErrors = [];
             this.activeIndex = 0;
             this.viewMode = 'image';
             this.showAboutPanel = false;
+            this.showCollectionPanel = false;
             this.showSettingsPanel = false;
             this.settings = {
                 language: {
@@ -576,6 +653,7 @@ export default {
             };
             this.isInFullscreen = false;
             this.hasAddedFullscreenListener = false;
+            this.collectionActiveManifest = null;
             // Load the manifest data.
             await this.loadManifest();
         },
@@ -585,36 +663,53 @@ export default {
          * @returns {Promise<void>}
          */
         async loadManifest() {
-            this.manifestLoader = new ManifestLoader(this.manifest);
+            const manifestLoader = new ManifestLoader(this.currentManifest);
             this.manifestStatus = 'loading';
-            await this.manifestLoader.load();
-            if (this.manifestLoader.hasErrors()) {
+            await manifestLoader.load();
+            if (manifestLoader.hasErrors()) {
                 this.manifestStatus = 'error';
-                this.manifestErrors = this.manifestLoader.getErrors();
-            } else if (this.manifestLoader.hasLoaded()) {
-                this.manifestStatus = 'loaded';
-                // Load column visibility.
-                this.loadTableColumnVisibility();
-                // Load languages.
-                const languages = this.manifestLoader.getParser().getLanguages();
-                this.settings.language.options = languages.map((lang) => {
-                    return {label: lang.name, value: lang.code}
-                });
-                // Set the default language.
-                const langCodes = languages.map((lang) => lang.code);
-                if (langCodes.indexOf('en') > -1) {
-                    this.settings.language.default = 'en';
+                this.manifestErrors = manifestLoader.getErrors();
+            } else if (manifestLoader.hasLoaded()) {
+                if (manifestLoader.getParser() instanceof CollectionParser) {
+                    // Collection.
+                    this.collectionLoader = manifestLoader;
+                    // Load the first manifest from the collection.
+                    const items = this.collectionLoader.getParser().getItems();
+                    if (items && items.length > 0) {
+                        this.currentManifest = items[0].id;
+                        await this.loadManifest();
+                    }
                 } else {
-                    this.settings.language.default = langCodes[0];
-                }
-                // Set the start index.
-                const startCanvas = this.manifestLoader.getParser().getStartCanvas();
-                if (startCanvas) {
-                    this.manifestLoader.getParser().getCanvases().forEach((canvas, index) => {
-                        if (canvas.id === startCanvas) {
-                            this.activeIndex = index;
-                        }
+                    // Manifest.
+                    this.manifestLoader = manifestLoader;
+                    this.manifestStatus = 'loaded';
+                    // Load column visibility.
+                    this.loadTableColumnVisibility();
+                    // Load languages.
+                    const languages = this.manifestLoader.getParser().getLanguages();
+                    this.settings.language.options = languages.map((lang) => {
+                        return {label: lang.name, value: lang.code}
                     });
+                    // Set the default language.
+                    const langCodes = languages.map((lang) => lang.code);
+                    if (langCodes.indexOf('en') > -1) {
+                        this.settings.language.default = 'en';
+                    } else {
+                        this.settings.language.default = langCodes[0];
+                    }
+                    // Set the start index.
+                    const startCanvas = this.manifestLoader.getParser().getStartCanvas();
+                    if (startCanvas) {
+                        this.manifestLoader.getParser().getCanvases().forEach((canvas, index) => {
+                            if (canvas.id === startCanvas) {
+                                this.activeIndex = index;
+                            }
+                        });
+                    }
+                    // Set the active manifest if it is in a collection.
+                    if (this.collectionLoader) {
+                        this.collectionActiveManifest = this.manifestLoader.getParser().getID();
+                    }
                 }
             }
         },
@@ -723,6 +818,16 @@ export default {
                     this.isInFullscreen = document.fullscreenElement !== null;
                 });
                 this.hasAddedFullscreenListener = true;
+            }
+        },
+        /**
+         * Switch the collection item.
+         *
+         * @param event
+         */
+        switchCollectionItem(event) {
+            if (event.value) {
+                this.reset(event.value);
             }
         }
     }

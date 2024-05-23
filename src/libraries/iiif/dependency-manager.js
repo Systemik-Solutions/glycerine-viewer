@@ -8,6 +8,7 @@ export * from '@/libraries/iiif/image-parser.js'
 export * from '@/libraries/iiif/manifest-parser.js'
 export * from '@/libraries/iiif/specific-resource-parser.js'
 export * from '@/libraries/iiif/agent-parser.js'
+export * from '@/libraries/iiif/collection-parser.js'
 
 export * from '@/libraries/iiif/resource-parser-factory.js'
 

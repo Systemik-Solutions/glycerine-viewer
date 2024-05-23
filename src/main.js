@@ -13,7 +13,7 @@ import ImageLoader from "@/libraries/image-loader.js";
 import Language from "@/libraries/languages.js";
 
 // Import IIIF libraries from the dependency manager.
-import { ManifestLoader, ResourceParser, ImageParser, ManifestParser, SpecificResourceParser, AgentParser } from "@/libraries/iiif/dependency-manager.js";
+import { ManifestLoader, ResourceParser, ImageParser, ManifestParser, SpecificResourceParser, AgentParser, CollectionParser } from "@/libraries/iiif/dependency-manager.js";
 
 export {
     GlycerineViewerPlugin,
@@ -33,5 +33,6 @@ export {
     ManifestParser,
     ImageParser,
     SpecificResourceParser,
-    AgentParser
+    AgentParser,
+    CollectionParser
 }

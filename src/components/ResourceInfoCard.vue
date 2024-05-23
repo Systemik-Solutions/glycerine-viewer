@@ -1,6 +1,6 @@
 <template>
 <div class="w-full mb-6">
-    <h3 v-if="cardTitle"><i class="pi pi-info-circle"></i> {{ cardTitle }}</h3>
+    <h3 v-if="cardTitle"><i :class="`pi pi-${titleIcon}`"></i> {{ cardTitle }}</h3>
     <h4 v-if="resourceInfo.label">{{ resourceInfo.label }}</h4>
     <div v-if="resourceInfo.link" class="gv-field">
         <div class="gv-field-label">{{ resourceInfo.link.text }}</div>
@@ -106,6 +106,10 @@ export default {
         // The title of the card.
         cardTitle: {
             type: String
+        },
+        titleIcon: {
+            type: String,
+            default: "info-circle"
         }
     },
     setup() {

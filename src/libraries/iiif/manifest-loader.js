@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ManifestParser } from "@/libraries/iiif/dependency-manager.js";
+import { ResourceParserFactory, ManifestParser } from "@/libraries/iiif/dependency-manager.js";
 
 /**
  * Class to load a IIIF manifest.
@@ -69,7 +69,7 @@ export class ManifestLoader {
             // Aggregate external resources.
             await this.#aggregateResources();
             // Initialize the parser.
-            this.#parser = new ManifestParser(this.#data);
+            this.#parser = ResourceParserFactory.create(this.#data);
             this.#status = 'loaded';
         }
     }
@@ -98,7 +98,7 @@ export class ManifestLoader {
                 return;
             }
             // Validate the type.
-            if (this.#data['type'] !== 'Manifest') {
+            if (this.#data['type'] !== 'Manifest' && this.#data['type'] !== 'Collection') {
                 this.#addError(`Invalid manifest: invalid type ${this.#data['type']}`);
                 return;
             }
@@ -208,5 +208,14 @@ export class ManifestLoader {
      */
     getErrors() {
         return this.#errors;
+    }
+
+    /**
+     * Check if the manifest is a collection.
+     *
+     * @returns {boolean}
+     */
+    isCollection() {
+        return this.#data && this.#data.type === 'Collection';
     }
 }
