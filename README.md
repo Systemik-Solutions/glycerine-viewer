@@ -139,6 +139,12 @@ Example:
 
 Glycerine Viewer currently supports [IIIF Presentation API 3.0](https://iiif.io/api/presentation/3.0/) manifests.
 
+> [!TIP]
+> [Glycerine](https://glycerine.io/) provides a suite of annotation tools and end-to-end workflows for researchers, 
+> curators and students to collaborate on projects across repositories. It is recommended to use  
+> [Glycerine Workbench](https://glycerine.io/) to create well formatted annotations and apply semantic tags from 
+> domain-specific vocabularies to annotations. 
+
 ### Selector
 
 Glycerine Viewer supports [Fragment Selector](https://www.w3.org/TR/media-frags/) for rectangles and

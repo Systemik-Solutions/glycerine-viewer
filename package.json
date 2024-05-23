@@ -1,6 +1,6 @@
 {
   "name": "glycerine-viewer",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "type": "module",
   "description": "An open-source Vue IIIF viewer optimized for annotations",
   "keywords": [
