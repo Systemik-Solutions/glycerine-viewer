@@ -872,6 +872,7 @@ export default {
     padding: 2rem;
     overflow-y: auto;
     box-shadow: -2px 2px 4px rgba(0,0,0,0.15);
+    overflow-wrap: break-word;
 }
 
 .gv-sidebar :deep(img) {
@@ -900,6 +901,7 @@ export default {
     max-height: 50%;
     overflow-x: hidden;
     overflow-y: auto;
+    overflow-wrap: break-word;
 }
 
 .gv-info-pane :deep(a) {
