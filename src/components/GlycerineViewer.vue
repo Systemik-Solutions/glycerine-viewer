@@ -3,7 +3,7 @@
         <div class="gv-gallery flex flex-column justify-content-end h-full">
             <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
                 <template v-for="(canvas, index) in canvases">
-                    <div class="h-full" v-show="activeIndex === index">
+                    <div class="h-full" v-if="activeIndex === index">
                         <template v-if="canvas.image">
                             <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
                                          :plain-image="canvas.image.type === 'image'"
