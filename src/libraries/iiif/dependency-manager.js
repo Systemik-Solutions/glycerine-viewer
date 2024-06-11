@@ -13,3 +13,5 @@ export * from '@/libraries/iiif/collection-parser.js'
 export * from '@/libraries/iiif/resource-parser-factory.js'
 
 export * from '@/libraries/iiif/manifest-loader.js'
+
+export * from '@/libraries/iiif/iiif-helper.js'

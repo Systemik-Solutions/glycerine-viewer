@@ -36,6 +36,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@iiif/parser": "^2.1.2",
     "@recogito/annotorious-openseadragon": "^2.7.15",
     "axios": "^1.6.0",
     "dompurify": "^3.1.2",

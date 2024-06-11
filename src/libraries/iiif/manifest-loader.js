@@ -1,5 +1,6 @@
 import axios from "axios";
-import { ResourceParserFactory, ManifestParser } from "@/libraries/iiif/dependency-manager.js";
+import { ResourceParserFactory, ManifestParser, IiifHelper } from "@/libraries/iiif/dependency-manager.js";
+import { convertPresentation2  } from '@iiif/parser/presentation-2';
 
 /**
  * Class to load a IIIF manifest.
@@ -8,6 +9,9 @@ export class ManifestLoader {
 
     // The manifest URL or data object.
     #manifest;
+
+    // The IIIF Presentation API version. e.g, '2.0', '3.0'.
+    #version;
 
     // The manifest data.
     #data;
@@ -68,6 +72,8 @@ export class ManifestLoader {
         if (!this.hasErrors()) {
             // Aggregate external resources.
             await this.#aggregateResources();
+            // Normalize the manifest.
+            this.#normalizeManifest();
             // Initialize the parser.
             this.#parser = ResourceParserFactory.create(this.#data);
             this.#status = 'loaded';
@@ -85,18 +91,24 @@ export class ManifestLoader {
                 return;
             }
             // Validate the version.
-            let context = this.#data['@context'];
-            if (Array.isArray(context)) {
-                // Get the last item.
-                context = context[context.length - 1];
-            }
-            if (context === 'http://iiif.io/api/presentation/2/context.json') {
-                this.#addError('Invalid manifest: unsupported version (v2)');
+            const version = IiifHelper.detectPresentationApiVersion(this.#data);
+            if (!version) {
+                this.#addError('Invalid manifest: unsupported version');
                 return;
-            } else if (context !== 'http://iiif.io/api/presentation/3/context.json') {
-                this.#addError(`Invalid manifest: invalid context ${this.#data['@context']}`);
-                return;
+            } else {
+                this.#version = version;
             }
+
+            // Converts the v2 manifest to v3.
+            if (version === '2.0') {
+                try {
+                    this.#data = convertPresentation2(this.#data);
+                } catch (error) {
+                    this.#addError('Invalid manifest: failed to parse the legacy v2 format');
+                    return;
+                }
+            }
+
             // Validate the type.
             if (this.#data['type'] !== 'Manifest' && this.#data['type'] !== 'Collection') {
                 this.#addError(`Invalid manifest: invalid type ${this.#data['type']}`);
@@ -131,6 +143,10 @@ export class ManifestLoader {
                                         Accept: "application/json",
                                     },
                                 });
+                                // Convert to V3 format.
+                                if (this.#version === '2.0') {
+                                    response.data = convertPresentation2(response.data);
+                                }
                                 if (response.data.type === 'AnnotationPage') {
                                     canvas.annotations[i] = response.data;
                                 }
@@ -141,6 +157,45 @@ export class ManifestLoader {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Normalize the manifest.
+     *
+     * This method is used to normalize the manifest data. Especially, after a v2 manifest is converted to v3, some
+     * remediation is needed to make it compatible with the v3 format.
+     */
+    #normalizeManifest() {
+        if (this.#version === '2.0') {
+            // Normalize the annotations.
+            if (this.#data.type === 'Manifest' && this.#data.items) {
+                this.#data.items.forEach((canvas) => {
+                    if (canvas.annotations) {
+                        canvas.annotations.forEach((annotationPage) => {
+                            if (annotationPage.type === 'AnnotationPage' && annotationPage.items) {
+                                annotationPage.items.forEach((annotation) => {
+                                    if (annotation.type === 'Annotation') {
+                                        // Only use a single motivation.
+                                        if (annotation.motivation && Array.isArray(annotation.motivation)) {
+                                            annotation.motivation = annotation.motivation[0];
+                                        }
+                                        if (annotation.body) {
+                                            annotation.body.forEach((body) => {
+                                                if (body.type === 'Text' && body.chars) {
+                                                    // Convert the body to a TextualBody.
+                                                    body.type = 'TextualBody';
+                                                    body.value = body.chars;
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             }
         }
     }

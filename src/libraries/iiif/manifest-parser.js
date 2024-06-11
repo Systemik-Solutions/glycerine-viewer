@@ -223,6 +223,14 @@ export class ManifestParser extends ResourceParser {
                                 name: 'point',
                             }
                         }
+                    } else if (selector.type === 'FragmentSelector') {
+                        // Normalize the selector value.
+                        if (selector.value.startsWith('xywh=') && !selector.value.startsWith('xywh=pixel:')) {
+                            selector.value = selector.value.replace(/^xywh=/, 'xywh=pixel:');
+                        }
+                        // Set "conformsTo".
+                        selector.conformsTo = 'http://www.w3.org/TR/media-frags/';
+                        return target;
                     }
                 }
             } else if (typeof target === 'string') {
