@@ -3,7 +3,7 @@
         <div class="gv-gallery flex flex-column justify-content-end h-full">
             <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
                 <template v-for="(canvas, index) in canvases">
-                    <div class="h-full" v-if="activeIndex === index">
+                    <div class="h-full" v-if="navigation.activeIndex === index">
                         <template v-if="canvas.image">
                             <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
                                          :plain-image="canvas.image.type === 'image'"
@@ -21,24 +21,28 @@
                     </div>
                 </template>
             </div>
-            <div class="anno-gallery-nav flex align-items-center justify-content-between w-full bg-black-alpha-90 p-3">
+            <div class="anno-gallery-nav flex align-items-center justify-content-between gap-3 w-full bg-black-alpha-90 p-3">
                 <div>
                     <Button type="button" severity="secondary" rounded outlined icon="pi pi-arrow-left"
-                            @click="activate(activeIndex - 1)" :disabled="activeIndex === 0" />
+                            @click="activate(navigation.activeIndex - 1)" :disabled="navigation.activeIndex === 0" />
                 </div>
-                <div class="flex align-items-center justify-content-center flex-wrap gap-3">
-                    <div class="w-7rem" v-for="(canvas, index) in canvases">
-                        <div class="thumbnail-container bg-gray-900">
-                            <a href="#" @click.prevent="activate(index)">
-                                <img v-if="canvas.thumbnail" :src="canvas.thumbnail" :alt="canvas.label" />
-                                <i v-else class="pi pi-image text-color-secondary" style="font-size: 3rem"></i>
-                            </a>
+                <div ref="navContainer" class="anno-gallery-nav-items flex align-items-center justify-content-center flex-no-wrap w-full overflow-hidden"
+                     :style="{gap: navigation.styles.gap + 'px'}">
+                    <TransitionGroup name="rolling">
+                        <div class="anno-gallery-nav-item flex-shrink-0" :style="{width: navigation.styles.thumbnailWidth + 'px'}"
+                             v-for="thumbnail in navThumbnails" :key="thumbnail.id">
+                            <div class="thumbnail-container bg-gray-900">
+                                <a class="thumbnail-item" :class="{'thumbnail-item-active': navigation.activeIndex === thumbnail.index}" href="#" @click.prevent="activate(thumbnail.index)">
+                                    <img v-if="thumbnail.image" :src="thumbnail.image" :alt="thumbnail.label" />
+                                    <i v-else class="pi pi-image text-color-secondary" style="font-size: 3rem"></i>
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    </TransitionGroup>
                 </div>
                 <div>
                     <Button type="button" severity="secondary" rounded outlined icon="pi pi-arrow-right"
-                            @click="activate(activeIndex + 1)" :disabled="activeIndex === canvases.length - 1" />
+                            @click="activate(navigation.activeIndex + 1)" :disabled="navigation.activeIndex === canvases.length - 1" />
                 </div>
             </div>
         </div>
@@ -60,9 +64,9 @@
                 </div>
             </div>
             <div class="gv-info-body">
-                <div v-if="currentCanvasInfo?.label" class="gv-field">
-                    <div class="gv-field-label">Currently Viewing</div>
-                    <div class="gv-field-value">{{ currentCanvasInfo.label }}</div>
+                <div class="gv-field">
+                    <div class="gv-field-label">Currently Viewing <span>({{ navigation.activeIndex + 1 }} of {{ canvases.length }})</span></div>
+                    <div v-if="currentCanvasInfo?.label" class="gv-field-value">{{ currentCanvasInfo.label }}</div>
                 </div>
                 <div v-if="manifestInfo.requiredStatement" class="gv-field">
                     <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
@@ -276,8 +280,6 @@ export default {
             manifestStatus: 'initial',
             // The manifest error messages.
             manifestErrors: [],
-            // The active index of the canvas.
-            activeIndex: 0,
             // The view mode. Can be 'image' or 'table'.
             viewMode: 'image',
             // Whether to show the "About" panel.
@@ -328,6 +330,19 @@ export default {
             hasAddedFullscreenListener: false,
             // The active manifest id of the current collection.
             collectionActiveManifest: null,
+            // The navigation data.
+            navigation: {
+                // The active index of the canvas.
+                activeIndex: 0,
+                // The max number of visible items in the navigation.
+                maxVisibleItems: 0,
+                styles: {
+                    // The image thumbnail width (in pixel).
+                    thumbnailWidth: 110,
+                    // The gap between thumbnails (in pixel).
+                    gap: 15,
+                }
+            },
         };
     },
     computed: {
@@ -386,7 +401,7 @@ export default {
         // The information of the current canvas.
         currentCanvasInfo() {
             if (this.manifestHasLoaded) {
-                const parser = toRaw(this.canvases[this.activeIndex].parser);
+                const parser = toRaw(this.canvases[this.navigation.activeIndex].parser);
                 const canvasInfo = {
                     label: parser.getPrefLabel(this.settings.language.default),
                     summary: parser.getSummary(this.settings.language.default),
@@ -586,6 +601,29 @@ export default {
                 return this.settings.filters.language;
             }
             return this.settings.language.default;
+        },
+        // The thumbnails to be displayed in the navigation.
+        // Each item is an object with 'id', 'thumbnail', 'label', and 'index'.
+        navThumbnails() {
+            const thumbnails = [];
+            if (this.canvases.length > 0 && this.navigation.maxVisibleItems > 0) {
+                let start = Math.max(0, this.navigation.activeIndex - Math.floor(this.navigation.maxVisibleItems / 2));
+                let end = Math.min(this.canvases.length, start + this.navigation.maxVisibleItems);
+                // Fill from the start if it is less than the max visible items.
+                if (end - start < this.navigation.maxVisibleItems) {
+                    start = Math.max(0, end - this.navigation.maxVisibleItems);
+                }
+                for (let i = start; i < end; i++) {
+                    const canvas = this.canvases[i];
+                    thumbnails.push({
+                        id: canvas.id,
+                        image: canvas.thumbnail,
+                        label: canvas.label,
+                        index: i,
+                    });
+                }
+            }
+            return thumbnails;
         }
     },
     setup() {
@@ -606,7 +644,16 @@ export default {
         manifest() {
             this.collectionLoader = null;
             this.reset();
-        }
+        },
+        // Init the navigation when the manifest has loaded.
+        manifestHasLoaded: {
+            handler(newValue, oldValue) {
+                if (newValue) {
+                    this.initNavigation();
+                }
+            },
+            flush: 'post'
+        },
     },
     methods: {
         /**
@@ -622,7 +669,7 @@ export default {
             this.currentManifest = manifest ?? this.manifest;
             this.manifestStatus = 'initial';
             this.manifestErrors = [];
-            this.activeIndex = 0;
+            this.navigation.activeIndex = 0;
             this.viewMode = 'image';
             this.showAboutPanel = false;
             this.showCollectionPanel = false;
@@ -702,7 +749,7 @@ export default {
                     if (startCanvas) {
                         this.manifestLoader.getParser().getCanvases().forEach((canvas, index) => {
                             if (canvas.id === startCanvas) {
-                                this.activeIndex = index;
+                                this.navigation.activeIndex = index;
                             }
                         });
                     }
@@ -756,7 +803,7 @@ export default {
          *   Index of the image to activate.
          */
         activate(index) {
-            this.activeIndex = index;
+            this.navigation.activeIndex = index;
         },
         /**
          * Toggle the view mode.
@@ -829,6 +876,20 @@ export default {
             if (event.value) {
                 this.reset(event.value);
             }
+        },
+        /**
+         * Initialize the navigation.
+         */
+        initNavigation() {
+            const navContainer = this.$refs.navContainer;
+            const containerWidth = navContainer.offsetWidth;
+            // Calculate the max number of visible items.
+            let maxCount = Math.floor(containerWidth / (this.navigation.styles.thumbnailWidth + this.navigation.styles.gap));
+            // Make it an odd number if it is greater than 1.
+            if (maxCount > 1 && maxCount % 2 === 0) {
+                maxCount -= 1;
+            }
+            this.navigation.maxVisibleItems = maxCount;
         }
     }
 }
@@ -859,6 +920,34 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.thumbnail-item {
+    opacity: 0.5;
+}
+
+.thumbnail-item-active {
+    opacity: 1;
+}
+
+.thumbnail-item:hover {
+    opacity: 1;
+}
+
+/* Navigation rolling animation */
+.rolling-move,
+.rolling-enter-active,
+.rolling-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.rolling-enter-from,
+.rolling-leave-to {
+    opacity: 0;
+}
+
+.rolling-leave-active {
+    position: absolute;
 }
 
 .gv-sidebar {
