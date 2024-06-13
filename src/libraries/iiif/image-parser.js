@@ -60,6 +60,7 @@ export class ImageParser extends ResourceParser {
             const service = this.getService()[0];
             if (
                 service['@context'] === 'http://iiif.io/api/image/2/context.json' ||
+                service['@context'] === 'https://iiif.io/api/image/2/context.json' ||
                 service['type'] === 'ImageService2' ||
                 service['@type'] === 'ImageService2' ||
                 service['type'] === 'ImageService3' ||
