@@ -15,6 +15,9 @@ export default class HtmlUtility {
      *   Whether the text is HTML.
      */
     static detectHtml(text) {
+        if (!text) {
+            return false;
+        }
         // Test the text:  the first character in the string must be a ‘<’ character and the last character must be ‘>’.
         return text.charAt(0) === '<' && text.charAt(text.length - 1) === '>';
     }
