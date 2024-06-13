@@ -23,4 +23,21 @@ export class IiifHelper {
         }
         return null;
     }
+
+    /**
+     * Traverse the structure of the manifest.
+     *
+     * @param {Array} structures
+     *   The structures to traverse.
+     * @param {Function} callback
+     *   The callback function to call for each structure node.
+     */
+    static structureTraverse(structures, callback) {
+        for (const structure of structures) {
+            callback(structure);
+            if (structure.items) {
+                this.structureTraverse(structure.items, callback);
+            }
+        }
+    }
 }

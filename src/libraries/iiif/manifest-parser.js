@@ -1,4 +1,4 @@
-import { ResourceParser, ImageParser, ResourceParserFactory, SpecificResourceParser} from "@/libraries/iiif/dependency-manager.js";
+import { ResourceParser, ImageParser, ResourceParserFactory, SpecificResourceParser, IiifHelper} from "@/libraries/iiif/dependency-manager.js";
 import Helper from "@/libraries/helper.js";
 import Language from "@/libraries/languages.js";
 
@@ -503,6 +503,15 @@ export class ManifestParser extends ResourceParser {
     }
 
     /**
+     * Get the structures from the manifest.
+     *
+     * @returns {Array|null}
+     */
+    getStructures() {
+        return this.data.structures ? this.data.structures : null;
+    }
+
+    /**
      * @inheritDoc
      */
     getLanguages() {
@@ -528,6 +537,23 @@ export class ManifestParser extends ResourceParser {
                 });
             }
         });
+        // Get structure languages.
+        const structures = this.getStructures();
+        if (structures) {
+            const structureLanguages = [];
+            IiifHelper.structureTraverse(structures, structure => {
+                if (structure.label) {
+                    const langCodes = Object.keys(structure.label);
+                    langCodes.forEach(langCode => {
+                        let langName = Language.getLanguageName(langCode);
+                        if (langName) {
+                            structureLanguages.push({ code: langCode, name: langName });
+                        }
+                    });
+                }
+            });
+            langSets.push(structureLanguages);
+        }
         // Consolidate the languages.
         const languages = {};
         langSets.forEach(langSet => {

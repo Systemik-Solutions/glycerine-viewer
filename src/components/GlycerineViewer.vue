@@ -88,6 +88,7 @@
                     @click="toggleFullscreen" />
             <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" title="Collection"
                     @click="showCollectionPanel = true" />
+            <Button rounded icon="pi pi-list" class="mr-2" title="Index" @click="openIndexPanel" />
             <Button v-if="hasAnnotation" rounded class="mr-2"
                     :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
                     :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
@@ -230,6 +231,51 @@
 
             </div>
         </Transition>
+        <Transition name="slide">
+            <div v-if="index.showIndexPanel" class="gv-sidebar">
+                <div ref="indexPanelTop"></div>
+                <div class="text-right">
+                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                            @click="index.showIndexPanel = false" />
+                </div>
+                <h3><i class="pi pi-list"></i> Index</h3>
+                <TabView class="gv-index-tabs">
+                    <TabPanel header="Items">
+                        <DataTable :value="indexItems" tableClass="w-full" paginator :rows="index.rowsPerPage" selectionMode="single"
+                                   dataKey="id" paginatorTemplate="PrevPageLink JumpToPageDropdown NextPageLink"
+                                   v-model:filters="index.searchFilter" :globalFilterFields="['label']"
+                                   @page="indexPanelScrollTop" v-bind:selection="activeIndexItem"
+                                   @rowSelect="onIndexRowSelect" :first="indexTableFirstIndex">
+                            <template #header>
+                                <div class="flex justify-content-end">
+                                    <div class="p-input-icon-left w-full">
+                                        <i class="pi pi-search" />
+                                        <InputText v-model="index.searchFilter['global'].value" placeholder="Search" class="w-full" />
+                                    </div>
+                                </div>
+                            </template>
+                            <template #empty> No results found. </template>
+                            <Column style="width:20%" field="thumbnail" header="Image">
+                                <template #body="slotProps">
+                                    <img v-if="slotProps.data.thumbnail" class="w-full" :src="slotProps.data.thumbnail" alt="" />
+                                </template>
+                            </Column>
+                            <Column style="width:80%" field="label" header="Label">
+                                <template #body="slotProps">
+                                    {{ slotProps.data.label }}
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </TabPanel>
+                    <TabPanel v-if="structureNodes.length > 0" header="Structures">
+                        <Tree :value="structureNodes" class="w-full" selectionMode="single"
+                              v-bind:selectionKeys="selectedStructureNodes"
+                              v-bind:expandedKeys="expandedStructureNodes"
+                              @nodeSelect="onStructureNodeSelect"></Tree>
+                    </TabPanel>
+                </TabView>
+            </div>
+        </Transition>
     </div>
     <div v-else class="w-full h-full bg-gray-900 overflow-hidden flex flex-column align-items-center justify-content-center gap-4">
         <img :class="{ 'gv-start-logo': true, animation: manifestIsLoading }" :src="logoPath" alt="Glycerine" />
@@ -252,6 +298,14 @@ import InputSwitch from 'primevue/inputswitch';
 import Message from 'primevue/message';
 import Listbox from 'primevue/listbox';
 import Chip from 'primevue/chip';
+import TabView from "primevue/tabview";
+import TabPanel from 'primevue/tabpanel';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
+import Tree from 'primevue/tree';
+
+import {FilterMatchMode} from "primevue/api";
 
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
@@ -264,7 +318,7 @@ import { ManifestLoader, CollectionParser, ResourceParserFactory } from "@/libra
 
 export default {
     name: "GlycerineViewer",
-    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip},
+    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -342,6 +396,14 @@ export default {
                     // The gap between thumbnails (in pixel).
                     gap: 15,
                 }
+            },
+            // Index.
+            index: {
+                showIndexPanel: false,
+                searchFilter: {
+                    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                },
+                rowsPerPage: 10,
             },
         };
     },
@@ -624,7 +686,136 @@ export default {
                 }
             }
             return thumbnails;
-        }
+        },
+        // The index items to be displayed in the index panel.
+        indexItems() {
+            const items = [];
+            if (this.canvases.length > 0) {
+                for (let i = 0; i < this.canvases.length; i++) {
+                    const canvas = this.canvases[i];
+                    items.push({
+                        id: canvas.id,
+                        label: canvas.label,
+                        thumbnail: canvas.thumbnail,
+                        index: i,
+                    });
+                }
+            }
+            return items;
+        },
+        // The active index item.
+        activeIndexItem() {
+            if (this.indexItems[this.navigation.activeIndex]) {
+                return this.indexItems[this.navigation.activeIndex];
+            }
+            return null;
+        },
+        // The first row index to display in the table. Controls the page to display.
+        indexTableFirstIndex() {
+            return Math.floor(this.navigation.activeIndex / this.index.rowsPerPage) * this.index.rowsPerPage;
+        },
+        // The nodes for the structure tree.
+        structureNodes() {
+            let nodes = [];
+            if (this.manifestHasLoaded) {
+                const canvasIDs = this.canvases.map((canvas) => canvas.id);
+                // Define the traversal function.
+                const createStructureTree = (structures) => {
+                    const treeNodes = [];
+                    for (const structure of structures) {
+                        let parser = ResourceParserFactory.create(structure);
+                        if (parser.getType() === 'Range') {
+                            const rangeLabel = parser.getPrefLabel(this.settings.language.default);
+                            if (rangeLabel) {
+                                const treeNode = {
+                                    key: parser.getID(),
+                                    label: rangeLabel,
+                                    data: {
+                                        id: parser.getID(),
+                                        type: parser.getType(),
+                                        label: rangeLabel,
+                                    },
+                                };
+                                if (structure.items) {
+                                    const subRanges = [];
+                                    for (const item of structure.items) {
+                                        if (item.type === 'Range') {
+                                            subRanges.push(item);
+                                        } else if (item.type === 'Canvas') {
+                                            const canvasID = item.id;
+                                            const canvasIndex = canvasIDs.indexOf(canvasID);
+                                            if (canvasIndex > -1) {
+                                                if (treeNode.data.canvasIndices) {
+                                                    treeNode.data.canvasIndices.push(canvasIndex);
+                                                } else {
+                                                    treeNode.data.canvasIndices = [canvasIndex];
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (subRanges.length > 0) {
+                                        treeNode.children = createStructureTree(subRanges);
+                                    }
+                                }
+                                treeNodes.push(treeNode);
+                            }
+                        }
+                    }
+                    return treeNodes;
+                };
+                const parser = this.manifestLoader.getParser();
+                const structures = parser.getStructures();
+                if (structures) {
+                    nodes = createStructureTree(structures);
+                }
+            }
+            return nodes;
+        },
+        // Selected node keys in the structure tree. It is a map where the key is the node key and the value is true.
+        selectedStructureNodes() {
+            const selectNodeKeys = {};
+            if (this.structureNodes.length > 0) {
+                // Define the traversal function.
+                const findSelectedNodes = (nodes) => {
+                    for (const node of nodes) {
+                        if (node.data.canvasIndices && node.data.canvasIndices.indexOf(this.navigation.activeIndex) > -1) {
+                            selectNodeKeys[node.key] = true;
+                        }
+                        if (node.children) {
+                            findSelectedNodes(node.children);
+                        }
+                    }
+
+                };
+                findSelectedNodes(this.structureNodes);
+            }
+            return selectNodeKeys;
+        },
+        // Expanded node keys in the structure tree. It is a map where the key is the node key and the value is true.
+        expandedStructureNodes() {
+            const expandedNodeKeys = {};
+            if (this.structureNodes.length > 0) {
+                // Define the traversal function.
+                const expandedNodes = (nodes) => {
+                    let expand = false;
+                    for (const node of nodes) {
+                        if (node.data.canvasIndices && node.data.canvasIndices.indexOf(this.navigation.activeIndex) > -1) {
+                            expand = true;
+                        }
+                        if (node.children) {
+                            const childExpand = expandedNodes(node.children);
+                            if (childExpand) {
+                                expand = true;
+                                expandedNodeKeys[node.key] = true;
+                            }
+                        }
+                    }
+                    return expand;
+                };
+                expandedNodes(this.structureNodes);
+            }
+            return expandedNodeKeys;
+        },
     },
     setup() {
         return {
@@ -669,7 +860,6 @@ export default {
             this.currentManifest = manifest ?? this.manifest;
             this.manifestStatus = 'initial';
             this.manifestErrors = [];
-            this.navigation.activeIndex = 0;
             this.viewMode = 'image';
             this.showAboutPanel = false;
             this.showCollectionPanel = false;
@@ -701,6 +891,21 @@ export default {
             this.isInFullscreen = false;
             this.hasAddedFullscreenListener = false;
             this.collectionActiveManifest = null;
+            this.navigation = {
+                activeIndex: 0,
+                maxVisibleItems: 0,
+                styles: {
+                    thumbnailWidth: 110,
+                    gap: 15,
+                }
+            }
+            this.index = {
+                showIndexPanel: false,
+                searchFilter: {
+                    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                },
+                rowsPerPage: 10,
+            }
             // Load the manifest data.
             await this.loadManifest();
         },
@@ -890,7 +1095,46 @@ export default {
                 maxCount -= 1;
             }
             this.navigation.maxVisibleItems = maxCount;
-        }
+        },
+        /**
+         * Open the index panel.
+         */
+        openIndexPanel() {
+            this.index.searchFilter.global.value = null;
+            this.index.showIndexPanel = true;
+        },
+        /**
+         * Scroll to the top of the index panel.
+         */
+        indexPanelScrollTop() {
+            this.$nextTick(() => {
+                this.$refs.indexPanelTop.scrollIntoView({ behavior: 'smooth' });
+            });
+        },
+        /**
+         * Event handler when an index row is selected.
+         *
+         * @param event
+         */
+        onIndexRowSelect(event) {
+            const selectedItem = event.data;
+            for (let i = 0; i < this.indexItems.length; i++) {
+                if (this.indexItems[i].id === selectedItem.id) {
+                    this.activate(i);
+                    break;
+                }
+            }
+        },
+        /**
+         * Event handler when a structure node is selected.
+         *
+         * @param node
+         */
+        onStructureNodeSelect(node) {
+            if (node.data.canvasIndices && node.data.canvasIndices.length > 0) {
+                this.activate(node.data.canvasIndices[0]);
+            }
+        },
     }
 }
 </script>
@@ -1061,5 +1305,11 @@ export default {
     100% {
         filter: grayscale(0);
     }
+}
+
+/* Index */
+.p-tabview.gv-index-tabs :deep(.p-tabview-panels) {
+    padding-left: 0;
+    padding-right: 0;
 }
 </style>
