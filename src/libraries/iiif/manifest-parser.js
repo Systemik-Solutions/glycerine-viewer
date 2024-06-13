@@ -77,13 +77,13 @@ export class ManifestParser extends ResourceParser {
                                     if (parser.isIIIF()) {
                                         image = {
                                             type: 'iiif',
-                                            url: parser.getIIIFUrl(),
+                                            url: decodeURI(parser.getIIIFUrl()),
                                         };
                                     } else {
                                         // Handle plain image.
                                         image = {
                                             type: 'image',
-                                            url: anno.body.id,
+                                            url: decodeURI(anno.body.id),
                                         };
                                     }
                                 } else if (parser instanceof SpecificResourceParser) {
@@ -117,7 +117,7 @@ export class ManifestParser extends ResourceParser {
                                         }
                                         image = {
                                             type: 'image',
-                                            url: imageUrl,
+                                            url: decodeURI(imageUrl),
                                         };
                                     }
                                 }
@@ -142,14 +142,14 @@ export class ManifestParser extends ResourceParser {
         const canvasParser = ResourceParserFactory.create(canvas);
         const thumbnail = canvasParser.getThumbnail();
         if (thumbnail) {
-            return thumbnail;
+            return decodeURI(thumbnail);
         }
         const image = this.getCanvasImage(canvas);
         if (image !== null) {
             if (image.type === 'iiif') {
-                return `${image.url}/full/80,/0/default.jpg`;
+                return `${decodeURI(image.url)}/full/80,/0/default.jpg`;
             } else {
-                return image.url;
+                return decodeURI(image.url);
             }
         }
         return null;
