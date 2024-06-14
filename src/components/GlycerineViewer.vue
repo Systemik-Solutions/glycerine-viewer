@@ -1197,7 +1197,7 @@ export default {
 
 .gv-sidebar {
     height: 100%;
-    width: 400px;
+    width: 100%;
     position: absolute;
     top: 0;
     right: 0;
@@ -1207,6 +1207,12 @@ export default {
     overflow-y: auto;
     box-shadow: -2px 2px 4px rgba(0,0,0,0.15);
     overflow-wrap: break-word;
+}
+
+@media (min-width: 400px) {
+    .gv-sidebar {
+        width: 400px;
+    }
 }
 
 .gv-sidebar :deep(img) {
@@ -1227,15 +1233,24 @@ export default {
 /* Info Pane */
 .gv-info-pane {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
-    width: 400px;
+    width: 100%;
+    top: 5rem;
+    left: 0;
     background-color: rgba(0,0,0,0.4);
     color: white;
-    max-height: 50%;
+    max-height: 70%;
     overflow-x: hidden;
     overflow-y: auto;
     overflow-wrap: break-word;
+    z-index: 50;
+}
+
+@media (min-width: 450px) {
+    .gv-info-pane {
+        width: 400px;
+        top: 1rem;
+        left: 1rem;
+    }
 }
 
 .gv-info-pane :deep(a) {
