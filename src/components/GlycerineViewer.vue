@@ -201,8 +201,8 @@
                 <ResourceInfoCard v-if="currentCanvasInfo" :resource-info="currentCanvasInfo"
                                   card-title="Canvas Information" />
                 <div class="text-center mt-8 gv-powered-by">
-                    <span class="mr-2">Powered by Glycerine</span>
-                    <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io">
+                    <span class="mr-2">Powered by Glycerine Viewer (v{{ version }})</span>
+                    <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io/viewer/">
                         <i class="pi pi-globe"></i>
                     </a>
                     <a target="_blank" title="GitHub" href="https://github.com/Systemik-Solutions/glycerine-viewer">
@@ -819,6 +819,7 @@ export default {
     },
     setup() {
         return {
+            version: __APP_VERSION__,
             logoPath,
             HtmlUtility,
             Helper,
