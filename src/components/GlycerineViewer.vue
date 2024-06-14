@@ -23,7 +23,7 @@
             </div>
             <div class="anno-gallery-nav flex align-items-center justify-content-between gap-3 w-full bg-black-alpha-90 p-3">
                 <div>
-                    <Button type="button" severity="secondary" rounded outlined icon="pi pi-arrow-left"
+                    <Button class="text-white" type="button" text rounded icon="pi pi-chevron-left"
                             @click="activate(navigation.activeIndex - 1)" :disabled="navigation.activeIndex === 0" />
                 </div>
                 <div ref="navContainer" class="anno-gallery-nav-items flex align-items-center justify-content-center flex-no-wrap w-full overflow-hidden"
@@ -41,7 +41,7 @@
                     </TransitionGroup>
                 </div>
                 <div>
-                    <Button type="button" severity="secondary" rounded outlined icon="pi pi-arrow-right"
+                    <Button class="text-white" type="button" text rounded icon="pi pi-chevron-right"
                             @click="activate(navigation.activeIndex + 1)" :disabled="navigation.activeIndex === canvases.length - 1" />
                 </div>
             </div>
