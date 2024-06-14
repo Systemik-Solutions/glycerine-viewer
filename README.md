@@ -137,7 +137,15 @@ Example:
 
 ## IIIF Manifest
 
-Glycerine Viewer currently supports [IIIF Presentation API 3.0](https://iiif.io/api/presentation/3.0/) manifests.
+Glycerine Viewer currently supports IIIF Presentation API [2.0](https://iiif.io/api/presentation/2.0/) and 
+[3.0](https://iiif.io/api/presentation/3.0/) manifests.
+
+> [!WARNING]
+> While Glycerine Viewer supports IIIF Presentation API 3.0 natively, it uses 
+> [iiif/parser](https://github.com/IIIF-Commons/parser) to convert IIIF Presentation API 2.0 manifests to IIIF
+> Presentation API 3.0 manifests before rendering. Some components from older versions of the IIIF Presentation API
+> may not be fully supported. If you are the owner of the IIIF manifest, it is recommended to update the manifest
+> to 3.0 before using it in Glycerine Viewer.
 
 > [!TIP]
 > [Glycerine](https://glycerine.io/) provides a suite of annotation tools and end-to-end workflows for researchers, 
