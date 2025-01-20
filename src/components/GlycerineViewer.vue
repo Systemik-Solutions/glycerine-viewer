@@ -326,7 +326,7 @@ export default {
             required: true,
         },
         // The default state of the info panel.
-        infoPanelVisibility: {
+        defaultInfoPanel: {
             type: Boolean,
             default: true,
         },
@@ -368,7 +368,7 @@ export default {
                 // Whether to turn on the light.
                 light: true,
                 // Whether to show the info panel.
-                showInfoPanel: this.infoPanelVisibility,
+                showInfoPanel: this.defaultInfoPanel,
                 // The display of table columns.
                 tableColumns: {
                     Title: true,
