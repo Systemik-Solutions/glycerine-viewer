@@ -21,7 +21,7 @@
                     </div>
                 </template>
             </div>
-            <div class="anno-gallery-nav flex align-items-center justify-content-between gap-3 w-full bg-black-alpha-90 p-3">
+            <div v-if="canvases.length > 1" class="anno-gallery-nav flex align-items-center justify-content-between gap-3 w-full bg-black-alpha-90 p-3">
                 <div>
                     <Button class="text-white" type="button" text rounded icon="pi pi-chevron-left"
                             @click="activate(navigation.activeIndex - 1)" :disabled="navigation.activeIndex === 0" />
@@ -845,7 +845,7 @@ export default {
         // Init the navigation when the manifest has loaded.
         manifestHasLoaded: {
             handler(newValue, oldValue) {
-                if (newValue) {
+                if (newValue && this.canvases && this.canvases.length > 1) {
                     this.initNavigation();
                 }
             },
