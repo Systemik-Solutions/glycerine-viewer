@@ -90,6 +90,31 @@ export default class ImageCropper {
     }
 
     /**
+     * Crop an SVG path area from the image.
+     *
+     * @param {string} d
+     *   The value of the "d" attribute of the SVG path.
+     * @returns {string}
+     */
+    cropSvgPath(d) {
+        // Convert the SVG path to polygon points.
+        // Use Path2D and SVGGeometryElement to get points
+        const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathElement.setAttribute('d', d);
+        const path = new Path2D(d);
+        const points = [];
+
+        const length = pathElement.getTotalLength();
+        const step = 1; // Adjust this for higher/lower resolution
+
+        for (let i = 0; i <= length; i += step) {
+            const { x, y } = pathElement.getPointAtLength(i);
+            points.push([x, y]);
+        }
+        return this.crop(points);
+    }
+
+    /**
      * Clear and reset the canvas.
      */
     resetCanvas() {

@@ -53,6 +53,15 @@ export default class AnnotationCropper {
                 const rx = parseFloat(matches[0][3]) * ratio;
                 const ry = parseFloat(matches[0][4]) * ratio;
                 return cropper.cropEllipse([cx, cy], rx, ry);
+            } else if (selector.value.match(/<path d="([^"]+)"/)) {
+                // Get the value of the "d" attribute.
+                const matches = [...selector.value.matchAll(/<path d="([^"]+)"/g)];
+                const d = matches[0][1];
+                // Apply the ration to all numbers in the path.
+                const path = d.replace(/([0-9.]+)/g, (match) => {
+                    return parseFloat(match) * ratio;
+                });
+                return cropper.cropSvgPath(path);
             }
         } else if (selector.type === 'FragmentSelector') {
             let selectorValue = selector.value;
