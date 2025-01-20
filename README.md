@@ -124,6 +124,7 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 It accepts the following props:
 
 - `manifest`: (Required) The URL of the IIIF manifest or the object of the manifest content.
+- `info-panel-visibility`: The initial visibility of the info panel. Default is `true`.
 
 Example:
 

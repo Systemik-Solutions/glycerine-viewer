@@ -324,7 +324,12 @@ export default {
         manifest: {
             type: [Object, String],
             required: true,
-        }
+        },
+        // The default state of the info panel.
+        infoPanelVisibility: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -363,7 +368,7 @@ export default {
                 // Whether to turn on the light.
                 light: true,
                 // Whether to show the info panel.
-                showInfoPanel: true,
+                showInfoPanel: this.infoPanelVisibility,
                 // The display of table columns.
                 tableColumns: {
                     Title: true,
