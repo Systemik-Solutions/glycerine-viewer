@@ -134,7 +134,8 @@
                             <h4 class="pl-2">Display</h4>
                             <div v-if="viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
                                 <div><i class="pi pi-sun"></i> Light</div>
-                                <InputSwitch v-model="settings.light" />
+                                <Slider v-model="settings.light" class="w-10rem" />
+                                <span>{{ settings.light }}%</span>
                             </div>
                             <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
                                 <div><i class="pi pi-info-circle"></i> Information Panel</div>
@@ -310,6 +311,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import Tree from 'primevue/tree';
+import Slider from "primevue/slider";
 
 import {FilterMatchMode} from "primevue/api";
 
@@ -324,7 +326,7 @@ import { ManifestLoader, CollectionParser, ResourceParserFactory } from "@/libra
 
 export default {
     name: "GlycerineViewer",
-    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree},
+    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -371,8 +373,8 @@ export default {
                     // The line color filter.
                     line: 'all',
                 },
-                // Whether to turn on the light.
-                light: true,
+                // Light level 0-100.
+                light: 100,
                 // Whether to show the info panel.
                 showInfoPanel: this.defaultInfoPanel,
                 // The display of table columns.
@@ -888,7 +890,7 @@ export default {
                     language: 'all',
                     line: 'all',
                 },
-                light: true,
+                light: 100,
                 showInfoPanel: true,
                 tableColumns: {
                     Title: true,

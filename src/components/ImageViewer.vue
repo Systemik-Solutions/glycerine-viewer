@@ -96,10 +96,10 @@ export default {
             type: String,
             default: 'en',
         },
-        // Whether to turn on the light.
+        // Light level (0-100).
         light: {
-            type: Boolean,
-            default: true,
+            type: Number,
+            default: 100,
         }
     },
     data() {
@@ -172,15 +172,7 @@ export default {
         },
         // Watch for changes to the light to turn on/off the light.
         light(newValue, oldValue) {
-            // Find the `.a9s-annotationlayer` element inside the container.
-            const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
-            if (newValue) {
-                // Turn on the light. Remove the class `bg-gray-900` from the annotation layer.
-                annotationLayer.classList.remove('bg-gray-900');
-            } else {
-                // Turn off the light. Add the class `bg-gray-900` to the annotation layer.
-                annotationLayer.classList.add('bg-gray-900');
-            }
+            this.setLightLevel();
         }
     },
     setup() {
@@ -234,6 +226,10 @@ export default {
             this.annotorious.on('selectAnnotation', (annotation) => {
                 this.openPopup(annotation);
             });
+            // Find the `.a9s-annotationlayer` element inside the container.
+            const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
+            // Initialize the light level.
+            this.setLightLevel();
         },
         /**
          * Opens the popup.
@@ -382,6 +378,12 @@ export default {
         formatDate(date) {
             return Helper.formatDate(date);
         },
+        setLightLevel() {
+            // Find the `.a9s-annotationlayer` element inside the container.
+            const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
+            // Add the background color.
+            annotationLayer.style.backgroundColor = `rgba(33,33,33,${1 - this.light / 100}`;
+        }
     }
 }
 
