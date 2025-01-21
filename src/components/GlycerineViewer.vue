@@ -1,291 +1,297 @@
 <template>
-    <div ref="gViewer" v-if="manifestHasLoaded" v-bind="$attrs" class="w-full h-full relative overflow-hidden">
-        <div class="gv-gallery flex flex-column justify-content-end h-full">
-            <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
-                <template v-for="(canvas, index) in canvases">
-                    <div class="h-full" v-if="navigation.activeIndex === index">
-                        <template v-if="canvas.image">
-                            <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
-                                         :plain-image="canvas.image.type === 'image'"
-                                         :annotations="annotations[canvas.id]" :table-columns="tableColumns"></TableViewer>
-                            <ImageViewer v-else :image="canvas.image.url"
-                                         :plain-image="canvas.image.type === 'image'"
-                                         :annotations="annotations[canvas.id]"
-                                         :light="settings.light"
-                                         :default-language="annotationDefaultLanguage"></ImageViewer>
-                        </template>
-                        <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
-                            <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
-                            <div>Missing/Unsupported Image</div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-            <div v-if="canvases.length > 1" class="anno-gallery-nav flex align-items-center justify-content-between gap-3 w-full bg-black-alpha-90 p-3">
-                <div>
-                    <Button class="text-white" type="button" text rounded icon="pi pi-chevron-left"
-                            @click="activate(navigation.activeIndex - 1)" :disabled="navigation.activeIndex === 0" />
-                </div>
-                <div ref="navContainer" class="anno-gallery-nav-items flex align-items-center justify-content-center flex-no-wrap w-full overflow-hidden"
-                     :style="{gap: navigation.styles.gap + 'px'}">
-                    <TransitionGroup name="rolling">
-                        <div class="anno-gallery-nav-item flex-shrink-0" :style="{width: navigation.styles.thumbnailWidth + 'px'}"
-                             v-for="thumbnail in navThumbnails" :key="thumbnail.id">
-                            <div class="thumbnail-container bg-gray-900">
-                                <a class="thumbnail-item" :class="{'thumbnail-item-active': navigation.activeIndex === thumbnail.index}" href="#" @click.prevent="activate(thumbnail.index)">
-                                    <img v-if="thumbnail.image" :src="thumbnail.image" :alt="thumbnail.label" />
-                                    <i v-else class="pi pi-image text-color-secondary" style="font-size: 3rem"></i>
-                                </a>
+    <div class="gv-container w-full h-full relative overflow-hidden" @dragover="onManifestDragOver($event)">
+        <div ref="gViewer" v-if="manifestHasLoaded" v-bind="$attrs" class="w-full h-full relative overflow-hidden">
+            <div class="gv-gallery flex flex-column justify-content-end h-full">
+                <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
+                    <template v-for="(canvas, index) in canvases">
+                        <div class="h-full" v-if="navigation.activeIndex === index">
+                            <template v-if="canvas.image">
+                                <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
+                                             :plain-image="canvas.image.type === 'image'"
+                                             :annotations="annotations[canvas.id]" :table-columns="tableColumns"></TableViewer>
+                                <ImageViewer v-else :image="canvas.image.url"
+                                             :plain-image="canvas.image.type === 'image'"
+                                             :annotations="annotations[canvas.id]"
+                                             :light="settings.light"
+                                             :default-language="annotationDefaultLanguage"></ImageViewer>
+                            </template>
+                            <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
+                                <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
+                                <div>Missing/Unsupported Image</div>
                             </div>
                         </div>
-                    </TransitionGroup>
+                    </template>
                 </div>
-                <div>
-                    <Button class="text-white" type="button" text rounded icon="pi pi-chevron-right"
-                            @click="activate(navigation.activeIndex + 1)" :disabled="navigation.activeIndex === canvases.length - 1" />
-                </div>
-            </div>
-        </div>
-        <div v-if="infoPanelVisibility" class="gv-info-pane">
-            <div class="gv-info-header">
-                <div class="gv-info-tools">
-                    <span @click="this.settings.showInfoPanel = false"><i class="pi pi-times-circle"></i></span>
-                </div>
-                <div class="flex justify-content-between align-items-center w-full gap-2">
-                    <div v-if="manifestInfo.thumbnail" class="gv-info-thumbnail flex-shrink-0">
-                        <img :src="manifestInfo.thumbnail" :alt="manifestInfo.label" />
+                <div v-if="canvases.length > 1" class="anno-gallery-nav flex align-items-center justify-content-between gap-3 w-full bg-black-alpha-90 p-3">
+                    <div>
+                        <Button class="text-white" type="button" text rounded icon="pi pi-chevron-left"
+                                @click="activate(navigation.activeIndex - 1)" :disabled="navigation.activeIndex === 0" />
+                    </div>
+                    <div ref="navContainer" class="anno-gallery-nav-items flex align-items-center justify-content-center flex-no-wrap w-full overflow-hidden"
+                         :style="{gap: navigation.styles.gap + 'px'}">
+                        <TransitionGroup name="rolling">
+                            <div class="anno-gallery-nav-item flex-shrink-0" :style="{width: navigation.styles.thumbnailWidth + 'px'}"
+                                 v-for="thumbnail in navThumbnails" :key="thumbnail.id">
+                                <div class="thumbnail-container bg-gray-900">
+                                    <a class="thumbnail-item" :class="{'thumbnail-item-active': navigation.activeIndex === thumbnail.index}" href="#" @click.prevent="activate(thumbnail.index)">
+                                        <img v-if="thumbnail.image" :src="thumbnail.image" :alt="thumbnail.label" />
+                                        <i v-else class="pi pi-image text-color-secondary" style="font-size: 3rem"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </TransitionGroup>
                     </div>
                     <div>
-                        <div class="gv-info-title">{{ manifestInfo.label }}</div>
-                        <div class="mt-2" v-if="collectionInfo">
-                            Part of <a @click.prevent="showCollectionPanel = true" href="#">{{ collectionInfo.label }}</a>
-                        </div>
+                        <Button class="text-white" type="button" text rounded icon="pi pi-chevron-right"
+                                @click="activate(navigation.activeIndex + 1)" :disabled="navigation.activeIndex === canvases.length - 1" />
                     </div>
                 </div>
             </div>
-            <div class="gv-info-body">
-                <div class="gv-field">
-                    <div class="gv-field-label">Currently Viewing <span>({{ navigation.activeIndex + 1 }} of {{ canvases.length }})</span></div>
-                    <div v-if="currentCanvasInfo?.label" class="gv-field-value">{{ currentCanvasInfo.label }}</div>
-                </div>
-                <div v-if="manifestInfo.requiredStatement" class="gv-field">
-                    <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
-                    <div class="gv-field-value">
-                        <div v-if="HtmlUtility.detectHtml(manifestInfo.requiredStatement.value)"
-                                  v-html="HtmlUtility.sanitizeHtml(manifestInfo.requiredStatement.value)">
-                        </div>
-                        <template v-else>
-                            {{ manifestInfo.requiredStatement.value }}
-                        </template>
+            <div v-if="infoPanelVisibility" class="gv-info-pane">
+                <div class="gv-info-header">
+                    <div class="gv-info-tools">
+                        <span @click="this.settings.showInfoPanel = false"><i class="pi pi-times-circle"></i></span>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="absolute" style="top:1rem;right:1rem">
-            <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" title="Fullscreen"
-                    @click="toggleFullscreen" />
-            <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" title="Exit Fullscreen"
-                    @click="toggleFullscreen" />
-            <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" title="Collection"
-                    @click="showCollectionPanel = true" />
-            <Button rounded icon="pi pi-list" class="mr-2" title="Index" @click="openIndexPanel" />
-            <Button v-if="hasAnnotation" rounded class="mr-2"
-                    :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
-                    :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
-            <Button rounded icon="pi pi-info-circle" class="mr-2" title="About" @click="showAboutPanel = true" />
-            <Button rounded icon="pi pi-cog" title="Settings" @click="showSettingsPanel = true" />
-        </div>
-        <Transition name="slide">
-            <div v-if="showSettingsPanel" class="gv-sidebar">
-                <div class="text-right">
-                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
-                            @click="showSettingsPanel = false" />
-                </div>
-                <h3><i class="pi pi-cog"></i> Settings</h3>
-                <div class="p-fluid formgrid grid">
-                    <div class="w-full mb-2">
-                        <h4 class="pl-2">Preference</h4>
-                        <div class="field col-12">
-                            <label for="filterLang">Language</label>
-                            <Dropdown id="filterLang" v-model="settings.language.default" :options="settings.language.options"
-                                      option-label="label" option-value="value" append-to="self" />
+                    <div class="flex justify-content-between align-items-center w-full gap-2">
+                        <div v-if="manifestInfo.thumbnail" class="gv-info-thumbnail flex-shrink-0">
+                            <img :src="manifestInfo.thumbnail" :alt="manifestInfo.label" />
                         </div>
-                    </div>
-                    <div v-if="hasAnnotation" class="w-full mb-2">
-                        <h4 class="pl-2">Annotation Filters</h4>
-                        <div class="field col-12">
-                            <label for="filterSet">Show</label>
-                            <Dropdown id="filterSet" v-model="settings.filters.set" :options="filterSetOptions"
-                                      option-label="label" option-value="value" append-to="self" />
-                        </div>
-                        <div class="field col-12">
-                            <label for="filterLang">Language</label>
-                            <Dropdown id="filterLang" v-model="settings.filters.language" :options="filterLanguageOptions"
-                                      option-label="label" option-value="value" append-to="self" />
-                        </div>
-                        <div class="field col-12">
-                            <label for="filterLine">Line Color</label>
-                            <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
-                                      option-label="label" option-value="value" append-to="self" />
-                        </div>
-                    </div>
-                    <div class="w-full">
-                        <h4 class="pl-2">Display</h4>
-                        <div v-if="viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
-                            <div><i class="pi pi-sun"></i> Light</div>
-                            <InputSwitch v-model="settings.light" />
-                        </div>
-                        <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
-                            <div><i class="pi pi-info-circle"></i> Information Panel</div>
-                            <InputSwitch v-model="settings.showInfoPanel" />
-                        </div>
-                        <div v-if="viewMode === 'table' && hasAnnotation" class="field col-12">
-                            <div class="mb-2">Table Columns</div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
-                                          :binary="true" />
-                                <label for="tcTitle">Title</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Description" input-id="tcDescription"
-                                          :binary="true" />
-                                <label for="tcDescription">Description</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Links" input-id="tcLinks"
-                                          :binary="true" />
-                                <label for="tcLinks">Links</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Tags" input-id="tcTags"
-                                          :binary="true" />
-                                <label for="tcTags">Tags</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Notes" input-id="tcNotes"
-                                          :binary="true" />
-                                <label for="tcNotes">Notes</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Attribution" input-id="tcAttribution"
-                                          :binary="true" />
-                                <label for="tcAttribution">Attribution</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Date" input-id="tcDate"
-                                          :binary="true" />
-                                <label for="tcDate">Date</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
-                                          :binary="true" />
-                                <label for="tcLineColor">Line Color</label>
-                            </div>
-                            <div class="mb-1">
-                                <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
-                                          :binary="true" />
-                                <label for="tcComments">Comments</label>
+                        <div>
+                            <div class="gv-info-title">{{ manifestInfo.label }}</div>
+                            <div class="mt-2" v-if="collectionInfo">
+                                Part of <a @click.prevent="showCollectionPanel = true" href="#">{{ collectionInfo.label }}</a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </Transition>
-        <Transition name="slide">
-            <div v-if="showAboutPanel" class="gv-sidebar">
-                <div class="text-right">
-                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
-                            @click="showAboutPanel = false" />
-                </div>
-                <ResourceInfoCard :resource-info="manifestInfo" card-title="About" />
-                <ResourceInfoCard v-if="currentCanvasInfo" :resource-info="currentCanvasInfo"
-                                  card-title="Canvas Information" />
-                <div class="text-center mt-8 gv-powered-by">
-                    <span class="mr-2">Powered by Glycerine Viewer (v{{ version }})</span>
-                    <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io/viewer/">
-                        <i class="pi pi-globe"></i>
-                    </a>
-                    <a target="_blank" title="GitHub" href="https://github.com/Systemik-Solutions/glycerine-viewer">
-                        <i class="pi pi-github"></i>
-                    </a>
-                </div>
-            </div>
-        </Transition>
-        <Transition name="slide">
-            <div v-if="showCollectionPanel" class="gv-sidebar">
-                <div class="text-right">
-                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
-                            @click="showCollectionPanel = false" />
-                </div>
-                <ResourceInfoCard :resource-info="collectionInfo" card-title="Collection" title-icon="book" />
-                <div v-if="collectionInfo.items.length > 0">
-                    <Listbox :modelValue="collectionActiveManifest" :options="collectionInfo.items" optionLabel="label"
-                             optionValue="id" @change="switchCollectionItem" class="w-full">
-                        <template #option="slotProps">
-                            <span v-if="slotProps.option.type === 'Collection'"><i class="pi pi-book"></i></span>
-                            <span v-else><i class="pi pi-file"></i></span>
-                            {{ slotProps.option.label }}
-                        </template>
-                    </Listbox>
-                </div>
-
-            </div>
-        </Transition>
-        <Transition name="slide">
-            <div v-if="index.showIndexPanel" class="gv-sidebar">
-                <div ref="indexPanelTop"></div>
-                <div class="text-right">
-                    <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
-                            @click="index.showIndexPanel = false" />
-                </div>
-                <h3><i class="pi pi-list"></i> Index</h3>
-                <TabView class="gv-index-tabs">
-                    <TabPanel header="Items">
-                        <DataTable :value="indexItems" tableClass="w-full" paginator :rows="index.rowsPerPage" selectionMode="single"
-                                   dataKey="id" paginatorTemplate="PrevPageLink JumpToPageDropdown NextPageLink"
-                                   v-model:filters="index.searchFilter" :globalFilterFields="['label']"
-                                   @page="indexPanelScrollTop" v-bind:selection="activeIndexItem"
-                                   @rowSelect="onIndexRowSelect" :first="indexTableFirstIndex">
-                            <template #header>
-                                <div class="flex justify-content-end">
-                                    <div class="p-input-icon-left w-full">
-                                        <i class="pi pi-search" />
-                                        <InputText v-model="index.searchFilter['global'].value" placeholder="Search" class="w-full" />
-                                    </div>
-                                </div>
+                <div class="gv-info-body">
+                    <div class="gv-field">
+                        <div class="gv-field-label">Currently Viewing <span>({{ navigation.activeIndex + 1 }} of {{ canvases.length }})</span></div>
+                        <div v-if="currentCanvasInfo?.label" class="gv-field-value">{{ currentCanvasInfo.label }}</div>
+                    </div>
+                    <div v-if="manifestInfo.requiredStatement" class="gv-field">
+                        <div class="gv-field-label">{{ manifestInfo.requiredStatement.label }}</div>
+                        <div class="gv-field-value">
+                            <div v-if="HtmlUtility.detectHtml(manifestInfo.requiredStatement.value)"
+                                 v-html="HtmlUtility.sanitizeHtml(manifestInfo.requiredStatement.value)">
+                            </div>
+                            <template v-else>
+                                {{ manifestInfo.requiredStatement.value }}
                             </template>
-                            <template #empty> No results found. </template>
-                            <Column style="width:20%" field="thumbnail" header="Image">
-                                <template #body="slotProps">
-                                    <img v-if="slotProps.data.thumbnail" class="w-full" :src="slotProps.data.thumbnail" alt="" />
-                                </template>
-                            </Column>
-                            <Column style="width:80%" field="label" header="Label">
-                                <template #body="slotProps">
-                                    {{ slotProps.data.label }}
-                                </template>
-                            </Column>
-                        </DataTable>
-                    </TabPanel>
-                    <TabPanel v-if="structureNodes.length > 0" header="Structures">
-                        <Tree :value="structureNodes" class="w-full" selectionMode="single"
-                              v-bind:selectionKeys="selectedStructureNodes"
-                              v-bind:expandedKeys="expandedStructureNodes"
-                              @nodeSelect="onStructureNodeSelect"></Tree>
-                    </TabPanel>
-                </TabView>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </Transition>
-    </div>
-    <div v-else class="w-full h-full bg-gray-900 overflow-hidden flex flex-column align-items-center justify-content-center gap-4">
-        <img :class="{ 'gv-start-logo': true, animation: manifestIsLoading }" :src="logoPath" alt="Glycerine" />
-        <div v-if="manifestHadErrors">
-            <Message v-for="error in manifestErrors" style="max-width: 400px" severity="error" :closable="false">
-                {{ error }}
-            </Message>
+            <div class="absolute" style="top:1rem;right:1rem">
+                <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" title="Fullscreen"
+                        @click="toggleFullscreen" />
+                <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" title="Exit Fullscreen"
+                        @click="toggleFullscreen" />
+                <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" title="Collection"
+                        @click="showCollectionPanel = true" />
+                <Button rounded icon="pi pi-list" class="mr-2" title="Index" @click="openIndexPanel" />
+                <Button v-if="hasAnnotation" rounded class="mr-2"
+                        :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
+                        :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
+                <Button rounded icon="pi pi-info-circle" class="mr-2" title="About" @click="showAboutPanel = true" />
+                <Button rounded icon="pi pi-cog" title="Settings" @click="showSettingsPanel = true" />
+            </div>
+            <Transition name="slide">
+                <div v-if="showSettingsPanel" class="gv-sidebar">
+                    <div class="text-right">
+                        <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                                @click="showSettingsPanel = false" />
+                    </div>
+                    <h3><i class="pi pi-cog"></i> Settings</h3>
+                    <div class="p-fluid formgrid grid">
+                        <div class="w-full mb-2">
+                            <h4 class="pl-2">Preference</h4>
+                            <div class="field col-12">
+                                <label for="filterLang">Language</label>
+                                <Dropdown id="filterLang" v-model="settings.language.default" :options="settings.language.options"
+                                          option-label="label" option-value="value" append-to="self" />
+                            </div>
+                        </div>
+                        <div v-if="hasAnnotation" class="w-full mb-2">
+                            <h4 class="pl-2">Annotation Filters</h4>
+                            <div class="field col-12">
+                                <label for="filterSet">Show</label>
+                                <Dropdown id="filterSet" v-model="settings.filters.set" :options="filterSetOptions"
+                                          option-label="label" option-value="value" append-to="self" />
+                            </div>
+                            <div class="field col-12">
+                                <label for="filterLang">Language</label>
+                                <Dropdown id="filterLang" v-model="settings.filters.language" :options="filterLanguageOptions"
+                                          option-label="label" option-value="value" append-to="self" />
+                            </div>
+                            <div class="field col-12">
+                                <label for="filterLine">Line Color</label>
+                                <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
+                                          option-label="label" option-value="value" append-to="self" />
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <h4 class="pl-2">Display</h4>
+                            <div v-if="viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
+                                <div><i class="pi pi-sun"></i> Light</div>
+                                <InputSwitch v-model="settings.light" />
+                            </div>
+                            <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
+                                <div><i class="pi pi-info-circle"></i> Information Panel</div>
+                                <InputSwitch v-model="settings.showInfoPanel" />
+                            </div>
+                            <div v-if="viewMode === 'table' && hasAnnotation" class="field col-12">
+                                <div class="mb-2">Table Columns</div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
+                                              :binary="true" />
+                                    <label for="tcTitle">Title</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Description" input-id="tcDescription"
+                                              :binary="true" />
+                                    <label for="tcDescription">Description</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Links" input-id="tcLinks"
+                                              :binary="true" />
+                                    <label for="tcLinks">Links</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Tags" input-id="tcTags"
+                                              :binary="true" />
+                                    <label for="tcTags">Tags</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Notes" input-id="tcNotes"
+                                              :binary="true" />
+                                    <label for="tcNotes">Notes</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Attribution" input-id="tcAttribution"
+                                              :binary="true" />
+                                    <label for="tcAttribution">Attribution</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Date" input-id="tcDate"
+                                              :binary="true" />
+                                    <label for="tcDate">Date</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
+                                              :binary="true" />
+                                    <label for="tcLineColor">Line Color</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
+                                              :binary="true" />
+                                    <label for="tcComments">Comments</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+            <Transition name="slide">
+                <div v-if="showAboutPanel" class="gv-sidebar">
+                    <div class="text-right">
+                        <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                                @click="showAboutPanel = false" />
+                    </div>
+                    <ResourceInfoCard :resource-info="manifestInfo" card-title="About" />
+                    <ResourceInfoCard v-if="currentCanvasInfo" :resource-info="currentCanvasInfo"
+                                      card-title="Canvas Information" />
+                    <div class="text-center mt-8 gv-powered-by">
+                        <span class="mr-2">Powered by Glycerine Viewer (v{{ version }})</span>
+                        <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io/viewer/">
+                            <i class="pi pi-globe"></i>
+                        </a>
+                        <a target="_blank" title="GitHub" href="https://github.com/Systemik-Solutions/glycerine-viewer">
+                            <i class="pi pi-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </Transition>
+            <Transition name="slide">
+                <div v-if="showCollectionPanel" class="gv-sidebar">
+                    <div class="text-right">
+                        <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                                @click="showCollectionPanel = false" />
+                    </div>
+                    <ResourceInfoCard :resource-info="collectionInfo" card-title="Collection" title-icon="book" />
+                    <div v-if="collectionInfo.items.length > 0">
+                        <Listbox :modelValue="collectionActiveManifest" :options="collectionInfo.items" optionLabel="label"
+                                 optionValue="id" @change="switchCollectionItem" class="w-full">
+                            <template #option="slotProps">
+                                <span v-if="slotProps.option.type === 'Collection'"><i class="pi pi-book"></i></span>
+                                <span v-else><i class="pi pi-file"></i></span>
+                                {{ slotProps.option.label }}
+                            </template>
+                        </Listbox>
+                    </div>
+
+                </div>
+            </Transition>
+            <Transition name="slide">
+                <div v-if="index.showIndexPanel" class="gv-sidebar">
+                    <div ref="indexPanelTop"></div>
+                    <div class="text-right">
+                        <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
+                                @click="index.showIndexPanel = false" />
+                    </div>
+                    <h3><i class="pi pi-list"></i> Index</h3>
+                    <TabView class="gv-index-tabs">
+                        <TabPanel header="Items">
+                            <DataTable :value="indexItems" tableClass="w-full" paginator :rows="index.rowsPerPage" selectionMode="single"
+                                       dataKey="id" paginatorTemplate="PrevPageLink JumpToPageDropdown NextPageLink"
+                                       v-model:filters="index.searchFilter" :globalFilterFields="['label']"
+                                       @page="indexPanelScrollTop" v-bind:selection="activeIndexItem"
+                                       @rowSelect="onIndexRowSelect" :first="indexTableFirstIndex">
+                                <template #header>
+                                    <div class="flex justify-content-end">
+                                        <div class="p-input-icon-left w-full">
+                                            <i class="pi pi-search" />
+                                            <InputText v-model="index.searchFilter['global'].value" placeholder="Search" class="w-full" />
+                                        </div>
+                                    </div>
+                                </template>
+                                <template #empty> No results found. </template>
+                                <Column style="width:20%" field="thumbnail" header="Image">
+                                    <template #body="slotProps">
+                                        <img v-if="slotProps.data.thumbnail" class="w-full" :src="slotProps.data.thumbnail" alt="" />
+                                    </template>
+                                </Column>
+                                <Column style="width:80%" field="label" header="Label">
+                                    <template #body="slotProps">
+                                        {{ slotProps.data.label }}
+                                    </template>
+                                </Column>
+                            </DataTable>
+                        </TabPanel>
+                        <TabPanel v-if="structureNodes.length > 0" header="Structures">
+                            <Tree :value="structureNodes" class="w-full" selectionMode="single"
+                                  v-bind:selectionKeys="selectedStructureNodes"
+                                  v-bind:expandedKeys="expandedStructureNodes"
+                                  @nodeSelect="onStructureNodeSelect"></Tree>
+                        </TabPanel>
+                    </TabView>
+                </div>
+            </Transition>
+        </div>
+        <div v-else class="w-full h-full bg-gray-900 overflow-hidden flex flex-column align-items-center justify-content-center gap-4">
+            <img :class="{ 'gv-start-logo': true, animation: manifestIsLoading }" :src="logoPath" alt="Glycerine" />
+            <div v-if="manifestHadErrors">
+                <Message v-for="error in manifestErrors" style="max-width: 400px" severity="error" :closable="false">
+                    {{ error }}
+                </Message>
+            </div>
+        </div>
+        <div v-if="showDropZone" class="drop-zone w-full h-full overflow-hidden flex flex-column align-items-center justify-content-center gap-2"
+             @dragleave="onManifestDragLeave($event)" @drop="onManifestDrop($event)" >
+            <div><i class="pi pi-file" style="font-size: 5rem"></i></div>
+            <div>Drop manifests here</div>
         </div>
     </div>
-
 </template>
 
 <script>
@@ -410,6 +416,8 @@ export default {
                 },
                 rowsPerPage: 10,
             },
+            // Whether to show the drop zone.
+            showDropZone: false,
         };
     },
     computed: {
@@ -1141,6 +1149,37 @@ export default {
                 this.activate(node.data.canvasIndices[0]);
             }
         },
+        /**
+         * Event handler when a manifest is dropped.
+         *
+         * @param event
+         */
+        onManifestDrop(event) {
+            event.preventDefault();
+            const manifestUrl = event.dataTransfer.getData('text/plain');
+            if (Helper.isURL(manifestUrl)) {
+                this.reset(manifestUrl);
+            }
+            this.showDropZone = false;
+        },
+        /**
+         * Event handler when a manifest is dragged over.
+         *
+         * @param event
+         */
+        onManifestDragOver(event) {
+            event.preventDefault();
+            this.showDropZone = true;
+        },
+        /**
+         * Event handler when a manifest is dragged out.
+         *
+         * @param event
+         */
+        onManifestDragLeave(event) {
+            event.preventDefault();
+            this.showDropZone = false;
+        },
     }
 }
 </script>
@@ -1332,5 +1371,18 @@ export default {
 .p-tabview.gv-index-tabs :deep(.p-tabview-panels) {
     padding-left: 0;
     padding-right: 0;
+}
+
+/* Drop Zone */
+.drop-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: #d0d0d0 dashed 5px;
+    color: #d0d0d0;
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 </style>
