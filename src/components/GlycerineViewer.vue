@@ -127,6 +127,27 @@
                             <div class="field col-12">
                                 <label for="filterLine">Line Color</label>
                                 <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
+                                          option-label="label" option-value="value" append-to="self">
+                                    <template #value="slotProps">
+                                        <div v-if="slotProps.value" class="flex align-items-center gap-2">
+                                            <div v-if="slotProps.value === 'all'">All line colors</div>
+                                            <div v-else :style="`width:100%;height:20px;background-color:${slotProps.value}`"></div>
+                                        </div>
+                                        <span v-else>
+                                            {{ slotProps.placeholder }}
+                                        </span>
+                                    </template>
+                                    <template #option="slotProps">
+                                        <div class="flex align-items-center gap-2">
+                                            <div v-if="slotProps.option.value === 'all'">{{ slotProps.option.label }}</div>
+                                            <div :style="`width:100%;height:20px;background-color:${slotProps.option.value}`"></div>
+                                        </div>
+                                    </template>
+                                </Dropdown>
+                            </div>
+                            <div class="field col-12">
+                                <label for="filterLang">Line Weight</label>
+                                <Dropdown id="filterLang" v-model="settings.filters.weight" :options="filterWeightOptions"
                                           option-label="label" option-value="value" append-to="self" />
                             </div>
                         </div>
@@ -182,6 +203,11 @@
                                     <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
                                               :binary="true" />
                                     <label for="tcLineColor">Line Color</label>
+                                </div>
+                                <div class="mb-1">
+                                    <Checkbox class="mr-2" v-model="settings.tableColumns['Line Weight']" input-id="tcLineWeight"
+                                              :binary="true" />
+                                    <label for="tcLineWeight">Line Weight</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
@@ -372,6 +398,8 @@ export default {
                     language: 'all',
                     // The line color filter.
                     line: 'all',
+                    // The line weight filter.
+                    weight: 'all',
                 },
                 // Light level 0-100.
                 light: 100,
@@ -387,6 +415,7 @@ export default {
                     Attribution: false,
                     Date: false,
                     "Line Color": false,
+                    "Line Weight": false,
                     Comments: false,
                 }
             },
@@ -571,6 +600,12 @@ export default {
                             ) {
                                 return;
                             }
+                            if (
+                                this.settings.filters.weight !== 'all' &&
+                                annotation.fields['Line Weight']?.en?.[0] !== this.settings.filters.weight
+                            ) {
+                                return;
+                            }
                             annotations[canvas.id].push(annotation);
                         });
                     }
@@ -664,6 +699,37 @@ export default {
                 });
                 colors.forEach(color => {
                     options.push({ label: color, value: color });
+                });
+            }
+            return options;
+        },
+        // The line weight filter options.
+        filterWeightOptions() {
+            const options = [
+                { label: 'All line weights', value: 'all' },
+            ];
+            if (this.canvases.length > 0) {
+                const weights = [];
+                this.canvases.forEach(canvas => {
+                    if (canvas.annotations && canvas.annotations.length > 0) {
+                        canvas.annotations.forEach(annotation => {
+                            if (annotation.fields) {
+                                for (const fieldName in annotation.fields) {
+                                    if (fieldName === 'Line Weight') {
+                                        if (annotation.fields[fieldName].en) {
+                                            const color = annotation.fields[fieldName].en[0];
+                                            if (weights.indexOf(color) < 0) {
+                                                weights.push(color);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                weights.forEach(weight => {
+                    options.push({ label: weight, value: weight });
                 });
             }
             return options;
@@ -889,6 +955,7 @@ export default {
                     set: 'all',
                     language: 'all',
                     line: 'all',
+                    weight: 'all',
                 },
                 light: 100,
                 showInfoPanel: true,
@@ -901,6 +968,7 @@ export default {
                     Attribution: false,
                     Date: false,
                     "Line Color": false,
+                    "Line Weight": false,
                     Comments: false,
                 }
             };
@@ -987,7 +1055,7 @@ export default {
         loadTableColumnVisibility() {
             const usedColNames = [];
             // Always set these invisible by default.
-            const excludeColNames = ['Attribution', 'Date', 'Line Color'];
+            const excludeColNames = ['Attribution', 'Date', 'Line Color', 'Line Weight'];
             if (this.canvases.length > 0) {
                 this.canvases.forEach(canvas => {
                     if (canvas.annotations && canvas.annotations.length > 0) {

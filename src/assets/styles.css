@@ -26,16 +26,16 @@
 }
 
 .a9s-annotation .a9s-inner:hover, .a9s-selection .a9s-inner:hover {
-    stroke: #fff000;
+    stroke: #fff000 !important;
 }
 
 .a9s-annotation.selected .a9s-inner, .a9s-selection .a9s-inner {
-    stroke: #fff000;
+    stroke: #fff000 !important;
 }
 
 /* Point Annotation styles */
-.rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer {
-    display: inline;
+.rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer, .rdwb-ano-shape.a9s-annotation.a9s-point .a9s-inner {
+    display: inline !important;
 }
 
 .rdwb-ano-shape.a9s-annotation.a9s-point.outline-normal .a9s-outer {
@@ -55,11 +55,11 @@
 }
 
 .rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer:hover {
-    fill: #fff000;
+    fill: #fff000 !important;
 }
 
 .rdwb-ano-shape.a9s-annotation.a9s-point.selected .a9s-outer {
-    fill: #fff000;
+    fill: #fff000 !important;
 }
 
 /* Override the PrimeVue dialog mask z-index to fix the dropdown panel issue */

@@ -376,7 +376,8 @@ export class ManifestParser extends ResourceParser {
                 label === 'Note' ||
                 label === 'Attribution' ||
                 label === 'Date' ||
-                label === 'Line Color'
+                label === 'Line Color' ||
+                label === 'Line Weight'
             ) {
                 parsedValue.label = label;
                 parsedValue.value = match[2].trim();

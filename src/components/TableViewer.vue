@@ -80,6 +80,15 @@
                     <template #body="slotProps">
                         <template v-if="slotProps.data.fields?.['Line Color']">
                             <div class="mb-2" v-for="(item, lang) in slotProps.data.fields['Line Color']">
+                                <div class="mb-2" v-for="value in item" :style="`width:20px;height:20px;background-color:${value};`"></div>
+                            </div>
+                        </template>
+                    </template>
+                </Column>
+                <Column v-if="tableColumns.indexOf('Line Weight') >= 0" header="Line Weight">
+                    <template #body="slotProps">
+                        <template v-if="slotProps.data.fields?.['Line Weight']">
+                            <div class="mb-2" v-for="(item, lang) in slotProps.data.fields['Line Weight']">
                                 <div class="mb-2" v-for="value in item">{{ value }}</div>
                             </div>
                         </template>

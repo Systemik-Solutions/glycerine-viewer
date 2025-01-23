@@ -384,13 +384,28 @@ starts with the label `Date:`. A single annotation can have only one date. For e
     "value": "Date: 2024-01-01"
 }
 ```
-
 #### Line Color
 
-The line color field is used to specify the brightness of the annotation outline. Currently, Glycerine Viewer supports
-three levels of brightness: `Light`, `Medium`, and `Dark`. The line color field should have the `purpose` of 
-`classifying`. The `value` of the line color field should be a plain text string starts with the label `Line Color:`.
-A single annotation can have only one line color. For example:
+The line color field is used to specify the color of the annotation outline. The line color field should have the
+`purpose` of `classifying`. The `value` of the line color field should be a plain text string starts with the label
+`Line Color:` followed by the hex code of the color. A single annotation can have only one line color. For example:
+
+```json
+{
+    "type": "TextualBody",
+    "purpose": "classifying",
+    "language": "en",
+    "format": "text/plain",
+    "value": "Line Color: #FF0000"
+}
+```
+
+#### Line Weight
+
+The line weight field is used to specify the brightness of the annotation outline. Currently, Glycerine Viewer supports
+three levels of brightness: `Light`, `Medium`, and `Dark`, which will adjust the "Line Color" accordingly. The line 
+weight field should have the `purpose` of `classifying`. The `value` of the line weight field should be a plain text 
+string starts with the label `Line Weight:`. A single annotation can have only one line weight. For example:
 
 ```json
 {

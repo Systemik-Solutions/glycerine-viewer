@@ -58,25 +58,31 @@ export default class Helper {
     static annotoriousFormatter() {
         return function (annotation) {
             let className = 'rdwb-ano-shape';
-            let lineColor = 'Medium';
+            let lineWeight = 'Medium';
+            let lineColor = '#506DAC'
             if (typeof annotation.body[0] !== "undefined") {
                 const annotationData = annotation.body[0].value;
                 if (typeof annotationData.fields?.["Line Color"]?.en !== "undefined") {
                     lineColor = annotationData.fields["Line Color"].en[0];
                 }
+                if (typeof annotationData.fields?.["Line Weight"]?.en !== "undefined") {
+                    lineWeight = annotationData.fields["Line Weight"].en[0];
+                }
             }
-            if (lineColor === 'Light') {
-                //formatter.style = 'stroke:#A9BCE3;';
-                className += ' outline-light';
-            } else if (lineColor === 'Dark') {
-                //formatter.style = 'stroke:#1E3E82;';
-                className += ' outline-dark';
-            } else {
-                //formatter.style = 'stroke:#506DAC;';
-                className += ' outline-normal';
+            let lum = 0;
+            if (lineWeight === 'Light') {
+                lum = 0.7;
+            } else if (lineWeight === 'Dark') {
+                lum = -0.5;
+            }
+            let inlineStyle = `stroke:${Helper.adjustColor(lineColor, lum)};`;
+            // Use the fill color instead when it is a point.
+            if (annotation.target?.renderedVia?.name === 'point') {
+                inlineStyle = `fill:${Helper.adjustColor(lineColor, lum)};`;
             }
             return {
-                className: className
+                className: className,
+                style: inlineStyle,
             };
         };
     }
@@ -100,5 +106,36 @@ export default class Helper {
         return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
             (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
         );
+    }
+
+    /**
+     * Adjust the color luminosity.
+     *
+     * @param {String} color
+     *   The hex color code.
+     * @param {Number} percentage
+     *   The percentage (-1 to 1) to adjust the luminosity. Negative values darken the color. Positive values lighten
+     *   the color.
+     * @returns {string}
+     *   The adjusted color code.
+     */
+    static adjustColor(color, percentage) {
+        // validate hex string
+        color = String(color).replace(/[^0-9a-f]/gi, '');
+        if (color.length < 6) {
+            color = color[0]+color[0]+color[1]+color[1]+color[2]+color[2];
+        }
+        percentage = percentage || 0;
+
+        // convert to decimal and change luminosity
+        let rgb = "#", c, i;
+        for (i = 0; i < 3; i++) {
+            c = parseInt(color.substring(i * 2, i * 2 + 2), 16);
+
+            c = Math.round(Math.min(Math.max(0, c + (c * percentage)), 255)).toString(16);
+            rgb += ("00" + c).substring(c.length);
+        }
+
+        return rgb;
     }
 }
