@@ -1228,6 +1228,7 @@ export default {
             event.preventDefault();
             const manifestUrl = event.dataTransfer.getData('text/plain');
             if (Helper.isURL(manifestUrl)) {
+                this.collectionLoader = null;
                 this.reset(manifestUrl);
             }
             this.showDropZone = false;
