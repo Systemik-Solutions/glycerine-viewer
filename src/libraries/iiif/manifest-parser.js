@@ -1,4 +1,12 @@
-import { ResourceParser, ImageParser, ResourceParserFactory, SpecificResourceParser, IiifHelper} from "@/libraries/iiif/dependency-manager.js";
+import {
+    ResourceParser,
+    ImageParser,
+    ResourceParserFactory,
+    SpecificResourceParser,
+    IiifHelper,
+    AudioParser,
+    VideoParser
+} from "@/libraries/iiif/dependency-manager.js";
 import Helper from "@/libraries/helper.js";
 import Language from "@/libraries/languages.js";
 
@@ -35,7 +43,13 @@ export class ManifestParser extends ResourceParser {
                     }
                     const image = this.getCanvasImage(item);
                     if (image) {
-                        canvas.image = image;
+                        if (image.type === 'audio') {
+                            canvas.audio = image;
+                        } else if (image.type === 'video') {
+                            canvas.video = image;
+                        } else {
+                            canvas.image = image;
+                        }
                     }
                     const thumbnail = this.getCanvasThumbnail(item);
                     if (thumbnail) {
@@ -86,7 +100,21 @@ export class ManifestParser extends ResourceParser {
                                             url: decodeURI(anno.body.id),
                                         };
                                     }
-                                } else if (parser instanceof SpecificResourceParser) {
+                                } else if (parser instanceof VideoParser) {
+                                    image = {
+                                        type: 'video',
+                                        format: parser.getFormat(),
+                                        url: decodeURI(parser.getUrl()),
+                                        width: parser.getWidth(),
+                                        height: parser.getHeight(),
+                                    }
+                                }  else if (parser instanceof AudioParser) {
+                                    image = {
+                                        type: 'audio',
+                                        format: parser.getFormat(),
+                                        url: decodeURI(parser.getUrl()),
+                                    }
+                                }else if (parser instanceof SpecificResourceParser) {
                                     // Handle when image is a specific resource with selector.
                                     const source = parser.getSource();
                                     if (source && source.type === 'Image') {
@@ -148,7 +176,7 @@ export class ManifestParser extends ResourceParser {
         if (image !== null) {
             if (image.type === 'iiif') {
                 return `${decodeURI(image.url)}/full/80,/0/default.jpg`;
-            } else {
+            } else if (image.type === 'image') {
                 return decodeURI(image.url);
             }
         }

@@ -45,6 +45,7 @@
     "primeflex": "^3.3.0",
     "primeicons": "^6.0.1",
     "primevue": "^3.26.1",
+    "video.js": "^8.21.0",
     "vue": "^3.2.45"
   },
   "devDependencies": {

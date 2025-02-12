@@ -15,6 +15,12 @@
                                              :light="settings.light"
                                              :default-language="annotationDefaultLanguage"></ImageViewer>
                             </template>
+                            <template v-else-if="canvas.audio">
+                                <AudioViewer :source="canvas.audio.url" />
+                            </template>
+                            <template v-else-if="canvas.video">
+                                <VideoViewer :source="canvas.video.url" />
+                            </template>
                             <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
                                 <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
                                 <div>Missing/Unsupported Image</div>
@@ -35,6 +41,8 @@
                                 <div class="thumbnail-container bg-gray-900">
                                     <a class="thumbnail-item" :class="{'thumbnail-item-active': navigation.activeIndex === thumbnail.index}" href="#" @click.prevent="activate(thumbnail.index)">
                                         <img v-if="thumbnail.image" :src="thumbnail.image" :alt="thumbnail.label" />
+                                        <i v-else-if="thumbnail.type === 'Audio'" class="pi pi-volume-up text-color-secondary" style="font-size: 3rem"></i>
+                                        <i v-else-if="thumbnail.type === 'Video'" class="pi pi-video text-color-secondary" style="font-size: 3rem"></i>
                                         <i v-else class="pi pi-image text-color-secondary" style="font-size: 3rem"></i>
                                     </a>
                                 </div>
@@ -283,14 +291,21 @@
                                     </div>
                                 </template>
                                 <template #empty> No results found. </template>
-                                <Column style="width:20%" field="thumbnail" header="Image">
+                                <Column style="width:20%" field="thumbnail" header="Thumbnail">
                                     <template #body="slotProps">
                                         <img v-if="slotProps.data.thumbnail" class="w-full" :src="slotProps.data.thumbnail" alt="" />
+                                        <div v-else-if="slotProps.data.type === 'Audio'" class="thumbnail-container surface-50">
+                                            <i class="pi pi-volume-up text-color-secondary" style="font-size: 1rem"></i>
+                                        </div>
+                                        <div v-else-if="slotProps.data.type === 'Video'" class="thumbnail-container surface-50">
+                                            <i class="pi pi-video text-color-secondary" style="font-size: 1rem"></i>
+                                        </div>
                                     </template>
                                 </Column>
                                 <Column style="width:80%" field="label" header="Label">
                                     <template #body="slotProps">
-                                        {{ slotProps.data.label }}
+                                        <span v-if="slotProps.data.label">{{ slotProps.data.label }}</span>
+                                        <span v-else>NA</span>
                                     </template>
                                 </Column>
                             </DataTable>
@@ -344,6 +359,8 @@ import {FilterMatchMode} from "primevue/api";
 import ImageViewer from "@/components/ImageViewer.vue";
 import {toRaw} from "vue";
 import TableViewer from "@/components/TableViewer.vue";
+import AudioViewer from "@/components/AudioViewer.vue";
+import VideoViewer from "@/components/VideoViewer.vue";
 import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
@@ -352,7 +369,9 @@ import { ManifestLoader, CollectionParser, ResourceParserFactory } from "@/libra
 
 export default {
     name: "GlycerineViewer",
-    components: {TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
+    components: {
+        AudioViewer, VideoViewer,
+        TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -758,12 +777,20 @@ export default {
                 }
                 for (let i = start; i < end; i++) {
                     const canvas = this.canvases[i];
-                    thumbnails.push({
+                    const item = {
                         id: canvas.id,
                         image: canvas.thumbnail,
                         label: canvas.label,
                         index: i,
-                    });
+                    };
+                    if (canvas.image) {
+                        item.type = 'Image';
+                    } else if (canvas.audio) {
+                        item.type = 'Audio';
+                    } else if (canvas.video) {
+                        item.type = 'Video';
+                    }
+                    thumbnails.push(item);
                 }
             }
             return thumbnails;
@@ -774,12 +801,20 @@ export default {
             if (this.canvases.length > 0) {
                 for (let i = 0; i < this.canvases.length; i++) {
                     const canvas = this.canvases[i];
-                    items.push({
+                    const item = {
                         id: canvas.id,
                         label: canvas.label,
                         thumbnail: canvas.thumbnail,
                         index: i,
-                    });
+                    };
+                    if (canvas.image) {
+                        item.type = 'Image';
+                    } else if (canvas.audio) {
+                        item.type = 'Audio';
+                    } else if (canvas.video) {
+                        item.type = 'Video';
+                    }
+                    items.push(item);
                 }
             }
             return items;
