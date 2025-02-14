@@ -191,6 +191,29 @@ export default class Language {
         { name: "Zulu", code: "zu" }
     ];
 
+    // List of UI languages.
+    static uiLanguages = [
+        { name: "English", code: "en" },
+        { name: "Français", code: "fr" },
+        { name: "Deutsch", code: "de" },
+        { name: "Italiano", code: "it" },
+        { name: "Español", code: "es" },
+        { name: "Nederlands", code: "nl" },
+        { name: "Dansk", code: "da" },
+        { name: "Português", code: "pt" },
+        { name: "Ελληνικά", code: "el" },
+        { name: "Polski", code: "pl" },
+        { name: "Svenska", code: "sv" },
+        { name: "Norsk", code: "no" },
+        { name: "Suomi", code: "fi" },
+        { name: "Русский", code: "ru" },
+        { name: "हिन्दी", code: "hi" },
+        { name: "日本語", code: "ja" },
+        { name: "한국어", code: "ko" },
+        { name: "Tiếng Việt", code: "vi" },
+        { name: "中文", code: "zh" }
+    ];
+
     /**
      * Get the language name by the language code.
      *

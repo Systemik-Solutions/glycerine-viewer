@@ -23,7 +23,7 @@
                             </template>
                             <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
                                 <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
-                                <div>Missing/Unsupported Image</div>
+                                <div>{{ $t('message.invalidImage') }}</div>
                             </div>
                         </div>
                     </template>
@@ -67,14 +67,14 @@
                         <div>
                             <div class="gv-info-title">{{ manifestInfo.label }}</div>
                             <div class="mt-2" v-if="collectionInfo">
-                                Part of <a @click.prevent="showCollectionPanel = true" href="#">{{ collectionInfo.label }}</a>
+                                {{ $t('ui.collection') }}: <a @click.prevent="showCollectionPanel = true" href="#">{{ collectionInfo.label }}</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="gv-info-body">
                     <div class="gv-field">
-                        <div class="gv-field-label">Currently Viewing <span>({{ navigation.activeIndex + 1 }} of {{ canvases.length }})</span></div>
+                        <div class="gv-field-label">{{ $t('ui.currentlyViewing') }} <span>({{ navigation.activeIndex + 1 }} of {{ canvases.length }})</span></div>
                         <div v-if="currentCanvasInfo?.label" class="gv-field-value">{{ currentCanvasInfo.label }}</div>
                     </div>
                     <div v-if="manifestInfo.requiredStatement" class="gv-field">
@@ -91,18 +91,18 @@
                 </div>
             </div>
             <div class="absolute" style="top:1rem;right:1rem">
-                <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" title="Fullscreen"
+                <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" :title="$t('ui.fullscreen')"
                         @click="toggleFullscreen" />
-                <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" title="Exit Fullscreen"
+                <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" :title="$t('ui.exitFullscreen')"
                         @click="toggleFullscreen" />
-                <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" title="Collection"
+                <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" :title="$t('ui.collection')"
                         @click="showCollectionPanel = true" />
-                <Button rounded icon="pi pi-list" class="mr-2" title="Index" @click="openIndexPanel" />
+                <Button rounded icon="pi pi-list" class="mr-2" :title="$t('ui.index')" @click="openIndexPanel" />
                 <Button v-if="hasAnnotation" rounded class="mr-2"
                         :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
-                        :title="viewMode === 'table' ? 'Images' : 'Annotations'" @click="toggleViewMode" />
-                <Button rounded icon="pi pi-info-circle" class="mr-2" title="About" @click="showAboutPanel = true" />
-                <Button rounded icon="pi pi-cog" title="Settings" @click="showSettingsPanel = true" />
+                        :title="viewMode === 'table' ? $t('ui.images') : $t('ui.annotations')" @click="toggleViewMode" />
+                <Button rounded icon="pi pi-info-circle" class="mr-2" :title="$t('ui.about')" @click="showAboutPanel = true" />
+                <Button rounded icon="pi pi-cog" :title="$t('ui.settings')" @click="showSettingsPanel = true" />
             </div>
             <Transition name="slide">
                 <div v-if="showSettingsPanel" class="gv-sidebar">
@@ -110,35 +110,35 @@
                         <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
                                 @click="showSettingsPanel = false" />
                     </div>
-                    <h3><i class="pi pi-cog"></i> Settings</h3>
+                    <h3><i class="pi pi-cog"></i> {{ $t('ui.settings') }}</h3>
                     <div class="p-fluid formgrid grid">
                         <div class="w-full mb-2">
-                            <h4 class="pl-2">Preference</h4>
+                            <h4 class="pl-2">{{ $t('ui.preference') }}</h4>
                             <div class="field col-12">
-                                <label for="filterLang">Language</label>
-                                <Dropdown id="filterLang" v-model="settings.language.default" :options="settings.language.options"
-                                          option-label="label" option-value="value" append-to="self" />
+                                <label for="filterLang">{{ $t('ui.language') }}</label>
+                                <Dropdown id="filterLang" v-model="$i18n.locale" :options="settings.language.options"
+                                          option-label="label" option-value="value" append-to="self" @change="onPrefLanguageChange" />
                             </div>
                         </div>
                         <div v-if="hasAnnotation" class="w-full mb-2">
-                            <h4 class="pl-2">Annotation Filters</h4>
+                            <h4 class="pl-2">{{ $t('ui.annotationFilters') }}</h4>
                             <div class="field col-12">
-                                <label for="filterSet">Show</label>
+                                <label for="filterSet">{{ $t('ui.show') }}</label>
                                 <Dropdown id="filterSet" v-model="settings.filters.set" :options="filterSetOptions"
                                           option-label="label" option-value="value" append-to="self" />
                             </div>
                             <div class="field col-12">
-                                <label for="filterLang">Language</label>
+                                <label for="filterLang">{{ $t('ui.language') }}</label>
                                 <Dropdown id="filterLang" v-model="settings.filters.language" :options="filterLanguageOptions"
                                           option-label="label" option-value="value" append-to="self" />
                             </div>
                             <div class="field col-12">
-                                <label for="filterLine">Line Color</label>
+                                <label for="filterLine">{{ $t('ui.lineColor') }}</label>
                                 <Dropdown id="filterLine" v-model="settings.filters.line" :options="filterLineOptions"
                                           option-label="label" option-value="value" append-to="self">
                                     <template #value="slotProps">
                                         <div v-if="slotProps.value" class="flex align-items-center gap-2">
-                                            <div v-if="slotProps.value === 'all'">All line colors</div>
+                                            <div v-if="slotProps.value === 'all'">{{ $t('ui.allLineColors') }}</div>
                                             <div v-else :style="`width:100%;height:20px;background-color:${slotProps.value}`"></div>
                                         </div>
                                         <span v-else>
@@ -154,73 +154,73 @@
                                 </Dropdown>
                             </div>
                             <div class="field col-12">
-                                <label for="filterLang">Line Weight</label>
+                                <label for="filterLang">{{ $t('ui.lineWeight') }}</label>
                                 <Dropdown id="filterLang" v-model="settings.filters.weight" :options="filterWeightOptions"
                                           option-label="label" option-value="value" append-to="self" />
                             </div>
                         </div>
                         <div class="w-full">
-                            <h4 class="pl-2">Display</h4>
+                            <h4 class="pl-2">{{ $t('ui.display') }}</h4>
                             <div v-if="viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
-                                <div><i class="pi pi-sun"></i> Light</div>
+                                <div><i class="pi pi-sun"></i> {{ $t('ui.light') }}</div>
                                 <Slider v-model="settings.light" class="w-10rem" />
                                 <span>{{ settings.light }}%</span>
                             </div>
                             <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
-                                <div><i class="pi pi-info-circle"></i> Information Panel</div>
+                                <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
                                 <InputSwitch v-model="settings.showInfoPanel" />
                             </div>
                             <div v-if="viewMode === 'table' && hasAnnotation" class="field col-12">
-                                <div class="mb-2">Table Columns</div>
+                                <div class="mb-2">{{ $t('ui.tableColumns') }}</div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
                                               :binary="true" />
-                                    <label for="tcTitle">Title</label>
+                                    <label for="tcTitle">{{ $t('ui.title') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Description" input-id="tcDescription"
                                               :binary="true" />
-                                    <label for="tcDescription">Description</label>
+                                    <label for="tcDescription">{{ $t('ui.description') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Links" input-id="tcLinks"
                                               :binary="true" />
-                                    <label for="tcLinks">Links</label>
+                                    <label for="tcLinks">{{ $t('ui.links') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Tags" input-id="tcTags"
                                               :binary="true" />
-                                    <label for="tcTags">Tags</label>
+                                    <label for="tcTags">{{ $t('ui.tags') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Notes" input-id="tcNotes"
                                               :binary="true" />
-                                    <label for="tcNotes">Notes</label>
+                                    <label for="tcNotes">{{ $t('ui.notes') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Attribution" input-id="tcAttribution"
                                               :binary="true" />
-                                    <label for="tcAttribution">Attribution</label>
+                                    <label for="tcAttribution">{{ $t('ui.attribution') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Date" input-id="tcDate"
                                               :binary="true" />
-                                    <label for="tcDate">Date</label>
+                                    <label for="tcDate">{{ $t('ui.date') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
                                               :binary="true" />
-                                    <label for="tcLineColor">Line Color</label>
+                                    <label for="tcLineColor">{{ $t('ui.lineColor') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns['Line Weight']" input-id="tcLineWeight"
                                               :binary="true" />
-                                    <label for="tcLineWeight">Line Weight</label>
+                                    <label for="tcLineWeight">{{ $t('ui.lineWeight') }}</label>
                                 </div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
                                               :binary="true" />
-                                    <label for="tcComments">Comments</label>
+                                    <label for="tcComments">{{ $t('ui.comments') }}</label>
                                 </div>
                             </div>
                         </div>
@@ -233,9 +233,9 @@
                         <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
                                 @click="showAboutPanel = false" />
                     </div>
-                    <ResourceInfoCard :resource-info="manifestInfo" card-title="About" />
+                    <ResourceInfoCard :resource-info="manifestInfo" :card-title="$t('ui.about')" />
                     <ResourceInfoCard v-if="currentCanvasInfo" :resource-info="currentCanvasInfo"
-                                      card-title="Canvas Information" />
+                                      :card-title="$t('ui.canvasInformation')" />
                     <div class="text-center mt-8 gv-powered-by">
                         <span class="mr-2">Powered by Glycerine Viewer (v{{ version }})</span>
                         <a target="_blank" class="mr-2" title="Website" href="https://glycerine.io/viewer/">
@@ -253,7 +253,7 @@
                         <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
                                 @click="showCollectionPanel = false" />
                     </div>
-                    <ResourceInfoCard :resource-info="collectionInfo" card-title="Collection" title-icon="book" />
+                    <ResourceInfoCard :resource-info="collectionInfo" :card-title="$t('ui.collection')" title-icon="book" />
                     <div v-if="collectionInfo.items.length > 0">
                         <Listbox :modelValue="collectionActiveManifest" :options="collectionInfo.items" optionLabel="label"
                                  optionValue="id" @change="switchCollectionItem" class="w-full">
@@ -274,9 +274,9 @@
                         <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
                                 @click="index.showIndexPanel = false" />
                     </div>
-                    <h3><i class="pi pi-list"></i> Index</h3>
+                    <h3><i class="pi pi-list"></i> {{ $t('ui.index') }}</h3>
                     <TabView class="gv-index-tabs">
-                        <TabPanel header="Items">
+                        <TabPanel :header="$t('ui.items')">
                             <DataTable :value="indexItems" tableClass="w-full" paginator :rows="index.rowsPerPage" selectionMode="single"
                                        dataKey="id" paginatorTemplate="PrevPageLink JumpToPageDropdown NextPageLink"
                                        v-model:filters="index.searchFilter" :globalFilterFields="['label']"
@@ -286,12 +286,12 @@
                                     <div class="flex justify-content-end">
                                         <div class="p-input-icon-left w-full">
                                             <i class="pi pi-search" />
-                                            <InputText v-model="index.searchFilter['global'].value" placeholder="Search" class="w-full" />
+                                            <InputText v-model="index.searchFilter['global'].value" :placeholder="$t('ui.search')" class="w-full" />
                                         </div>
                                     </div>
                                 </template>
-                                <template #empty> No results found. </template>
-                                <Column style="width:20%" field="thumbnail" header="Thumbnail">
+                                <template #empty> {{ $t('message.noResults') }} </template>
+                                <Column style="width:20%" field="thumbnail" :header="$t('ui.thumbnail')">
                                     <template #body="slotProps">
                                         <img v-if="slotProps.data.thumbnail" class="w-full" :src="slotProps.data.thumbnail" alt="" />
                                         <div v-else-if="slotProps.data.type === 'Audio'" class="thumbnail-container surface-50">
@@ -302,7 +302,7 @@
                                         </div>
                                     </template>
                                 </Column>
-                                <Column style="width:80%" field="label" header="Label">
+                                <Column style="width:80%" field="label" :header="$t('ui.label')">
                                     <template #body="slotProps">
                                         <span v-if="slotProps.data.label">{{ slotProps.data.label }}</span>
                                         <span v-else>NA</span>
@@ -310,7 +310,7 @@
                                 </Column>
                             </DataTable>
                         </TabPanel>
-                        <TabPanel v-if="structureNodes.length > 0" header="Structures">
+                        <TabPanel v-if="structureNodes.length > 0" :header="$t('ui.structures')">
                             <Tree :value="structureNodes" class="w-full" selectionMode="single"
                                   v-bind:selectionKeys="selectedStructureNodes"
                                   v-bind:expandedKeys="expandedStructureNodes"
@@ -331,7 +331,7 @@
         <div v-if="showDropZone" class="drop-zone w-full h-full overflow-hidden flex flex-column align-items-center justify-content-center gap-2"
              @dragleave="onManifestDragLeave($event)" @drop="onManifestDrop($event)" >
             <div><i class="pi pi-file" style="font-size: 5rem"></i></div>
-            <div>Drop manifests here</div>
+            <div>{{ $t('ui.dropManifests') }}</div>
         </div>
     </div>
 </template>
@@ -647,7 +647,7 @@ export default {
         // The annotation set filter options.
         filterSetOptions() {
             const options = [
-                { label: 'All annotations', value: 'all' },
+                { label: this.$t('ui.allAnnotations'), value: 'all' },
             ];
             if (this.manifestHasLoaded) {
                 const annoSets = this.manifestLoader.getParser().getAnnotationSets();
@@ -659,13 +659,13 @@ export default {
                     options.push({ label: label, value: annoSet.id });
                 }
             }
-            options.push({ label: 'No annotations', value: 'none' });
+            options.push({ label: this.$t('ui.noAnnotations'), value: 'none' });
             return options;
         },
         // The language filter options.
         filterLanguageOptions() {
             const options = [
-                { label: 'All languages', value: 'all' },
+                { label: this.$t('ui.allLanguages'), value: 'all' },
                 { label: 'English', value: 'en' },
             ];
             if (this.canvases.length > 0) {
@@ -694,7 +694,7 @@ export default {
         // The line color filter options.
         filterLineOptions() {
             const options = [
-                { label: 'All line colors', value: 'all' },
+                { label: this.$t('ui.allLineColors'), value: 'all' },
             ];
             if (this.canvases.length > 0) {
                 const colors = [];
@@ -725,7 +725,7 @@ export default {
         // The line weight filter options.
         filterWeightOptions() {
             const options = [
-                { label: 'All line weights', value: 'all' },
+                { label: this.$t('ui.allLineWeights'), value: 'all' },
             ];
             if (this.canvases.length > 0) {
                 const weights = [];
@@ -1057,17 +1057,19 @@ export default {
                     // Load column visibility.
                     this.loadTableColumnVisibility();
                     // Load languages.
+                    const langOptions = Language.uiLanguages;
+                    const langOptionCodes = langOptions.map((lang) => lang.code);
                     const languages = this.manifestLoader.getParser().getLanguages();
-                    this.settings.language.options = languages.map((lang) => {
+                    for (const lang of languages) {
+                        if (langOptionCodes.indexOf(lang.code) < 0) {
+                            langOptions.push(lang);
+                        }
+                    }
+                    this.settings.language.options = langOptions.map((lang) => {
                         return {label: lang.name, value: lang.code}
                     });
-                    // Set the default language.
-                    const langCodes = languages.map((lang) => lang.code);
-                    if (langCodes.indexOf('en') > -1) {
-                        this.settings.language.default = 'en';
-                    } else {
-                        this.settings.language.default = langCodes[0];
-                    }
+                    // Set default language.
+                    this.settings.language.default = this.$i18n.locale;
                     // Set the start index.
                     const startCanvas = this.manifestLoader.getParser().getStartCanvas();
                     if (startCanvas) {
@@ -1285,6 +1287,16 @@ export default {
         onManifestDragLeave(event) {
             event.preventDefault();
             this.showDropZone = false;
+        },
+        /**
+         * Event handler when the language is changed.
+         *
+         * @param event
+         */
+        onPrefLanguageChange(event) {
+            this.settings.language.default = event.value;
+            // Save the language to local storage.
+            localStorage.setItem('prefLang', event.value);
         },
     }
 }

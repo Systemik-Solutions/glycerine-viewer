@@ -74,8 +74,8 @@ To use the component:
 ### Import Manually
 
 The Glycerine Viewer component can also be imported manually if you prefer to handle the dependencies yourself. The
-Glycerine Viewer is built on top of the [PrimeVue](https://primevue.org/) suite. Therefore, these dependencies must be
-imported into the project before using the Glycerine Viewer.
+Glycerine Viewer is built on top of the [PrimeVue](https://primevue.org/) suite and some other Vue libraries. Therefore, these 
+dependencies must be imported into the project before using the Glycerine Viewer.
 
 For example, in the `main.js` file of the Vue project:
 
@@ -101,7 +101,7 @@ import 'primevue/resources/themes/lara-light-teal/theme.css';
 import 'glycerine-viewer/style.css';
 
 // Import the Glycerine Viewer component.
-import { GlycerineViewer } from 'glycerine-viewer';
+import { GlycerineViewer, i18n } from 'glycerine-viewer';
 
 import App from './App.vue'
 
@@ -109,6 +109,9 @@ const app = createApp(App);
 
 // Use the PrimeVue library.
 app.use(PrimeVue);
+
+// Use the i18n plugin.
+app.use(i18n);
 
 // Register the Glycerine Viewer component globally.
 app.component('GlycerineViewer', GlycerineViewer);

@@ -1,7 +1,7 @@
 <template>
     <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view"></div>
     <Dialog v-model:visible="showPopup" @hide="onPopupClose" modal
-            :header="popupData.title[popupData.language] ?? 'Annotation'" :style="{ width: '50rem' }"
+            :header="popupData.title[popupData.language] ?? $t('ui.annotation')" :style="{ width: '50rem' }"
             :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
             append-to="self"
             :pt="{
@@ -14,7 +14,7 @@
         <template v-if="popupHasData">
             <TabView>
                 <TabPanel v-if="popupData.languages.length > 1 || popupData.description[popupData.language] || popupData.links[popupData.language]"
-                          header="About">
+                          :header="$t('ui.about')">
                     <div v-if="popupData.languages.length > 0" class="p-fluid formgrid grid">
                         <div class="field col-12 flex justify-content-end">
                             <Dropdown id="anoLanguage" class="w-5 lg:w-3" v-model="popupData.language" append-to="self"
@@ -23,7 +23,7 @@
                     </div>
                     <p v-if="popupData.description">{{ popupData.description[popupData.language] }}</p>
                     <div v-if="popupData.links[popupData.language] && popupData.links[popupData.language].length > 0">
-                        <h5>Links</h5>
+                        <h5>{{ $t('ui.links') }}</h5>
                         <ul>
                             <li v-for="link in popupData.links[popupData.language]">
                                 <a :href="link.url" target="_blank">{{ link.text ? link.text : link.url }}</a>
@@ -31,17 +31,17 @@
                         </ul>
                     </div>
                 </TabPanel>
-                <TabPanel v-if="popupData.tags.length > 0" header="Tags">
+                <TabPanel v-if="popupData.tags.length > 0" :header="$t('ui.tags')">
                     <TermTagGroup class="mb-4" :terms="popupData.tags" read-only />
                 </TabPanel>
-                <TabPanel v-if="popupData.attribution || popupData.date || popupData.notes.length > 0" header="Notes">
+                <TabPanel v-if="popupData.attribution || popupData.date || popupData.notes.length > 0" :header="$t('ui.notes')">
                     <div class="mb-4" v-if="popupData.notes.length > 0">
                         <p v-for="note in popupData.notes">{{ note }}</p>
                     </div>
                     <div class="text-sm text-right" v-if="popupData.attribution">{{ popupData.attribution }}</div>
                     <div class="text-sm text-right" v-if="popupData.date">{{ formatDate(popupData.date) }}</div>
                 </TabPanel>
-                <TabPanel v-if="popupData.comments.length > 0" header="Comments">
+                <TabPanel v-if="popupData.comments.length > 0" :header="$t('ui.comments')">
                     <div class="mb-4" v-if="popupData.comments.length > 0">
                         <div class="mb-4" v-for="comment in popupData.comments">
                             <div v-if="comment.format === 'text/html'"
@@ -53,7 +53,7 @@
             </TabView>
         </template>
         <template #footer>
-            <Button label="Close" icon="pi pi-times" @click="showPopup = false" outlined />
+            <Button :label="$t('ui.close')" icon="pi pi-times" @click="showPopup = false" outlined />
         </template>
     </Dialog>
 </template>

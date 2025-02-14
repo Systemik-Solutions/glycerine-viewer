@@ -24,7 +24,7 @@
             {{ activeTerm.data.description }}
         </div>
         <div v-if="activeTermUrl" class="text-sm mt-5">
-            <a :href="activeTermUrl" target="_blank">Tag Details</a>
+            <a :href="activeTermUrl" target="_blank">{{ $t('ui.details') }}</a>
         </div>
     </div>
 </template>

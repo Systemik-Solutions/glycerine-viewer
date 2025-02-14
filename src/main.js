@@ -15,6 +15,7 @@ import Helper from "@/libraries/helper.js";
 import ImageCropper from "@/libraries/image-cropper.js";
 import ImageLoader from "@/libraries/image-loader.js";
 import Language from "@/libraries/languages.js";
+import i18n from "@/i18n/i18n.js";
 
 // Import IIIF libraries from the dependency manager.
 import { ManifestLoader, ResourceParser, ImageParser, AudioParser, VideoParser, ManifestParser, SpecificResourceParser, AgentParser, CollectionParser, IiifHelper } from "@/libraries/iiif/dependency-manager.js";
@@ -45,4 +46,5 @@ export {
     AgentParser,
     CollectionParser,
     IiifHelper,
+    i18n,
 }
