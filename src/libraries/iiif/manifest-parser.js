@@ -91,6 +91,7 @@ export class ManifestParser extends ResourceParser {
                                     if (parser.isIIIF()) {
                                         image = {
                                             type: 'iiif',
+                                            isLevel0: parser.isLevel0(),
                                             url: decodeURI(parser.getIIIFUrl()),
                                         };
                                     } else {
@@ -175,7 +176,11 @@ export class ManifestParser extends ResourceParser {
         const image = this.getCanvasImage(canvas);
         if (image !== null) {
             if (image.type === 'iiif') {
-                return `${decodeURI(image.url)}/full/80,/0/default.jpg`;
+                if (image.isLevel0) {
+                    return `${decodeURI(image.url)}/full/max/0/default.jpg`;
+                } else {
+                    return `${decodeURI(image.url)}/full/80,/0/default.jpg`;
+                }
             } else if (image.type === 'image') {
                 return decodeURI(image.url);
             }

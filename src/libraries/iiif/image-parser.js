@@ -78,6 +78,44 @@ export class ImageParser extends ResourceParser {
     }
 
     /**
+     * Get the service type (The image API version).
+     *
+     * This can be 'ImageService2' or 'ImageService3'.
+     *
+     * @returns {string|null}
+     */
+    getServiceType() {
+        if (this.getService()) {
+            const service = this.getService()[0];
+            // Return the 'type' or '@type' property.
+            return service.type ? service.type : service['@type'];
+        }
+        return null;
+    }
+
+    /**
+     * Get the image service profile.
+     *
+     * @returns {string|null}
+     */
+    getServiceProfile() {
+        if (this.getService()) {
+            const service = this.getService()[0];
+            return service.profile ? service.profile : null;
+        }
+        return null;
+    }
+
+    /**
+     * Check if the image is level 0.
+     *
+     * @returns {boolean}
+     */
+    isLevel0() {
+        return this.getServiceProfile() === 'http://iiif.io/api/image/2/level0.json' || this.getServiceProfile() === 'level0';
+    }
+
+    /**
      * Check if the image is IIIF.
      *
      * @returns {boolean}
