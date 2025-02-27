@@ -224,6 +224,13 @@ export default {
             }
             // Listen for annotation selection.
             this.annotorious.on('selectAnnotation', (annotation) => {
+                window.parent.postMessage(
+                    {
+                        event: "Annotation selected",
+                        details: annotation['id'],
+                    },
+                    "*"
+                );
                 this.openPopup(annotation);
             });
             // Find the `.a9s-annotationlayer` element inside the container.
