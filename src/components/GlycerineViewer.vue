@@ -91,18 +91,28 @@
                 </div>
             </div>
             <div class="absolute" style="top:1rem;right:1rem">
-                <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" :title="$t('ui.fullscreen')"
-                        @click="toggleFullscreen" />
-                <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" :title="$t('ui.exitFullscreen')"
-                        @click="toggleFullscreen" />
+                <template v-if="showFullScreenButton">
+                    <Button v-if="!isInFullscreen" rounded icon="pi pi-window-maximize" class="mr-2" :title="$t('ui.fullscreen')"
+                            @click="toggleFullscreen" />
+                    <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" :title="$t('ui.exitFullscreen')"
+                            @click="toggleFullscreen" />
+                </template>
                 <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" :title="$t('ui.collection')"
                         @click="showCollectionPanel = true" />
-                <Button rounded icon="pi pi-list" class="mr-2" :title="$t('ui.index')" @click="openIndexPanel" />
-                <Button v-if="hasAnnotation" rounded class="mr-2"
-                        :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
-                        :title="viewMode === 'table' ? $t('ui.images') : $t('ui.annotations')" @click="toggleViewMode" />
-                <Button rounded icon="pi pi-info-circle" class="mr-2" :title="$t('ui.about')" @click="showAboutPanel = true" />
-                <Button rounded icon="pi pi-cog" :title="$t('ui.settings')" @click="showSettingsPanel = true" />
+                <template v-if="showIndexButton">
+                    <Button rounded icon="pi pi-list" class="mr-2" :title="$t('ui.index')" @click="openIndexPanel" />
+                </template>
+                <template v-if="showAnnotationViewButton">
+                    <Button v-if="hasAnnotation" rounded class="mr-2"
+                            :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
+                            :title="viewMode === 'table' ? $t('ui.images') : $t('ui.annotations')" @click="toggleViewMode" />
+                </template>
+                <template v-if="showAboutPaneButton">
+                    <Button rounded icon="pi pi-info-circle" class="mr-2" :title="$t('ui.about')" @click="showAboutPanel = true" />
+                </template>
+                <template v-if="showSettingPaneButton">
+                    <Button rounded icon="pi pi-cog" :title="$t('ui.settings')" @click="showSettingsPanel = true" />
+                </template>
             </div>
             <Transition name="slide">
                 <div v-if="showSettingsPanel" class="gv-sidebar">
@@ -380,6 +390,26 @@ export default {
         },
         // The default state of the info panel.
         defaultInfoPanel: {
+            type: Boolean,
+            default: true,
+        },
+        showFullScreenButton: {
+            type: Boolean,
+            default: true,
+        },
+        showIndexButton: {
+            type: Boolean,
+            default: true,
+        },
+        showAnnotationViewButton: {
+            type: Boolean,
+            default: true,
+        },
+        showAboutPaneButton: {
+            type: Boolean,
+            default: true,
+        },
+        showSettingPaneButton: {
             type: Boolean,
             default: true,
         },
