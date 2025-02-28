@@ -127,12 +127,12 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 It accepts the following props:
 
 - `manifest`: (Required) The URL of the IIIF manifest or the object of the manifest content.
-- `defaultInfoPanel` (Boolean): The initial visibility of the info panel. Default is `true`.
-- `showFullScreenButton` (Boolean): The initial visibility of the full-screen button. Default is `true`.
-- `showIndexButton` (Boolean): The initial visibility of the index button. Default is `true`.
-- `showAnnotationViewButton` (Boolean): The initial visibility of the annotation view button. Default is `true`.
-- `showAboutPaneButton` (Boolean): The initial visibility of the About button. Default is `true`.
-- `showSettingPaneButton` (Boolean): The initial visibility of the settings pane button. Default is `true`.
+- `default-info-panel` (Boolean): The initial visibility of the info panel. Default is `true`.
+- `show-full-screen-button` (Boolean): The initial visibility of the full-screen button. Default is `true`.
+- `show-index-button` (Boolean): The initial visibility of the index button. Default is `true`.
+- `show-annotation-view-button` (Boolean): The initial visibility of the annotation view button. Default is `true`.
+- `show-about-pane-button` (Boolean): The initial visibility of the About button. Default is `true`.
+- `show-setting-pane-button` (Boolean): The initial visibility of the settings pane button. Default is `true`.
 
 Example:
 
