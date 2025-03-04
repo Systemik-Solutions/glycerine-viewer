@@ -6,6 +6,7 @@ import ImageViewer from "@/components/ImageViewer.vue";
 import TableViewer from "@/components/TableViewer.vue";
 import TermTagGroup from "@/components/TermTagGroup.vue";
 import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
+import ResourceInfoDetails from "@/components/ResourceInfoDetails.vue";
 import AgentCard from "@/components/AgentCard.vue";
 import VideoPlayer from "@/components/VideoPlayer.vue";
 import AudioViewer from "@/components/AudioViewer.vue";
@@ -27,6 +28,7 @@ export {
     TableViewer,
     TermTagGroup,
     ResourceInfoCard,
+    ResourceInfoDetails,
     AgentCard,
     VideoPlayer,
     AudioViewer,

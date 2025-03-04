@@ -114,6 +114,14 @@ export class ManifestLoader {
                 this.#addError(`Invalid manifest: invalid type ${this.#data['type']}`);
                 return;
             }
+
+            // Validate the collection.
+            if (this.#data['type'] === 'Collection') {
+                if (!this.#data.items || this.#data.items.length === 0) {
+                    this.#addError('Invalid manifest: the collection is empty');
+                    return;
+                }
+            }
         } else {
             this.#addError('Manifest is empty');
         }

@@ -263,18 +263,43 @@
                         <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
                                 @click="showCollectionPanel = false" />
                     </div>
-                    <ResourceInfoCard :resource-info="collectionInfo" :card-title="$t('ui.collection')" title-icon="book" />
+                    <ResourceInfoCard :resource-info="collectionInfo" :card-title="$t('ui.collection')"
+                                      title-icon="book" :toggleable="true" :collapsed="true" />
                     <div v-if="collectionInfo.items.length > 0">
-                        <Listbox :modelValue="collectionActiveManifest" :options="collectionInfo.items" optionLabel="label"
-                                 optionValue="id" @change="switchCollectionItem" class="w-full">
-                            <template #option="slotProps">
-                                <span v-if="slotProps.option.type === 'Collection'"><i class="pi pi-book"></i></span>
-                                <span v-else><i class="pi pi-file"></i></span>
-                                {{ slotProps.option.label }}
+                        <div ref="collectionTableTop"></div>
+                        <DataTable :value="collectionInfo.items" tableClass="w-full" paginator :rows="collectionTableOptions.rowsPerPage" selectionMode="single"
+                                   dataKey="id" paginatorTemplate="PrevPageLink JumpToPageDropdown NextPageLink"
+                                   v-model:filters="collectionTableOptions.searchFilter" :globalFilterFields="['label']"
+                                   @page="collectionTableScrollTop" v-bind:selection="collectionTableActiveItem"
+                                   @rowSelect="onCollectionItemRowSelect" :first="collectionTableFirstIndex">
+                            <template #header>
+                                <div class="flex justify-content-end">
+                                    <div class="p-input-icon-left w-full">
+                                        <i class="pi pi-search" />
+                                        <InputText v-model="collectionTableOptions.searchFilter['global'].value" :placeholder="$t('ui.search')" class="w-full" />
+                                    </div>
+                                </div>
                             </template>
-                        </Listbox>
+                            <template #empty> {{ $t('message.noResults') }} </template>
+                            <Column style="width:20%" field="thumbnail" :header="$t('ui.thumbnail')">
+                                <template #body="slotProps">
+                                    <img v-if="slotProps.data.thumbnail" class="w-full" :src="slotProps.data.thumbnail" alt="" />
+                                    <div v-else-if="slotProps.data.type === 'Collection'" class="thumbnail-container surface-50">
+                                        <i class="pi pi-book text-color-secondary" style="font-size: 1rem"></i>
+                                    </div>
+                                    <div v-else class="thumbnail-container surface-50">
+                                        <i class="pi pi-file text-color-secondary" style="font-size: 1rem"></i>
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column style="width:80%" field="label" :header="$t('ui.label')">
+                                <template #body="slotProps">
+                                    <span v-if="slotProps.data.label">{{ slotProps.data.label }}</span>
+                                    <span v-else>NA</span>
+                                </template>
+                            </Column>
+                        </DataTable>
                     </div>
-
                 </div>
             </Transition>
             <Transition name="slide">
@@ -496,6 +521,13 @@ export default {
                 },
                 rowsPerPage: 10,
             },
+            // Collection table options.
+            collectionTableOptions: {
+                searchFilter: {
+                    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                },
+                rowsPerPage: 10,
+            },
             // Whether to show the drop zone.
             showDropZone: false,
         };
@@ -616,6 +648,21 @@ export default {
                 return collectionInfo;
             }
             return null;
+        },
+        // The active item in the collection table.
+        collectionTableActiveItem() {
+            if (this.collectionActiveManifest) {
+                return this.collectionInfo.items.find(item => item.id === this.collectionActiveManifest);
+            }
+            return null;
+        },
+        // The first row index to display in the collection table. Controls the page to display.
+        collectionTableFirstIndex() {
+            if (this.collectionInfo && this.collectionInfo.items) {
+                const activeItemIndex = this.collectionInfo.items.findIndex(item => item.id === this.collectionActiveManifest);
+                return Math.floor(activeItemIndex / this.collectionTableOptions.rowsPerPage) * this.collectionTableOptions.rowsPerPage;
+            }
+            return 0;
         },
         // The table columns to display.
         tableColumns() {
@@ -1055,6 +1102,13 @@ export default {
                 },
                 rowsPerPage: 10,
             }
+            // Collection table options.
+            this.collectionTableOptions = {
+                searchFilter: {
+                    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                },
+                rowsPerPage: 10,
+            };
             // Load the manifest data.
             await this.loadManifest();
         },
@@ -1224,16 +1278,6 @@ export default {
             }
         },
         /**
-         * Switch the collection item.
-         *
-         * @param event
-         */
-        switchCollectionItem(event) {
-            if (event.value) {
-                this.reset(event.value);
-            }
-        },
-        /**
          * Initialize the navigation.
          */
         initNavigation() {
@@ -1327,6 +1371,25 @@ export default {
             this.settings.language.default = event.value;
             // Save the language to local storage.
             localStorage.setItem('prefLang', event.value);
+        },
+        /**
+         * Event handler when a collection item row is selected.
+         *
+         * @param event
+         */
+        onCollectionItemRowSelect(event) {
+            const selectedItem = event.data;
+            if (selectedItem) {
+                this.reset(selectedItem.id);
+            }
+        },
+        /**
+         * Scroll to the top of the collection table.
+         */
+        collectionTableScrollTop() {
+            this.$nextTick(() => {
+                this.$refs.collectionTableTop.scrollIntoView({ behavior: 'smooth' });
+            });
         },
     }
 }
