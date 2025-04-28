@@ -4,7 +4,7 @@
             <i class="pi pi-volume-up" style="font-size: 7rem"></i>
         </div>
         <div class="p-3">
-            <VideoPlayer :options="{ controls: true, audioOnlyMode: true, sources: [{ src: source }] }" />
+            <VideoPlayer :options="{ controls: true, audioOnlyMode: true, sources: [{ src: source, type: format }] }" />
         </div>
     </div>
 </template>
@@ -20,6 +20,10 @@ export default {
         source: {
             type: String,
             required: true,
+        },
+        format: {
+            type: String,
+            required: true
         }
     }
 }

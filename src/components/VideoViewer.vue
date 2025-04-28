@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-full bg-gray-900 flex flex-column justify-content-end" style="overflow-y:auto">
         <div class="p-3 flex-grow-1">
-            <VideoPlayer :fit-height="true" :options="{ controls: true, responsive: true, sources: [{ src: source }] }" />
+            <VideoPlayer :fit-height="true" :options="{ controls: true, responsive: true, sources: [{ src: source, type: format }] }" />
         </div>
     </div>
 </template>
@@ -17,6 +17,10 @@ export default {
         source: {
             type: String,
             required: true,
+        },
+        format: {
+            type: String,
+            required: true
         }
     }
 }

@@ -18,10 +18,10 @@
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"></ImageViewer>
                             </template>
                             <template v-else-if="canvas.audio">
-                                <AudioViewer :source="canvas.audio.url" />
+                                <AudioViewer :source="canvas.audio.url" :format="canvas.audio.format" />
                             </template>
                             <template v-else-if="canvas.video">
-                                <VideoViewer :source="canvas.video.url" />
+                                <VideoViewer :source="canvas.video.url" :format="canvas.video.format" />
                             </template>
                             <div v-else class="flex flex-column align-items-center justify-content-center w-full h-full bg-gray-900 text-color-secondary">
                                 <div><i class="pi pi-image" style="font-size: 7rem"></i></div>
