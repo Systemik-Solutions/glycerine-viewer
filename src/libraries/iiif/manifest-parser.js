@@ -83,7 +83,7 @@ export class ManifestParser extends ResourceParser {
                         anoPage.items.forEach(anno => {
                             if (
                                 anno.type === 'Annotation' &&
-                                anno.motivation === 'painting' &&
+                                anno.motivation.toLowerCase() === 'painting' &&
                                 typeof anno.body !== 'undefined'
                             ) {
                                 const parser = ResourceParserFactory.create(anno.body);
@@ -359,7 +359,7 @@ export class ManifestParser extends ResourceParser {
                     value: `<img src="${imageParser.getUrl()}" alt="Annotation Image">`,
                     format: 'text/html',
                 });
-            } else if (body.type === 'SpecificResource' && motivation === 'tagging') {
+            } else if (body.type === 'SpecificResource' && motivation.toLowerCase() === 'tagging') {
                 // Handle the tagging annotation with the linked `SpecificResource`.
                 if (body.source && Helper.isURL(body.source)) {
                     tagLinkedSource = body.source;
