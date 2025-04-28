@@ -13,7 +13,9 @@
                                              :plain-image="canvas.image.type === 'image'"
                                              :annotations="annotations[canvas.id]"
                                              :light="settings.light"
-                                             :default-language="annotationDefaultLanguage"></ImageViewer>
+                                             :default-language="annotationDefaultLanguage"
+                                             :displayAnnotations="displayAnnotations"
+                                             @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"></ImageViewer>
                             </template>
                             <template v-else-if="canvas.audio">
                                 <AudioViewer :source="canvas.audio.url" />
@@ -97,12 +99,14 @@
                     <Button v-else rounded icon="pi pi-window-minimize" class="mr-2" :title="$t('ui.exitFullscreen')"
                             @click="toggleFullscreen" />
                 </template>
-                <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" :title="$t('ui.collection')"
-                        @click="showCollectionPanel = true" />
+                <template v-if="showCollectionPaneButton">
+                    <Button v-if="collectionInfo" rounded icon="pi pi-book" class="mr-2" :title="$t('ui.collection')"
+                            @click="showCollectionPanel = true" />
+                </template>
                 <template v-if="showIndexButton">
                     <Button rounded icon="pi pi-list" class="mr-2" :title="$t('ui.index')" @click="openIndexPanel" />
                 </template>
-                <template v-if="showAnnotationViewButton">
+                <template v-if="showAnnotationViewButton && displayAnnotations">
                     <Button v-if="hasAnnotation" rounded class="mr-2"
                             :icon="viewMode === 'table' ? 'pi pi-image' : 'pi pi-comment'"
                             :title="viewMode === 'table' ? $t('ui.images') : $t('ui.annotations')" @click="toggleViewMode" />
@@ -130,7 +134,7 @@
                                           option-label="label" option-value="value" append-to="self" @change="onPrefLanguageChange" />
                             </div>
                         </div>
-                        <div v-if="hasAnnotation" class="w-full mb-2">
+                        <div v-if="displayAnnotations && hasAnnotation" class="w-full mb-2">
                             <h4 class="pl-2">{{ $t('ui.annotationFilters') }}</h4>
                             <div class="field col-12">
                                 <label for="filterSet">{{ $t('ui.show') }}</label>
@@ -171,7 +175,7 @@
                         </div>
                         <div class="w-full">
                             <h4 class="pl-2">{{ $t('ui.display') }}</h4>
-                            <div v-if="viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
+                            <div v-if="displayAnnotations && viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
                                 <div><i class="pi pi-sun"></i> {{ $t('ui.light') }}</div>
                                 <Slider v-model="settings.light" class="w-10rem" />
                                 <span>{{ settings.light }}%</span>
@@ -180,7 +184,7 @@
                                 <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
                                 <InputSwitch v-model="settings.showInfoPanel" />
                             </div>
-                            <div v-if="viewMode === 'table' && hasAnnotation" class="field col-12">
+                            <div v-if="displayAnnotations && viewMode === 'table' && hasAnnotation" class="field col-12">
                                 <div class="mb-2">{{ $t('ui.tableColumns') }}</div>
                                 <div class="mb-1">
                                     <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
@@ -303,11 +307,11 @@
                 </div>
             </Transition>
             <Transition name="slide">
-                <div v-if="index.showIndexPanel" class="gv-sidebar">
+                <div v-if="showIndexPanel" class="gv-sidebar">
                     <div ref="indexPanelTop"></div>
                     <div class="text-right">
                         <Button icon="pi pi-times" severity="secondary" text rounded aria-label="Close"
-                                @click="index.showIndexPanel = false" />
+                                @click="showIndexPanel = false" />
                     </div>
                     <h3><i class="pi pi-list"></i> {{ $t('ui.index') }}</h3>
                     <TabView class="gv-index-tabs">
@@ -418,27 +422,58 @@ export default {
             type: Boolean,
             default: true,
         },
+        // Whether to show the full screen button.
         showFullScreenButton: {
             type: Boolean,
             default: true,
         },
+        // Whether to show the index button.
         showIndexButton: {
             type: Boolean,
             default: true,
         },
+        // Whether to show the annotation view button.
         showAnnotationViewButton: {
             type: Boolean,
             default: true,
         },
+        // Whether to show the about button.
         showAboutPaneButton: {
             type: Boolean,
             default: true,
         },
+        // Whether to show the settings button.
         showSettingPaneButton: {
             type: Boolean,
             default: true,
         },
+        // Whether to show the collection button.
+        showCollectionPaneButton: {
+            type: Boolean,
+            default: true,
+        },
+        // Whether to show the manifest URL in the about panel.
+        showManifestUrl: {
+            type: Boolean,
+            default: true,
+        },
+        // Whether to enable the annotation feature.
+        displayAnnotations: {
+            type: Boolean,
+            default: true,
+        },
+        // The visibility of the index panel.
+        toggleIndexPanel: {
+            type: Boolean,
+            default: false,
+        },
+        // The visibility of the about panel.
+        toggleAboutPanel: {
+            type: Boolean,
+            default: false,
+        },
     },
+    emits: ['osdInitialized', 'indexPanelClosed', 'aboutPanelClosed'],
     data() {
         return {
             // The IIIF manifest URL or object of the current viewing manifest.
@@ -451,6 +486,8 @@ export default {
             viewMode: 'image',
             // Whether to show the "About" panel.
             showAboutPanel: false,
+            // Whether to show the "Index" panel.
+            showIndexPanel: false,
             // Whether to show the "Collection" panel.
             showCollectionPanel: false,
             // Whether to show the "Settings" panel.
@@ -515,7 +552,6 @@ export default {
             },
             // Index.
             index: {
-                showIndexPanel: false,
                 searchFilter: {
                     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
                 },
@@ -557,19 +593,21 @@ export default {
         manifestInfo() {
             const manifestInfo = {};
             if (this.manifestHasLoaded) {
-                // Get the manifest link.
-                let linkURL = null;
-                if (typeof this.currentManifest === 'string') {
-                    linkURL = this.currentManifest;
-                }
-                if (typeof this.currentManifest === 'object' && this.currentManifest.id) {
-                    linkURL = this.currentManifest.id;
-                }
-                if (linkURL) {
-                    manifestInfo.link = {
-                        text: 'IIIF Manifest',
-                        url: linkURL,
-                    };
+                if (this.showManifestUrl) {
+                    // Get the manifest link.
+                    let linkURL = null;
+                    if (typeof this.currentManifest === 'string') {
+                        linkURL = this.currentManifest;
+                    }
+                    if (typeof this.currentManifest === 'object' && this.currentManifest.id) {
+                        linkURL = this.currentManifest.id;
+                    }
+                    if (linkURL) {
+                        manifestInfo.link = {
+                            text: 'IIIF Manifest',
+                            url: linkURL,
+                        };
+                    }
                 }
                 const parser = this.manifestLoader.getParser();
                 manifestInfo.label = parser.getPrefLabel(this.settings.language.default);
@@ -619,10 +657,6 @@ export default {
             if (this.manifestHasLoaded && this.collectionLoader) {
                 const collectionParser = this.collectionLoader.getParser();
                 const collectionInfo = {
-                    link: {
-                        text: 'IIIF Manifest',
-                        url: collectionParser.getID(),
-                    },
                     label: collectionParser.getPrefLabel(this.settings.language.default),
                     summary: collectionParser.getSummary(this.settings.language.default),
                     requiredStatement: collectionParser.getRequiredStatement(this.settings.language.default),
@@ -633,6 +667,12 @@ export default {
                     seeAlso: collectionParser.getSeeAlsoLinks(this.settings.language.default),
                     provider: collectionParser.getProvider(),
                 };
+                if (this.showManifestUrl) {
+                    collectionInfo.link = {
+                        text: 'IIIF Manifest',
+                        url: collectionParser.getID(),
+                    };
+                }
                 // Get items.
                 collectionInfo.items = [];
                 const items = collectionParser.getItems();
@@ -1039,6 +1079,26 @@ export default {
             },
             flush: 'post'
         },
+        // Watch for the about panel visibility.
+        toggleAboutPanel(newValue) {
+            this.showAboutPanel = newValue;
+        },
+        // Watch for the index panel visibility.
+        toggleIndexPanel(newValue) {
+            this.showIndexPanel = newValue;
+        },
+        // Emit events when the about panel is closed.
+        showAboutPanel(newValue, oldValue) {
+            if (oldValue === true && newValue === false) {
+                this.$emit('aboutPanelClosed');
+            }
+        },
+        // Emit events when the index panel is closed.
+        showIndexPanel(newValue, oldValue) {
+            if (newValue === false && oldValue === true) {
+                this.$emit('indexPanelClosed');
+            }
+        },
     },
     methods: {
         /**
@@ -1058,6 +1118,7 @@ export default {
             this.showAboutPanel = false;
             this.showCollectionPanel = false;
             this.showSettingsPanel = false;
+            this.showIndexPanel = false;
             this.settings = {
                 language: {
                     default: null,
@@ -1070,7 +1131,7 @@ export default {
                     weight: 'all',
                 },
                 light: 100,
-                showInfoPanel: true,
+                showInfoPanel: this.defaultInfoPanel,
                 tableColumns: {
                     Title: true,
                     Description: true,
@@ -1096,7 +1157,6 @@ export default {
                 }
             }
             this.index = {
-                showIndexPanel: false,
                 searchFilter: {
                     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
                 },
@@ -1296,7 +1356,7 @@ export default {
          */
         openIndexPanel() {
             this.index.searchFilter.global.value = null;
-            this.index.showIndexPanel = true;
+            this.showIndexPanel = true;
         },
         /**
          * Scroll to the top of the index panel.

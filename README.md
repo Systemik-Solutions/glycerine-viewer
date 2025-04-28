@@ -124,15 +124,28 @@ app.mount('#app');
 ### Glycerine Viewer
 
 The `GlycerineViewer` component is the main component for visualising IIIF images and annotations from IIIF manifests.
-It accepts the following props:
+
+#### Props
 
 - `manifest`: (Required) The URL of the IIIF manifest or the object of the manifest content.
 - `default-info-panel` (Boolean): The initial visibility of the info panel. Default is `true`.
-- `show-full-screen-button` (Boolean): The initial visibility of the full-screen button. Default is `true`.
-- `show-index-button` (Boolean): The initial visibility of the index button. Default is `true`.
-- `show-annotation-view-button` (Boolean): The initial visibility of the annotation view button. Default is `true`.
-- `show-about-pane-button` (Boolean): The initial visibility of the About button. Default is `true`.
-- `show-setting-pane-button` (Boolean): The initial visibility of the settings pane button. Default is `true`.
+- `show-full-screen-button` (Boolean): The visibility of the full-screen button. Default is `true`.
+- `show-index-button` (Boolean): The visibility of the index button. Default is `true`.
+- `show-annotation-view-button` (Boolean): The visibility of the annotation view button. Default is `true`.
+- `show-about-pane-button` (Boolean): The visibility of the About button. Default is `true`.
+- `show-setting-pane-button` (Boolean): The visibility of the settings pane button. Default is `true`.
+- `show-collection-pane-button` (Boolean): The visibility of the collection pane button. Default is `true`.
+- `show-manifest-url` (Boolean): The visibility of the manifest URL inside the "About" panel. Default is `true`.
+- `display-annotations` (Boolean): Whether to enable the annotation display and related features. Default is `true`.
+- `toggle-index-panel` (Boolean): This prop is used to toggle the index panel visibility. Default is `false`.
+- `toggle-about-panel` (Boolean): This prop is used to toggle the about panel visibility. Default is `false`.
+
+#### Emits
+
+- `osd-initialized`: Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance
+and the canvas data as parameters.
+- `index-panel-closed`: Emitted when the index panel is closed.
+- `about-panel-closed`: Emitted when the about panel is closed.
 
 Example:
 

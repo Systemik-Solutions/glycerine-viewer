@@ -265,6 +265,15 @@ export class ManifestLoader {
     }
 
     /**
+     * Get the original manifest version.
+     *
+     * @returns {String}
+     */
+    getVersion() {
+        return this.#version;
+    }
+
+    /**
      * Get the error messages.
      *
      * @returns {Array}

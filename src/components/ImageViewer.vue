@@ -100,8 +100,14 @@ export default {
         light: {
             type: Number,
             default: 100,
-        }
+        },
+        // Whether to display annotations.
+        displayAnnotations: {
+            type: Boolean,
+            default: true,
+        },
     },
+    emits: ['osdInitialized'],
     data() {
         return {
             // Whether to show the popup.
@@ -212,31 +218,35 @@ export default {
                 osdConfig.tileSources = [this.image + '/info.json'];
             }
             this.osdViewer = OpenSeadragon(osdConfig);
-            // Initialize Annotorious.
-            this.annotorious = Annotorious(this.osdViewer, {
-                disableEditor: true,
-                readOnly: true,
-                formatters: Helper.annotoriousFormatter(),
-            });
-            // Load annotations into Annotorious.
-            if (this.webAnnotations.length > 0) {
-                this.annotorious.setAnnotations(this.webAnnotations);
+            // Emit the osdInitialized event.
+            this.$emit('osdInitialized', this.osdViewer);
+            if (this.displayAnnotations) {
+                // Initialize Annotorious.
+                this.annotorious = Annotorious(this.osdViewer, {
+                    disableEditor: true,
+                    readOnly: true,
+                    formatters: Helper.annotoriousFormatter(),
+                });
+                // Load annotations into Annotorious.
+                if (this.webAnnotations.length > 0) {
+                    this.annotorious.setAnnotations(this.webAnnotations);
+                }
+                // Listen for annotation selection.
+                this.annotorious.on('selectAnnotation', (annotation) => {
+                    window.parent.postMessage(
+                        {
+                            event: "Annotation selected",
+                            details: annotation['id'],
+                        },
+                        "*"
+                    );
+                    this.openPopup(annotation);
+                });
+                // Find the `.a9s-annotationlayer` element inside the container.
+                const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
+                // Initialize the light level.
+                this.setLightLevel();
             }
-            // Listen for annotation selection.
-            this.annotorious.on('selectAnnotation', (annotation) => {
-                window.parent.postMessage(
-                    {
-                        event: "Annotation selected",
-                        details: annotation['id'],
-                    },
-                    "*"
-                );
-                this.openPopup(annotation);
-            });
-            // Find the `.a9s-annotationlayer` element inside the container.
-            const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
-            // Initialize the light level.
-            this.setLightLevel();
         },
         /**
          * Opens the popup.
