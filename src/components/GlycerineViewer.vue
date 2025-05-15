@@ -472,6 +472,11 @@ export default {
             type: Boolean,
             default: false,
         },
+        // Default id of the item(image) to show when canvas loaded.
+        defaultItemId: {
+            type: String,
+            default: null,
+        },
     },
     emits: ['osdInitialized', 'indexPanelClosed', 'aboutPanelClosed'],
     data() {
@@ -1060,9 +1065,20 @@ export default {
             collectionLoader: null,
         };
     },
-    mounted() {
+    async mounted() {
         // Load the manifest data.
-        this.loadManifest();
+        await this.loadManifest();
+
+        // Set the default item index by id.
+        if(this.defaultItemId){
+            let items = this.indexItems;
+            items.forEach((item, index) => {
+                if (item.id === this.defaultItemId) {
+                    this.navigation.activeIndex = index;
+                    return;
+                }
+            });        
+        }
     },
     watch: {
         // Watch the manifest change to reset the viewer.

@@ -139,6 +139,7 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 - `display-annotations` (Boolean): Whether to enable the annotation display and related features. Default is `true`.
 - `toggle-index-panel` (Boolean): This prop is used to toggle the index panel visibility. Default is `false`.
 - `toggle-about-panel` (Boolean): This prop is used to toggle the about panel visibility. Default is `false`.
+- `default-item-id` (String): The id of the item(image) to show by default when loaded.
 
 #### Emits
 
