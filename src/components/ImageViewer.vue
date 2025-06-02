@@ -106,14 +106,36 @@ export default {
             type: Boolean,
             default: true,
         },
+        // Highlighted annotation ID.
+        highlightedAnnotationId: {
+            type: String,
+            default: null,
+        },
     },
-    emits: ['osdInitialized'],
+    emits: [
+        // Event emitted when the OpenSeadragon viewer is initialized.
+        'osdInitialized',
+        // Event emitted when the canvas is loaded.
+        'canvasLoaded',
+        // Event emitted when annotations are loaded. The list of raw annotation data is passed as the first argument.
+        'annotationsLoaded',
+        // Emitted when mouse has entered an annotation. It passes the annotation id as a parameter.
+        'mouseEnterAnnotation',
+        // Emitted when mouse has left an annotation. It passes the annotation id as a parameter.
+        'mouseLeaveAnnotation',
+        // Emitted when an annotation popup is opened. It passes the annotation id as a parameter.
+        'annotationPopupOpened',
+        // Emitted when an annotation popup is closed. It passes the annotation id as a parameter.
+        'annotationPopupClosed',
+    ],
     data() {
         return {
             // Whether to show the popup.
             showPopup: false,
             // The popup data.
             popupData: {
+                // The annotation ID.
+                id: null,
                 // The current language code.
                 language: 'en',
                 // Available annotation languages.
@@ -173,13 +195,39 @@ export default {
                 this.annotorious.clearAnnotations();
                 if (this.webAnnotations.length > 0) {
                     this.annotorious.setAnnotations(this.webAnnotations);
+                    // Emit the annotationsLoaded event with the raw annotation data.
+                    const rawAnnotations = [];
+                    if (newValue && Array.isArray(newValue)) {
+                        for (const annotation of newValue) {
+                            rawAnnotations.push(annotation.data);
+                        }
+                    }
+                    if (rawAnnotations > 0) {
+                        this.$emit('annotationsLoaded', rawAnnotations);
+                    }
                 }
             }
         },
         // Watch for changes to the light to turn on/off the light.
         light(newValue, oldValue) {
             this.setLightLevel();
-        }
+        },
+        // Watch for changes to the highlighted annotation ID.
+        highlightedAnnotationId(newValue, oldValue) {
+            if (this.annotorious) {
+                // Clear all highlights first.
+                const highlightedElements = this.$refs.container.querySelectorAll('.highlighted');
+                highlightedElements.forEach((el) => el.classList.remove('highlighted'));
+                if (newValue) {
+                    // Find the element with "data-id" attribute matching the highlighted annotation ID.
+                    const highlightedElement = this.$refs.container.querySelector(`[data-id="${newValue}"]`);
+                    // Add the "highlighted" class to the element.
+                    if (highlightedElement) {
+                        highlightedElement.classList.add('highlighted');
+                    }
+                }
+            }
+        },
     },
     setup() {
         return {
@@ -230,23 +278,37 @@ export default {
                 // Load annotations into Annotorious.
                 if (this.webAnnotations.length > 0) {
                     this.annotorious.setAnnotations(this.webAnnotations);
+                    // Emit the annotationsLoaded event with the raw annotation data.
+                    const rawAnnotations = [];
+                    for (const annotation of this.annotations) {
+                        rawAnnotations.push(annotation.data);
+                    }
+                    this.$emit('annotationsLoaded', rawAnnotations);
                 }
                 // Listen for annotation selection.
                 this.annotorious.on('selectAnnotation', (annotation) => {
-                    window.parent.postMessage(
-                        {
-                            event: "Annotation selected",
-                            details: annotation['id'],
-                        },
-                        "*"
-                    );
                     this.openPopup(annotation);
                 });
+
+                // Listen for annotation hover on.
+                this.annotorious.on('mouseEnterAnnotation', (annotation, element) => {
+                    // Emit the mouseEnterAnnotation event with the annotation ID.
+                    this.$emit('mouseEnterAnnotation', annotation.id);
+                });
+
+                // Listen for annotation hover off.
+                this.annotorious.on('mouseLeaveAnnotation', (annotation, element) => {
+                    // Emit the mouseLeaveAnnotation event with the annotation ID.
+                    this.$emit('mouseLeaveAnnotation', annotation.id);
+                });
+
                 // Find the `.a9s-annotationlayer` element inside the container.
                 const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
                 // Initialize the light level.
                 this.setLightLevel();
             }
+            // Emit the canvasLoaded event.
+            this.$emit('canvasLoaded');
         },
         /**
          * Opens the popup.
@@ -257,18 +319,23 @@ export default {
         openPopup(annotation) {
             this.loadPopupData(annotation);
             this.showPopup = true;
+            // Emit the annotationPopupOpened event with the annotation ID.
+            this.$emit('annotationPopupOpened', annotation.id);
         },
         /**
          * On popup close.
          */
         onPopupClose() {
             this.annotorious.cancelSelected();
+            // Emit the annotationPopupClosed event with the current popup data.
+            this.$emit('annotationPopupClosed', this.popupData.id);
         },
         /**
          * Initializes the popup data.
          */
         initPopupData() {
             this.popupData = {
+                id: null,
                 language: 'en',
                 languages: [],
                 title: {},
@@ -288,6 +355,8 @@ export default {
          */
         loadPopupData(annotation) {
             this.initPopupData();
+            // Set the annotation ID.
+            this.popupData.id = annotation.id;
             if (typeof annotation.body[0] !== "undefined") {
                 const annotationData = annotation.body[0].value;
                 if (annotationData.fields) {

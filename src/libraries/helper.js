@@ -75,7 +75,7 @@ export default class Helper {
             } else if (lineWeight === 'Dark') {
                 lum = -0.5;
             }
-            let inlineStyle = `stroke:${Helper.adjustColor(lineColor, lum)};`;
+            let inlineStyle = `stroke:${Helper.adjustColor(lineColor, lum)};fill:${Helper.adjustColor(lineColor, lum)};fill-opacity:0`;
             // Use the fill color instead when it is a point.
             if (annotation.target?.renderedVia?.name === 'point') {
                 inlineStyle = `fill:${Helper.adjustColor(lineColor, lum)};`;

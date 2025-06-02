@@ -33,6 +33,10 @@
     stroke: #fff000 !important;
 }
 
+.a9s-annotation.highlighted .a9s-inner, .a9s-selection.highlighted .a9s-inner {
+    fill-opacity: 0.2 !important;
+}
+
 /* Point Annotation styles */
 .rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer, .rdwb-ano-shape.a9s-annotation.a9s-point .a9s-inner {
     display: inline !important;

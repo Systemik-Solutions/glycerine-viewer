@@ -212,6 +212,7 @@ export class ManifestParser extends ResourceParser {
                                     id: anno.id,
                                     target: this.getAnnotationTarget(anno),
                                     group: identifier || anoPage.id,
+                                    data: anno,
                                 }
                                 if (anno.body) {
                                     annotation.fields = this.createAnnotationFieldsData(anno.body, anno.motivation);

@@ -144,6 +144,15 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 
 - `osd-initialized`: Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance
 and the canvas data as parameters.
+- `manifest-loaded`: Emitted when the manifest is loaded successfully. It passes the manifest data as a parameter.
+- `canvas-loaded`: Emitted when a canvas is loaded. It passes the canvas id as a parameter.
+- `canvas-annotations-loaded`: Emitted when the annotations of a canvas are loaded. It passes the list of annotations 
+and the canvas id as parameters.
+- `mouse-enter-annotation`: Emitted when mouse has entered an annotation. It passes the annotation id as a parameter.
+- `mouse-leave-annotation`: Emitted when mouse has left an annotation. It passes the annotation id as a parameter.
+- `annotation-popup-opened`: Emitted when an annotation popup is opened. It passes the annotation id as a parameter.
+- `annotation-popup-closed`: Emitted when an annotation popup is closed. It passes the annotation id as a parameter.
+- `view-mode-changed`: Emitted when the view mode is changed. It passes the new view mode as a parameter.
 - `index-panel-closed`: Emitted when the index panel is closed.
 - `about-panel-closed`: Emitted when the about panel is closed.
 

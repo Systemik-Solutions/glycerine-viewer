@@ -15,7 +15,15 @@
                                              :light="settings.light"
                                              :default-language="annotationDefaultLanguage"
                                              :displayAnnotations="displayAnnotations"
-                                             @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"></ImageViewer>
+                                             :highlightedAnnotationId="highlightedAnnotationId"
+                                             @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
+                                             @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
+                                             @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
+                                             @mouseEnterAnnotation="(annotationId) => { $emit('mouseEnterAnnotation', annotationId) }"
+                                             @mouseLeaveAnnotation="(annotationId) => { $emit('mouseLeaveAnnotation', annotationId) }"
+                                             @annotationPopupOpened="(annotationId) => { $emit('annotationPopupOpened', annotationId) }"
+                                             @annotationPopupClosed="(annotationId) => { $emit('annotationPopupClosed', annotationId) }"
+                                ></ImageViewer>
                             </template>
                             <template v-else-if="canvas.audio">
                                 <AudioViewer :source="canvas.audio.url" :format="canvas.audio.format" />
@@ -473,7 +481,30 @@ export default {
             default: false,
         },
     },
-    emits: ['osdInitialized', 'indexPanelClosed', 'aboutPanelClosed'],
+    emits: [
+        // Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance and the canvas data as parameters.
+        'osdInitialized',
+        // Emitted when the manifest is loaded successfully. It passes the manifest data as a parameter.
+        'manifestLoaded',
+        // Emitted when a canvas is loaded. It passes the canvas id as a parameter.
+        'canvasLoaded',
+        // Emitted when the annotations of a canvas are loaded. It passes the list of annotations and the canvas id as parameters.
+        'canvasAnnotationsLoaded',
+        // Emitted when mouse has entered an annotation. It passes the annotation id as a parameter.
+        'mouseEnterAnnotation',
+        // Emitted when mouse has left an annotation. It passes the annotation id as a parameter.
+        'mouseLeaveAnnotation',
+        // Emitted when an annotation popup is opened. It passes the annotation id as a parameter.
+        'annotationPopupOpened',
+        // Emitted when an annotation popup is closed. It passes the annotation id as a parameter.
+        'annotationPopupClosed',
+        // Emitted when the view mode is changed. It passes the new view mode as a parameter.
+        'viewModeChanged',
+        // Emitted when the index panel is closed.
+        'indexPanelClosed',
+        // Emitted when the about panel is closed.
+        'aboutPanelClosed'
+    ],
     data() {
         return {
             // The IIIF manifest URL or object of the current viewing manifest.
@@ -484,6 +515,8 @@ export default {
             manifestErrors: [],
             // The view mode. Can be 'image' or 'table'.
             viewMode: 'image',
+            // Highlighted annotation id.
+            highlightedAnnotationId: null,
             // Whether to show the "About" panel.
             showAboutPanel: false,
             // Whether to show the "Index" panel.
@@ -566,6 +599,8 @@ export default {
             },
             // Whether to show the drop zone.
             showDropZone: false,
+            // User annotation filter. An array of annotation IDs to be made visible. If explicitly set to null, no filter is applied.
+            userAnnotationFilter: null,
         };
     },
     computed: {
@@ -741,6 +776,12 @@ export default {
                                 annotation.fields['Line Weight']?.en?.[0] !== this.settings.filters.weight
                             ) {
                                 return;
+                            }
+                            // Apply the user filter.
+                            if (this.userAnnotationFilter !== null) {
+                                if (this.userAnnotationFilter.indexOf(annotation.id) < 0) {
+                                    return;
+                                }
                             }
                             annotations[canvas.id].push(annotation);
                         });
@@ -1115,6 +1156,7 @@ export default {
             this.manifestStatus = 'initial';
             this.manifestErrors = [];
             this.viewMode = 'image';
+            this.highlightedAnnotationId = null;
             this.showAboutPanel = false;
             this.showCollectionPanel = false;
             this.showSettingsPanel = false;
@@ -1169,6 +1211,7 @@ export default {
                 },
                 rowsPerPage: 10,
             };
+            this.userAnnotationFilter = null;
             // Load the manifest data.
             await this.loadManifest();
         },
@@ -1198,6 +1241,8 @@ export default {
                     // Manifest.
                     this.manifestLoader = manifestLoader;
                     this.manifestStatus = 'loaded';
+                    // Emit the manifest loaded event.
+                    this.$emit('manifestLoaded', this.manifestLoader.getData());
                     // Load column visibility.
                     this.loadTableColumnVisibility();
                     // Load languages.
@@ -1280,6 +1325,8 @@ export default {
          */
         toggleViewMode() {
             this.viewMode = this.viewMode === 'image' ? 'table' : 'image';
+            // Emit the view mode changed event.
+            this.$emit('viewModeChanged', this.viewMode);
         },
         /**
          * Get the language codes of an annotation.
@@ -1450,6 +1497,29 @@ export default {
             this.$nextTick(() => {
                 this.$refs.collectionTableTop.scrollIntoView({ behavior: 'smooth' });
             });
+        },
+        /**
+         * Highlight an annotation by its ID.
+         *
+         * @param id
+         */
+        highlightAnnotation(id) {
+            this.highlightedAnnotationId = id;
+        },
+        /**
+         * Clear the highlighted annotation.
+         */
+        clearHighlight() {
+            this.highlightedAnnotationId = null;
+        },
+        /**
+         * Set the user annotation filter.
+         *
+         * @param {array|null} ids
+         *   The array of annotation IDs to filter. If set to null, no filter is applied.
+         */
+        setUserAnnotationFilter(ids = null) {
+            this.userAnnotationFilter = ids;
         },
     }
 }

@@ -347,6 +347,15 @@ export class ResourceParser {
     }
 
     /**
+     * Get the raw data of the resource.
+     *
+     * @returns {Object}
+     */
+    getData() {
+        return this.data;
+    }
+
+    /**
      * Get the value display for a multi-language property value.
      *
      * @param {Object} propValue
