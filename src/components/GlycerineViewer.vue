@@ -470,6 +470,10 @@ export default {
             type: Boolean,
             default: true,
         },
+        enableDropManifest: {
+            type: Boolean,
+            default: true,
+        },
         // The visibility of the index panel.
         toggleIndexPanel: {
             type: Boolean,
@@ -1445,10 +1449,7 @@ export default {
         onManifestDrop(event) {
             event.preventDefault();
             const manifestUrl = event.dataTransfer.getData('text/plain');
-            if (Helper.isURL(manifestUrl)) {
-                this.collectionLoader = null;
-                this.reset(manifestUrl);
-            }
+            this.openManifest(manifestUrl);
             this.showDropZone = false;
         },
         /**
@@ -1458,7 +1459,9 @@ export default {
          */
         onManifestDragOver(event) {
             event.preventDefault();
-            this.showDropZone = true;
+            if (this.enableDropManifest) {
+                this.showDropZone = true;
+            }
         },
         /**
          * Event handler when a manifest is dragged out.
@@ -1497,6 +1500,29 @@ export default {
             this.$nextTick(() => {
                 this.$refs.collectionTableTop.scrollIntoView({ behavior: 'smooth' });
             });
+        },
+        /**
+         * Open a manifest by URL.
+         *
+         * @param {string} url
+         *   The URL of the manifest to open.
+         */
+        async openManifest(url) {
+            if (Helper.isURL(url)) {
+                this.collectionLoader = null;
+                await this.reset(url);
+            }
+        },
+        /**
+         * Activate a canvas by its ID.
+         *
+         * @param {string} id
+         */
+        activateCanvas(id) {
+            const index = this.canvases.findIndex(canvas => canvas.id === id);
+            if (index >= 0) {
+                this.activate(index);
+            }
         },
         /**
          * Highlight an annotation by its ID.

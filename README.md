@@ -1,8 +1,8 @@
 # Glycerine Viewer
 
 Glycerine Viewer is an [International Image Interoperability Framework](https://iiif.io/) (IIIF) viewer optimised for 
-annotations. It is built using [Vue](https://vuejs.org/) 3 and provides the Vue components for visualising IIIF images 
-and annotations from IIIF manifests.
+annotations. It is built using [Vue](https://vuejs.org/) 3 and provides the Vue components and Javascript widget for 
+visualising IIIF images and annotations from IIIF manifests.
 
 The Glycerine Viewer is a component from the [Glycerine](https://glycerine.io/) project, offering a platform for 
 annotating and publishing IIIF images.
@@ -13,21 +13,91 @@ annotating and publishing IIIF images.
 
 ## Getting Started
 
-### Prerequisites
+### JS Widget
 
-Glycerine Viewer is a Vue 3 component, so it must be used in a Vue 3 project.
+Glycerine Viewer provides a JavaScript widget which is packed with all required dependencies such as 
+[Vue](https://vuejs.org/) and [PrimeVue](https://primevue.org/).
 
-### Installation
+#### Using CDN
 
-To install the Glycerine Viewer, run the following command with `npm`:
+Include the styles and scripts via CDN in your project:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/glycerine-viewer@latest/jslib/style.css">
+```
+
+```html
+<script src="https://unpkg.com/glycerine-viewer@latest/jslib/glycerine-viewer.umd.cjs"></script>
+```
+
+#### Using NPM
+
+If your project uses a package manager like `npm`, you can install Glycerine Viewer as a dependency:
 
 ```shell
 npm install glycerine-viewer
 ```
 
-## Usage
+Then include the styles and scripts in your project:
 
-### Use the Plugin
+```html
+<link rel="stylesheet" href="node_modules/glycerine-viewer/jslib/style.css">
+```
+
+```html
+<script src="node_modules/glycerine-viewer/jslib/glycerine-viewer.umd.cjs"></script>
+```
+
+#### Usage
+
+The following is a simple example of using Glycerine Viewer in a web page. It creates an instance of the 
+`GlycerineViewer` class and called the `init` method to mount to the container element. For more information about the
+configurations and methods, refer to the [JS Widget API](#js-widget-api) section.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Glycerine Viewer</title>
+  
+    <!-- Include the Glycerine Viewer styles -->
+    <link rel="stylesheet" href="https://unpkg.com/glycerine-viewer@latest/jslib/style.css">
+</head>
+<body>
+<!-- Create a container for the Glycerine Viewer -->
+<div id="viewer"></div>
+
+<!-- Include the Glycerine Viewer script -->
+<script src="https://unpkg.com/glycerine-viewer@latest/jslib/glycerine-viewer.umd.cjs"></script>
+
+<script>
+    // Get the container element for the viewer.
+    const ele = document.getElementById('viewer')
+
+    // Create a new GlycerineViewer instance.
+    const viewer = new GlycerineViewer(ele, {
+        width: '1000px',
+        height: '700px',
+        manifest: 'https://w3id.org/iaw/data/publications/image-sets/01hm598yb6hc3s7btmqth813mg/manifest',
+    });
+    
+    // Initialize the viewer.
+    viewer.init();
+</script>
+</body>
+</html>
+```
+
+### Vue Component
+
+To use Glycerine Viewer in a Vue project, run the following command with `npm` to install the Glycerine Viewer:
+
+```shell
+npm install glycerine-viewer
+```
+
+#### Use the Plugin
 
 The easiest way to use Glycerine Viewer is to use the provided plugin. The plugin handles the import of its
 dependencies and registers the Glycerine Viewer component globally.
@@ -71,7 +141,10 @@ To use the component:
 > [!NOTE]
 > The container `div` of the `GlycerineViewer` component is required and should have a defined width and height.
 
-### Import Manually
+For more information about the props and events of the `GlycerineViewer` component, refer to the 
+[Components](#components) section.
+
+#### Import Manually
 
 The Glycerine Viewer component can also be imported manually if you prefer to handle the dependencies yourself. The
 Glycerine Viewer is built on top of the [PrimeVue](https://primevue.org/) suite and some other Vue libraries. Therefore, these 
@@ -137,6 +210,7 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 - `show-collection-pane-button` (Boolean): The visibility of the collection pane button. Default is `true`.
 - `show-manifest-url` (Boolean): The visibility of the manifest URL inside the "About" panel. Default is `true`.
 - `display-annotations` (Boolean): Whether to enable the annotation display and related features. Default is `true`.
+- `enable-drop-manifest` (Boolean): Whether to enable the drag-and-drop feature for IIIF manifests. Default is `true`.
 - `toggle-index-panel` (Boolean): This prop is used to toggle the index panel visibility. Default is `false`.
 - `toggle-about-panel` (Boolean): This prop is used to toggle the about panel visibility. Default is `false`.
 
@@ -164,6 +238,122 @@ Example:
         <GlycerineViewer manifest="https://w3id.org/iaw/data/publications/image-sets/01hm598yb6hc3s7btmqth813mg/manifest"></GlycerineViewer>
     </div>
 </template>
+```
+
+## JS Widget API
+
+### Constructor
+
+The `GlycerineViewer` constructor takes two parameters:
+
+- `container`: The HTML element which serves as the container for the viewer.
+- `config`: The configurations for the viewer which includes the options and event handlers.
+
+```javascript
+const ele = document.getElementById('viewer')
+const viewer = new GlycerineViewer(ele, {
+    manifest: 'https://w3id.org/iaw/data/publications/image-sets/01hm598yb6hc3s7btmqth813mg/manifest'
+})
+```
+
+### Configurations
+
+All [props](#props) from the `GlycerineViewer` component can be passed as options in the `config` object. The option
+name should be the prop name in `camelCase`. For example, use the option name `defaultInfoPanel` for prop name 
+`default-info-panel`. Note that the `manifest` option is required. For more information about the options, refer to the 
+[Props](#props) section.
+
+```javascript
+const viewer = new GlycerineViewer(ele, {
+    manifest: 'https://w3id.org/iaw/data/publications/image-sets/01hm598yb6hc3s7btmqth813mg/manifest',
+    defaultInfoPanel: false,
+    enableDropManifest: false,
+})
+```
+
+All [events](#emits) from the `GlycerineViewer` component can be passed as event handlers in the `config` object. 
+The handler name should be the event name in the format of `on<EventName>`. For example, use the handler name 
+`onManifestLoaded` for the event `manifest-loaded`. For more information about the events, refer to the
+[Emits](#emits) section.
+
+```javascript
+const viewer = new GlycerineViewer(ele, {
+    manifest: 'https://w3id.org/iaw/data/publications/image-sets/01hm598yb6hc3s7btmqth813mg/manifest',
+    defaultInfoPanel: false,
+    enableDropManifest: false,
+    onManifestLoaded: (data) => {
+        console.log('Manifest loaded:', data);
+    }
+})
+```
+
+There are also some additional options that can be passed in the `config` object:
+
+- `width`: The width of the viewer container. The value can be a string with CSS units (e.g., `1000px`, `100%`, etc.). 
+Default is `100%`.
+- `height`: The height of the viewer container. The value can be a string with CSS units (e.g., `700px`, `100%`, etc.).
+Default is `600px`.
+
+### Methods
+
+There are several methods available in the `GlycerineViewer` instance to interact with the viewer.
+
+#### init
+
+The `init` method is used to initialize the viewer. It will mount the viewer to the container element.
+
+#### destroy
+
+Destroy the viewer instance and clean up the resources.
+
+#### openManifest
+
+Open a manifest by URL in the viewer.
+
+Parameters:
+
+- `url`: The URL of the IIIF manifest.
+
+#### activateCanvas
+
+Activate a specific canvas in the viewer.
+
+Parameters:
+
+- `id`: The ID of the canvas to activate.
+
+#### highlightAnnotation
+
+Highlight a specific annotation in the viewer.
+
+Parameters:
+
+- `id`: The ID of the annotation to highlight.
+
+#### clearHighlight
+
+Clear the highlight of all annotations in the viewer.
+
+#### setAnnotationIdFilter
+
+Set the ID filter for annotations in the viewer. This will filter out annotations which are not included in the provided
+ID list from display.
+
+Parameters:
+
+- `ids`: An array of annotation IDs to filter. If set to `null`, the filter will be removed and all annotations will
+be displayed. Default is `null`.
+
+```javascript
+// Set the filter.
+viewer.setAnnotationIdFilter([
+    'https://example.com/annotation/1',
+    'https://example.com/annotation/2',
+    'https://example.com/annotation/5',
+]);
+
+// Remove the filter.
+viewer.setAnnotationIdFilter();
 ```
 
 ## IIIF Manifest
