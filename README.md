@@ -374,6 +374,50 @@ Glycerine Viewer currently supports IIIF Presentation API [2.0](https://iiif.io/
 > [Glycerine Workbench](https://glycerine.io/) to create well formatted annotations and apply semantic tags from 
 > domain-specific vocabularies to annotations. 
 
+### Annotation Collection
+
+Annotation pages can be grouped by [Annotation Collection](https://iiif.io/api/presentation/3.0/#58-annotation-collection) 
+in the IIIF manifest. Then annotations can be filtered by annotation collection in the Glycerine Viewer. The
+`AnnotationPage` can use the `partOf` property to specify the collection it belongs to. The `AnnotationCollection`
+should have the `label` in order to provide user-friendly name for the filter options.
+
+For example:
+
+```json
+{
+    "annotations": [
+        {
+            "id": "https://example.com/annotationpage/1",
+            "type": "AnnotationPage",
+            "partOf": {
+                "id": "https://example.com/annotationcollection/1",
+                "type": "AnnotationCollection",
+                "label": {
+                    "none": [
+                        "Core Annotations"
+                    ]
+                }
+            },
+            "items": ["..."]
+        },
+        {
+            "id": "https://example.com/annotationpage/2",
+            "type": "AnnotationPage",
+            "partOf": {
+                "id": "https://example.com/annotationcollection/2",
+                "type": "AnnotationCollection",
+                "label": {
+                    "none": [
+                        "Other Annotations"
+                    ]
+                }
+            },
+            "items": ["..."]
+        }
+    ]
+}
+```
+
 ### Selector
 
 Glycerine Viewer supports [Fragment Selector](https://www.w3.org/TR/media-frags/) for rectangles and

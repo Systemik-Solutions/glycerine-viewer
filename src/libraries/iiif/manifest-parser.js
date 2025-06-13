@@ -203,15 +203,19 @@ export class ManifestParser extends ResourceParser {
         if (Array.isArray(canvas.annotations)) {
             for (const anoPage of canvas.annotations) {
                 if (anoPage.type === 'AnnotationPage') {
+                    const annoCollectionID = anoPage.partOf?.id;
+
+                    // @deprecated: Use the annotation collection for grouping instead.
                     const anoPageParser = ResourceParserFactory.create(anoPage);
                     const identifier = anoPageParser.getMetadataValue('Identifier');
+
                     if (Array.isArray(anoPage.items)) {
                         for (const anno of anoPage.items) {
                             if (anno.type === 'Annotation') {
                                 const annotation = {
                                     id: anno.id,
                                     target: this.getAnnotationTarget(anno),
-                                    group: identifier || anoPage.id,
+                                    group: annoCollectionID || identifier || anoPage.id,
                                     data: anno,
                                 }
                                 if (anno.body) {
@@ -493,24 +497,46 @@ export class ManifestParser extends ResourceParser {
                 if (item.type === 'Canvas' && Array.isArray(item.annotations)) {
                     item.annotations.forEach(anoPage => {
                         if (anoPage.type === 'AnnotationPage') {
-                            const anoPageParser = ResourceParserFactory.create(anoPage);
                             const set = {};
-                            const identifier =  anoPageParser.getMetadataValue('Identifier');
-                            set.id = identifier || anoPage.id;
-                            // Find whether the set has been already added.
-                            const existingSet = sets.find(s => s.id === set.id);
-                            if (existingSet) {
-                                return;
-                            }
-                            if (typeof anoPage.label !== 'undefined') {
-                                set.label = ResourceParser.displayLangPropertyAuto(anoPage.label, prefLangCode);
-                            }
-                            if (typeof anoPage.summary !== 'undefined') {
-                                set.description = ResourceParser.displayLangPropertyAuto(anoPage.summary, prefLangCode);
-                            }
-                            const creator = anoPageParser.getMetadataValue('Creator');
-                            if (creator) {
-                                set.creator = creator;
+                            if (anoPage.partOf && (anoPage.partOf.type === 'AnnotationCollection')) {
+                                const anoCollection = anoPage.partOf;
+                                const anoCollectionParser = ResourceParserFactory.create(anoCollection);
+                                set.id = anoCollectionParser.getID();
+                                // Find whether the set has been already added.
+                                const existingSet = sets.find(s => s.id === set.id);
+                                if (existingSet) {
+                                    return;
+                                }
+                                if (typeof anoCollection.label !== 'undefined') {
+                                    set.label = ResourceParser.displayLangPropertyAuto(anoCollection.label, prefLangCode);
+                                }
+                                if (typeof anoCollection.summary !== 'undefined') {
+                                    set.description = ResourceParser.displayLangPropertyAuto(anoCollection.summary, prefLangCode);
+                                }
+                                const creator = anoCollectionParser.getMetadataValue('Creator');
+                                if (creator) {
+                                    set.creator = creator;
+                                }
+                            } else {
+                                // @deprecated: Use the annotation collection as the annotation set.
+                                const anoPageParser = ResourceParserFactory.create(anoPage);
+                                const identifier =  anoPageParser.getMetadataValue('Identifier');
+                                set.id = identifier || anoPage.id;
+                                // Find whether the set has been already added.
+                                const existingSet = sets.find(s => s.id === set.id);
+                                if (existingSet) {
+                                    return;
+                                }
+                                if (typeof anoPage.label !== 'undefined') {
+                                    set.label = ResourceParser.displayLangPropertyAuto(anoPage.label, prefLangCode);
+                                }
+                                if (typeof anoPage.summary !== 'undefined') {
+                                    set.description = ResourceParser.displayLangPropertyAuto(anoPage.summary, prefLangCode);
+                                }
+                                const creator = anoPageParser.getMetadataValue('Creator');
+                                if (creator) {
+                                    set.creator = creator;
+                                }
                             }
                             sets.push(set);
                         }

@@ -133,12 +133,14 @@ export class ManifestLoader {
      * @returns {Promise<void>}
      */
     async #aggregateResources() {
-        // Aggregate external annotation page.
+        // Aggregate external annotation page and annotation collection.
+        const loadedAnnoCollections = {};
         if (this.#data.items) {
             for (const canvas of this.#data.items) {
                 if (canvas.annotations) {
                     for (let i = 0; i < canvas.annotations.length; i++) {
                         const annoPage = canvas.annotations[i];
+                        // Load the full annotation page.
                         if (
                             annoPage.type === 'AnnotationPage' &&
                             !annoPage.items &&
@@ -161,6 +163,40 @@ export class ManifestLoader {
                             } catch (error) {
                                 // Fail silently here as it does not affect the main functionality.
                                 console.error('Failed to load annotation page', annoPage.id);
+                            }
+                        }
+                        // Load the full annotation collection.
+                        if (
+                            annoPage.type === 'AnnotationPage' &&
+                            annoPage.partOf
+                        ) {
+                            // TODO: Support multiple collections.
+                            if (Array.isArray(annoPage.partOf)) {
+                                // Only use the first collection.
+                                canvas.annotations[i].partOf = annoPage.partOf[0];
+                            }
+                            const anoCollection = canvas.annotations[i].partOf;
+                            if (anoCollection.type === 'AnnotationCollection' && !anoCollection.first) {
+                                const annoCollectionID = anoCollection.id;
+                                if (!loadedAnnoCollections[annoCollectionID]) {
+                                    try {
+                                        const response = await axios.get(annoCollectionID, {
+                                            withCredentials: false,
+                                            headers: {
+                                                Accept: "application/json",
+                                            },
+                                        });
+                                        if (response.data.type === 'AnnotationCollection') {
+                                            loadedAnnoCollections[annoCollectionID] = response.data;
+                                        }
+                                    } catch (error) {
+                                        // Fail silently here as it does not affect the main functionality.
+                                        console.error('Failed to load annotation collection', annoCollectionID);
+                                    }
+                                }
+                                if (loadedAnnoCollections[annoCollectionID]) {
+                                    canvas.annotations[i].partOf = loadedAnnoCollections[annoCollectionID];
+                                }
                             }
                         }
                     }
