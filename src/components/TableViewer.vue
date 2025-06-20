@@ -26,7 +26,8 @@
                     <template #body="slotProps">
                         <template v-if="slotProps.data.fields?.Description">
                             <div class="mb-2" v-for="(item, lang) in slotProps.data.fields.Description">
-                                <div class="mb-2" v-for="value in item">{{ value }}</div>
+                                <div class="mb-2" v-for="value in item"
+                                     v-html="HtmlUtility.detectHtml(value) ? HtmlUtility.sanitizeHtml(value) : HtmlUtility.nl2br(value)"></div>
                             </div>
                         </template>
                     </template>
@@ -53,7 +54,8 @@
                     <template #body="slotProps">
                         <template v-if="slotProps.data.fields?.Note">
                             <div class="mb-2" v-for="(item, lang) in slotProps.data.fields.Note">
-                                <div class="mb-2" v-for="value in item">{{ value }}</div>
+                                <div class="mb-2" v-for="value in item"
+                                     v-html="HtmlUtility.detectHtml(value) ? HtmlUtility.sanitizeHtml(value) : HtmlUtility.nl2br(value)"></div>
                             </div>
                         </template>
                     </template>

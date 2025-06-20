@@ -21,7 +21,9 @@
                                       :options="popupData.languages" option-label="name" option-value="code" />
                         </div>
                     </div>
-                    <p v-if="popupData.description">{{ popupData.description[popupData.language] }}</p>
+                    <div class="mb-4" v-if="popupData.description"
+                       v-html="HtmlUtility.detectHtml(popupData.description[popupData.language]) ? HtmlUtility.sanitizeHtml(popupData.description[popupData.language]) : HtmlUtility.nl2br(popupData.description[popupData.language])">
+                    </div>
                     <div v-if="popupData.links[popupData.language] && popupData.links[popupData.language].length > 0">
                         <h5>{{ $t('ui.links') }}</h5>
                         <ul>
@@ -36,7 +38,9 @@
                 </TabPanel>
                 <TabPanel v-if="popupData.attribution || popupData.date || popupData.notes.length > 0" :header="$t('ui.notes')">
                     <div class="mb-4" v-if="popupData.notes.length > 0">
-                        <p v-for="note in popupData.notes">{{ note }}</p>
+                        <div class="mb-4" v-for="note in popupData.notes"
+                           v-html="HtmlUtility.detectHtml(note) ? HtmlUtility.sanitizeHtml(note) : HtmlUtility.nl2br(note)">
+                        </div>
                     </div>
                     <div class="text-sm text-right" v-if="popupData.attribution">{{ popupData.attribution }}</div>
                     <div class="text-sm text-right" v-if="popupData.date">{{ formatDate(popupData.date) }}</div>

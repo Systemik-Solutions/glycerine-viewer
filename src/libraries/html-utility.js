@@ -43,4 +43,17 @@ export default class HtmlUtility {
         };
         return DOMPurify.sanitize(html, config);
     }
+
+    /**
+     * Convert newlines to <br /> tags.
+     *
+     * @param {string} text
+     * @returns {string}
+     */
+    static nl2br(text) {
+        if (text === null || typeof text === 'undefined') {
+            return '';
+        }
+        return text.replace(/\n/g, '<br />');
+    }
 }
