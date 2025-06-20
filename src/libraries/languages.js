@@ -188,7 +188,8 @@ export default class Language {
         { name: "Yoruba", code: "yo" },
         { name: "Zhuang; Chuang", code: "za" },
         { name: "Chinese", code: "zh" },
-        { name: "Zulu", code: "zu" }
+        { name: "Zulu", code: "zu" },
+        { name: "Latin", code: "en-Latn" },
     ];
 
     // List of UI languages.
