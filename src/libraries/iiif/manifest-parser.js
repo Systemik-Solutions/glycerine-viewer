@@ -5,7 +5,8 @@ import {
     SpecificResourceParser,
     IiifHelper,
     AudioParser,
-    VideoParser
+    VideoParser,
+    AnnotationParser
 } from "@/libraries/iiif/dependency-manager.js";
 import Helper from "@/libraries/helper.js";
 import Language from "@/libraries/languages.js";
@@ -212,14 +213,17 @@ export class ManifestParser extends ResourceParser {
                     if (Array.isArray(anoPage.items)) {
                         for (const anno of anoPage.items) {
                             if (anno.type === 'Annotation') {
+                                const parser = new AnnotationParser(anno);
                                 const annotation = {
                                     id: anno.id,
                                     target: this.getAnnotationTarget(anno),
                                     group: annoCollectionID || identifier || anoPage.id,
                                     data: anno,
-                                }
-                                if (anno.body) {
-                                    annotation.fields = this.createAnnotationFieldsData(anno.body, anno.motivation);
+                                    title: parser.getTitle(),
+                                    content: parser.getContent(),
+                                    lineColor: parser.getLineColor(),
+                                    lineWeight: parser.getLineWeight(),
+                                    templateName: parser.getTemplateName(),
                                 }
                                 annotations.push(annotation);
                             }
@@ -306,179 +310,6 @@ export class ManifestParser extends ResourceParser {
             return target;
         }
         return null;
-    }
-
-    /**
-     * Create the annotation fields data.
-     *
-     * @param {Object|Array} annoBody
-     *   The `body` of the annotation from the manifest.
-     * @param {string|null} motivation
-     *   The motivation of the annotation.
-     * @returns {{}}
-     *   The annotation fields data. The key of the object is the field label. The value of the object is another object
-     *   contains the language code and the field value. The language code is the key of the object and the field value
-     *   is an array of the field values.
-     */
-    createAnnotationFieldsData(annoBody, motivation = null) {
-        if (typeof annoBody === 'object' && !Array.isArray(annoBody)) {
-            annoBody = [annoBody];
-        }
-        const fields = {};
-        let tagLinkedSource = null;
-        for (const body of annoBody) {
-            if (body.type === 'TextualBody') {
-                let purpose = motivation;
-                if (body.purpose) {
-                    purpose = body.purpose;
-                }
-                const value = this.#parseAnnotationValue(body.value, purpose);
-                const lang = body.language || 'none';
-                // Process the comment value.
-                if (value.label === 'Comment') {
-                    // Convert the value to an object containing the 'format' and 'value'.
-                    value.value = {
-                        value: value.value,
-                    }
-                    if (body.format) {
-                        value.value.format = body.format;
-                    }
-                }
-                if (typeof fields[value.label] === 'undefined') {
-                    fields[value.label] = {};
-                }
-                if (typeof fields[value.label][lang] === 'undefined') {
-                    fields[value.label][lang] = [];
-                }
-                fields[value.label][lang].push(value.value);
-            } else if (body.type === 'Image') {
-                // Handle the image type annotation and make it as a value of the 'Comment' field.
-                if (typeof fields['Comment'] === 'undefined') {
-                    fields['Comment'] = {};
-                }
-                if (typeof fields['Comment']['none'] === 'undefined') {
-                    fields['Comment']['none'] = [];
-                }
-                const imageParser = ResourceParserFactory.create(body);
-                fields['Comment']['none'].push({
-                    value: `<img src="${imageParser.getUrl()}" alt="Annotation Image">`,
-                    format: 'text/html',
-                });
-            } else if (body.type === 'SpecificResource' && motivation.toLowerCase() === 'tagging') {
-                // Handle the tagging annotation with the linked `SpecificResource`.
-                if (body.source && Helper.isURL(body.source)) {
-                    tagLinkedSource = body.source;
-                }
-            }
-        }
-        // Add the linked source to the tag value.
-        if (tagLinkedSource) {
-            if (fields.Tag) {
-                for (const lang in fields.Tag) {
-                    for (const tag of fields.Tag[lang]) {
-                        if (!tag.data) {
-                            tag.data = {};
-                        }
-                        tag.data.link = tagLinkedSource;
-                    }
-                }
-            }
-        }
-        return fields;
-    }
-
-    /**
-     * Parse the annotation value.
-     *
-     * This function will parse the annotation value string to an object contains the label and the value.
-     *
-     * @param {string} value
-     *   The annotation value string.
-     * @param {string|null} purpose
-     *   The purpose of the annotation.
-     * @returns {*}
-     *   The parsed annotation value object. The object contains the `value` and the `label`.
-     */
-    #parseAnnotationValue(value, purpose = null) {
-        // Set the default annotation type as 'Comment'.
-        const parsedValue = {
-            label: 'Comment',
-            value: value,
-        };
-        const match = value.match(/^([^:]+):(.*)$/s);
-        if (match) {
-            const label = match[1].trim();
-            if (
-                label === 'Title' ||
-                label === 'Description' ||
-                label === 'Note' ||
-                label === 'Attribution' ||
-                label === 'Date' ||
-                label === 'Line Color' ||
-                label === 'Line Weight'
-            ) {
-                parsedValue.label = label;
-                parsedValue.value = match[2].trim();
-            } else if (label === 'Link') {
-                parsedValue.label = label;
-                parsedValue.value = this.#parseLink(match[2].trim());
-            } else if (label === 'Tag') {
-                parsedValue.label = label;
-                const tagValue = {};
-                const lines = value.split('\n');
-                for (const line of lines) {
-                    const lineMatch = line.match(/^([^:]+):(.*)$/);
-                    if (lineMatch) {
-                        const propName = lineMatch[1].trim();
-                        const propValue = lineMatch[2].trim();
-                        if (propName === 'Tag') {
-                            const term = this.#parseLink(propValue);
-                            tagValue.term_id = term.url;
-                            tagValue.term_label = term.text;
-                        } else if (propName === 'Vocabulary') {
-                            const vocab = this.#parseLink(propValue);
-                            tagValue.vocabulary_id = vocab.url;
-                            tagValue.vocabulary_name = vocab.text;
-                        } else if (propName === 'Data') {
-                            tagValue.data = JSON.parse(propValue);
-                        }
-                    }
-                }
-                parsedValue.value = tagValue;
-            }
-        } else if (purpose === 'tagging') {
-            // Handle generic comment with the tagging purpose.
-            parsedValue.label = 'Tag';
-            parsedValue.value = {
-                term_id: Helper.generateUUID(),
-                term_label: value,
-            };
-        }
-        return parsedValue;
-    }
-
-    /**
-     * Parse the link string.
-     *
-     * @param {string} value
-     *   The link string in the format of "[text](url)".
-     * @returns {{text: *, url: *}}
-     *   The parsed link object contains the `text` and the `url`.
-     */
-    #parseLink(value) {
-        // The value string is in the format of "[text](url)". Parse the string value to an object with `text` and `url`.
-        const match = value.match(/^\[(.*)\]\((.*)\)$/);
-        if (match) {
-            return {
-                text: match[1],
-                url: match[2],
-            };
-        } else {
-            return {
-                text: value,
-                url: value,
-            };
-        }
     }
 
     /**
@@ -582,17 +413,19 @@ export class ManifestParser extends ResourceParser {
             // Get annotation languages.
             if (canvas.annotations) {
                 canvas.annotations.forEach(annotation => {
-                    if (annotation.fields) {
-                        for (const label in annotation.fields) {
-                            const fieldLangCodes = Object.keys(annotation.fields[label]);
-                            const fieldLanguages = [];
-                            for (const langCode of fieldLangCodes) {
-                                let langName = Language.getLanguageName(langCode);
-                                if (langName) {
-                                    fieldLanguages.push({ code: langCode, name: langName });
+                    if (annotation.content) {
+                        for (const item in annotation.content) {
+                            if (item.values) {
+                                const fieldLangCodes = Object.keys(item.values);
+                                const fieldLanguages = [];
+                                for (const langCode of fieldLangCodes) {
+                                    let langName = Language.getLanguageName(langCode);
+                                    if (langName) {
+                                        fieldLanguages.push({ code: langCode, name: langName });
+                                    }
                                 }
+                                langSets.push(fieldLanguages);
                             }
-                            langSets.push(fieldLanguages);
                         }
                     }
                 });

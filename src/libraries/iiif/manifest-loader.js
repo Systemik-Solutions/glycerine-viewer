@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ResourceParserFactory, ManifestParser, IiifHelper } from "@/libraries/iiif/dependency-manager.js";
+import { ResourceParserFactory, ManifestParser, IiifHelper, TemplateManager } from "@/libraries/iiif/dependency-manager.js";
 import { convertPresentation2  } from '@iiif/parser/presentation-2';
 
 /**
@@ -196,6 +196,16 @@ export class ManifestLoader {
                                 }
                                 if (loadedAnnoCollections[annoCollectionID]) {
                                     canvas.annotations[i].partOf = loadedAnnoCollections[annoCollectionID];
+                                }
+                            }
+                        }
+                        // Load the template information.
+                        if (annoPage.type === 'AnnotationPage' && annoPage.items && annoPage.items.length > 0) {
+                            for (const annotation of annoPage.items) {
+                                if (annotation.generator) {
+                                    if (!TemplateManager.hasTemplate(annotation.generator)) {
+                                        await TemplateManager.loadTemplate(annotation.generator);
+                                    }
                                 }
                             }
                         }

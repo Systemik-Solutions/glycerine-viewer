@@ -49,6 +49,7 @@ export default {
         provider: 'Anbieter',
         details: 'Details',
         close: 'Schließen',
+        template: 'Vorlage',
     },
     message: {
         invalidImage: 'Fehlendes/nicht unterstütztes Bild',

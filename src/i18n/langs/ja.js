@@ -49,6 +49,7 @@ export default {
         provider: '提供者',
         details: '詳細',
         close: '閉じる',
+        template: 'テンプレート',
     },
     message: {
         invalidImage: '画像がない/非対応の画像',

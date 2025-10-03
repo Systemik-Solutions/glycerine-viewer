@@ -49,6 +49,7 @@ export default {
         provider: '제공자',
         details: '세부 사항',
         close: '닫기',
+        template: '템플릿',
     },
     message: {
         invalidImage: '이미지 없음/지원되지 않는 이미지',

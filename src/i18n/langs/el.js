@@ -49,6 +49,7 @@ export default {
         provider: 'Πάροχος',
         details: 'Λεπτομέρειες',
         close: 'Κλείσιμο',
+        template: 'Πρότυπο',
     },
     message: {
         invalidImage: 'Εικόνα που λείπει/μη υποστηριζόμενη',

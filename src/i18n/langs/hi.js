@@ -49,6 +49,7 @@ export default {
         provider: 'प्रदाता',
         details: 'विवरण',
         close: 'बंद करें',
+        template: 'टेम्पलेट',
     },
     message: {
         invalidImage: 'गायब/असमर्थित चित्र',

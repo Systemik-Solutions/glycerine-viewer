@@ -49,6 +49,7 @@ export default {
         provider: 'Leverantör',
         details: 'Detaljer',
         close: 'Stäng',
+        template: 'Mall',
     },
     message: {
         invalidImage: 'Saknad/icke-stödd bild',

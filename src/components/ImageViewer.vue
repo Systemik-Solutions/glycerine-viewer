@@ -1,85 +1,21 @@
 <template>
     <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view"></div>
-    <Dialog v-model:visible="showPopup" @hide="onPopupClose" modal
-            :header="popupData.title[popupData.language] ?? $t('ui.annotation')" :style="{ width: '50rem' }"
-            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-            append-to="self"
-            :pt="{
-                mask: (options) => ({
-                    style: {
-                        'z-index': 1000
-                    }
-                }),
-            }">
-        <template v-if="popupHasData">
-            <TabView>
-                <TabPanel v-if="popupData.languages.length > 1 || popupData.description[popupData.language] || popupData.links[popupData.language]"
-                          :header="$t('ui.about')">
-                    <div v-if="popupData.languages.length > 0" class="p-fluid formgrid grid">
-                        <div class="field col-12 flex justify-content-end">
-                            <Dropdown id="anoLanguage" class="w-5 lg:w-3" v-model="popupData.language" append-to="self"
-                                      :options="popupData.languages" option-label="name" option-value="code" />
-                        </div>
-                    </div>
-                    <div class="mb-4" v-if="popupData.description"
-                       v-html="HtmlUtility.detectHtml(popupData.description[popupData.language]) ? HtmlUtility.sanitizeHtml(popupData.description[popupData.language]) : HtmlUtility.nl2br(popupData.description[popupData.language])">
-                    </div>
-                    <div v-if="popupData.links[popupData.language] && popupData.links[popupData.language].length > 0">
-                        <h5>{{ $t('ui.links') }}</h5>
-                        <ul>
-                            <li v-for="link in popupData.links[popupData.language]">
-                                <a :href="link.url" target="_blank">{{ link.text ? link.text : link.url }}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </TabPanel>
-                <TabPanel v-if="popupData.tags.length > 0" :header="$t('ui.tags')">
-                    <TermTagGroup class="mb-4" :terms="popupData.tags" read-only />
-                </TabPanel>
-                <TabPanel v-if="popupData.attribution || popupData.date || popupData.notes.length > 0" :header="$t('ui.notes')">
-                    <div class="mb-4" v-if="popupData.notes.length > 0">
-                        <div class="mb-4" v-for="note in popupData.notes"
-                           v-html="HtmlUtility.detectHtml(note) ? HtmlUtility.sanitizeHtml(note) : HtmlUtility.nl2br(note)">
-                        </div>
-                    </div>
-                    <div class="text-sm text-right" v-if="popupData.attribution">{{ popupData.attribution }}</div>
-                    <div class="text-sm text-right" v-if="popupData.date">{{ formatDate(popupData.date) }}</div>
-                </TabPanel>
-                <TabPanel v-if="popupData.comments.length > 0" :header="$t('ui.comments')">
-                    <div class="mb-4" v-if="popupData.comments.length > 0">
-                        <div class="mb-4" v-for="comment in popupData.comments">
-                            <div v-if="comment.format === 'text/html'"
-                                 v-html="HtmlUtility.sanitizeHtml(comment.text)"></div>
-                            <template v-else>{{ comment.text }}</template>
-                        </div>
-                    </div>
-                </TabPanel>
-            </TabView>
-        </template>
-        <template #footer>
-            <Button :label="$t('ui.close')" icon="pi pi-times" @click="showPopup = false" outlined />
-        </template>
-    </Dialog>
+    <AnnotationPopup v-if="selectedAnnotation" :visible="showPopup" :annotation="selectedAnnotation"
+                     :defaultLanguage="defaultLanguage"
+                     @open="$emit('annotationPopupOpened', selectedAnnotation.id)" @close="onPopupClose" />
 </template>
 
 <script>
-import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
-import Dialog from 'primevue/dialog';
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-
 import OpenSeadragon from "openseadragon";
 import Annotorious from '@recogito/annotorious-openseadragon';
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
-import Languages from "@/libraries/languages";
 import Helper from "@/libraries/helper";
-import TermTagGroup from "@/components/TermTagGroup.vue";
+import AnnotationPopup from "@/components/AnnotationPopup.vue";
 import HtmlUtility from "@/libraries/html-utility.js";
 
 export default {
     name: "ImageViewer",
-    components: {TermTagGroup, Dialog, TabView, TabPanel, Dropdown, Button},
+    components: {AnnotationPopup},
     props: {
         // The image URL.
         image: {
@@ -136,31 +72,8 @@ export default {
         return {
             // Whether to show the popup.
             showPopup: false,
-            // The popup data.
-            popupData: {
-                // The annotation ID.
-                id: null,
-                // The current language code.
-                language: 'en',
-                // Available annotation languages.
-                languages: [],
-                // Annotation titles. Keyed by language code.
-                title: {},
-                // Annotation descriptions. Keyed by language code.
-                description: {},
-                // Annotation links. Keyed by language code.
-                links: {},
-                // Attribution.
-                attribution: null,
-                // Date.
-                date: null,
-                // Notes.
-                notes: [],
-                // Tags.
-                tags: [],
-                // Comments.
-                comments: [],
-            }
+            // The selected annotation for the popup.
+            selectedAnnotation: null,
         }
     },
     computed: {
@@ -184,12 +97,6 @@ export default {
                 }
             }
             return webAnnotations;
-        },
-        // Whether the popup has valid data.
-        popupHasData() {
-            return this.popupData.description[this.popupData.language] || this.popupData.attribution || this.popupData.date ||
-                this.popupData.notes.length > 0 || this.popupData.links[this.popupData.language] || this.popupData.languages.length > 1
-                || this.popupData.tags.length > 0 || this.popupData.comments.length > 0;
         },
     },
     watch: {
@@ -291,7 +198,8 @@ export default {
                 }
                 // Listen for annotation selection.
                 this.annotorious.on('selectAnnotation', (annotation) => {
-                    this.openPopup(annotation);
+                    this.selectedAnnotation = annotation.body[0].value;
+                    this.showPopup = true;
                 });
 
                 // Listen for annotation hover on.
@@ -315,158 +223,13 @@ export default {
             this.$emit('canvasLoaded');
         },
         /**
-         * Opens the popup.
-         *
-         * @param {Object} annotation
-         *   The annotation.
-         */
-        openPopup(annotation) {
-            this.loadPopupData(annotation);
-            this.showPopup = true;
-            // Emit the annotationPopupOpened event with the annotation ID.
-            this.$emit('annotationPopupOpened', annotation.id);
-        },
-        /**
          * On popup close.
          */
         onPopupClose() {
             this.annotorious.cancelSelected();
+            this.showPopup = false;
             // Emit the annotationPopupClosed event with the current popup data.
-            this.$emit('annotationPopupClosed', this.popupData.id);
-        },
-        /**
-         * Initializes the popup data.
-         */
-        initPopupData() {
-            this.popupData = {
-                id: null,
-                language: 'en',
-                languages: [],
-                title: {},
-                description: {},
-                links: {},
-                attribution: null,
-                date: null,
-                notes: [],
-                tags: [],
-                comments: [],
-            };
-        },
-        /**
-         * Loads the popup data from an annotation.
-         *
-         * @param {Object} annotation
-         */
-        loadPopupData(annotation) {
-            this.initPopupData();
-            // Set the annotation ID.
-            this.popupData.id = annotation.id;
-            if (typeof annotation.body[0] !== "undefined") {
-                const annotationData = annotation.body[0].value;
-                if (annotationData.fields) {
-                    // Load languages.
-                    const langCodes = this.getAnnotationLanguageCodes(annotationData);
-                    if (langCodes.indexOf(this.defaultLanguage) > -1) {
-                        this.popupData.language = this.defaultLanguage;
-                    } else if (langCodes.indexOf('en') === -1) {
-                        this.popupData.language = langCodes[0];
-                    } else {
-                        this.popupData.language = 'en';
-                    }
-                    for (const code of langCodes) {
-                        // Find the item from this.languages that matches the code.
-                        const langName = Languages.getLanguageName(code);
-                        if (langName) {
-                            this.popupData.languages.push({
-                                code: code,
-                                name: langName,
-                            });
-                        }
-                    }
-                    // Load language enabled fields.
-                    for (const code of langCodes) {
-                        if (typeof annotationData.fields.Title?.[code] !== "undefined") {
-                            this.popupData.title[code] = annotationData.fields.Title[code][0];
-                        }
-                        if (typeof annotationData.fields.Description?.[code] !== "undefined") {
-                            this.popupData.description[code] = annotationData.fields.Description[code][0];
-                        }
-                        if (typeof annotationData.fields.Link?.[code] !== "undefined") {
-                            this.popupData.links[code] = annotationData.fields.Link[code];
-                        }
-                    }
-                    // Load other fields.
-                    if (typeof annotationData.fields.Attribution?.en !== "undefined") {
-                        this.popupData.attribution = annotationData.fields.Attribution.en[0];
-                    }
-                    if (typeof annotationData.fields.Date?.en !== "undefined") {
-                        this.popupData.date = annotationData.fields.Date.en[0];
-                    }
-                    if (typeof annotationData.fields.Note?.en !== "undefined") {
-                        this.popupData.notes = annotationData.fields.Note.en;
-                    }
-                    // Load tags.
-                    if (typeof annotationData.fields.Tag !== "undefined") {
-                        for (const lang in annotationData.fields.Tag) {
-                            annotationData.fields.Tag[lang].forEach((termValue) => {
-                                const term = Helper.createTermObject(termValue);
-                                this.popupData.tags.push(term);
-                            });
-                        }
-                    }
-                    // Load comments.
-                    if (typeof annotationData.fields.Comment !== "undefined") {
-                        for (const code in annotationData.fields.Comment) {
-                            annotationData.fields.Comment[code].forEach((comment) => {
-                                this.popupData.comments.push({
-                                    language: code,
-                                    text: comment.value,
-                                    format: comment.format,
-                                });
-                            });
-                        }
-                    }
-                }
-            }
-        },
-        /**
-         * Gets the annotation language codes.
-         *
-         * @param {Object} annotation
-         *   The annotation.
-         * @returns {Array}
-         *  List of language codes.
-         */
-        getAnnotationLanguageCodes(annotation) {
-            let languageCodes = [];
-            const languageEnabledFields = ['Title', 'Description', 'Link'];
-            if (annotation.fields) {
-                for (const fieldName in annotation.fields) {
-                    if (languageEnabledFields.indexOf(fieldName) === -1) {
-                        continue;
-                    }
-                    const field = annotation.fields[fieldName];
-                    if (field) {
-                        for (const langCode in field) {
-                            if (languageCodes.indexOf(langCode) === -1) {
-                                languageCodes.push(langCode);
-                            }
-                        }
-                    }
-                }
-            }
-            return languageCodes;
-        },
-        /**
-         * Formats a date.
-         *
-         * @param {String} date
-         *   The date.
-         * @returns {String}
-         *   The formatted date.
-         */
-        formatDate(date) {
-            return Helper.formatDate(date);
+            this.$emit('annotationPopupClosed', this.selectedAnnotation.id);
         },
         setLightLevel() {
             // Find the `.a9s-annotationlayer` element inside the container.

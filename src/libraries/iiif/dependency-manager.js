@@ -11,9 +11,12 @@ export * from '@/libraries/iiif/manifest-parser.js'
 export * from '@/libraries/iiif/specific-resource-parser.js'
 export * from '@/libraries/iiif/agent-parser.js'
 export * from '@/libraries/iiif/collection-parser.js'
+export * from '@/libraries/iiif/annotation-parser.js'
 
 export * from '@/libraries/iiif/resource-parser-factory.js'
 
 export * from '@/libraries/iiif/manifest-loader.js'
 
 export * from '@/libraries/iiif/iiif-helper.js'
+
+export * from '@/libraries/template/template-manager.js'

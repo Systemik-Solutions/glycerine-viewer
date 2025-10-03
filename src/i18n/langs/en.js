@@ -49,6 +49,7 @@ export default {
         provider: 'Provider',
         details: 'Details',
         close: 'Close',
+        template: 'Template',
     },
     message: {
         invalidImage: 'Missing/Unsupported Image',

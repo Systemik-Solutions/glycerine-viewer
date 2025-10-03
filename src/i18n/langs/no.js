@@ -49,6 +49,7 @@ export default {
         provider: 'Leverandør',
         details: 'Detaljer',
         close: 'Lukk',
+        template: 'Mal',
     },
     message: {
         invalidImage: 'Manglende/ikke støttet bilde',

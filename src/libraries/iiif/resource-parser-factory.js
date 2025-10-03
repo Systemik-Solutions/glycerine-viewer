@@ -6,7 +6,8 @@ import {
     AgentParser,
     CollectionParser,
     AudioParser,
-    VideoParser
+    VideoParser,
+    AnnotationParser
 } from "@/libraries/iiif/dependency-manager.js";
 
 /**
@@ -37,6 +38,8 @@ export class ResourceParserFactory {
                 return new AgentParser(data);
             case 'Collection':
                 return new CollectionParser(data);
+            case 'Annotation':
+                return new AnnotationParser(data);
             default:
                 return new ResourceParser(data);
         }

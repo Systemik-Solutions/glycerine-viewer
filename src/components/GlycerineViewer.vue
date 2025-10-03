@@ -8,7 +8,8 @@
                             <template v-if="canvas.image">
                                 <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
                                              :plain-image="canvas.image.type === 'image'"
-                                             :annotations="annotations[canvas.id]" :table-columns="tableColumns"></TableViewer>
+                                             :annotations="annotations[canvas.id]"
+                                             :default-language="annotationDefaultLanguage"></TableViewer>
                                 <ImageViewer v-else :image="canvas.image.url"
                                              :plain-image="canvas.image.type === 'image'"
                                              :annotations="annotations[canvas.id]"
@@ -191,59 +192,6 @@
                             <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
                                 <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
                                 <InputSwitch v-model="settings.showInfoPanel" />
-                            </div>
-                            <div v-if="displayAnnotations && viewMode === 'table' && hasAnnotation" class="field col-12">
-                                <div class="mb-2">{{ $t('ui.tableColumns') }}</div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Title" input-id="tcTitle"
-                                              :binary="true" />
-                                    <label for="tcTitle">{{ $t('ui.title') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Description" input-id="tcDescription"
-                                              :binary="true" />
-                                    <label for="tcDescription">{{ $t('ui.description') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Links" input-id="tcLinks"
-                                              :binary="true" />
-                                    <label for="tcLinks">{{ $t('ui.links') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Tags" input-id="tcTags"
-                                              :binary="true" />
-                                    <label for="tcTags">{{ $t('ui.tags') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Notes" input-id="tcNotes"
-                                              :binary="true" />
-                                    <label for="tcNotes">{{ $t('ui.notes') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Attribution" input-id="tcAttribution"
-                                              :binary="true" />
-                                    <label for="tcAttribution">{{ $t('ui.attribution') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Date" input-id="tcDate"
-                                              :binary="true" />
-                                    <label for="tcDate">{{ $t('ui.date') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns['Line Color']" input-id="tcLineColor"
-                                              :binary="true" />
-                                    <label for="tcLineColor">{{ $t('ui.lineColor') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns['Line Weight']" input-id="tcLineWeight"
-                                              :binary="true" />
-                                    <label for="tcLineWeight">{{ $t('ui.lineWeight') }}</label>
-                                </div>
-                                <div class="mb-1">
-                                    <Checkbox class="mr-2" v-model="settings.tableColumns.Comments" input-id="tcComments"
-                                              :binary="true" />
-                                    <label for="tcComments">{{ $t('ui.comments') }}</label>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -553,19 +501,6 @@ export default {
                 light: 100,
                 // Whether to show the info panel.
                 showInfoPanel: this.defaultInfoPanel,
-                // The display of table columns.
-                tableColumns: {
-                    Title: true,
-                    Description: true,
-                    Links: true,
-                    Tags: true,
-                    Notes: true,
-                    Attribution: false,
-                    Date: false,
-                    "Line Color": false,
-                    "Line Weight": false,
-                    Comments: false,
-                }
             },
             // Whether the viewer is in fullscreen mode.
             isInFullscreen: false,
@@ -743,11 +678,6 @@ export default {
             }
             return 0;
         },
-        // The table columns to display.
-        tableColumns() {
-            // Return the keys in an array where the value is true.
-            return Object.keys(this.settings.tableColumns).filter(key => this.settings.tableColumns[key]);
-        },
         // The annotations from the manifest. It is an object with canvas ID as key and array of annotations as value.
         annotations() {
             const annotations = {};
@@ -771,13 +701,13 @@ export default {
                             }
                             if (
                                 this.settings.filters.line !== 'all' &&
-                                annotation.fields['Line Color']?.en?.[0] !== this.settings.filters.line
+                                annotation.lineColor !== this.settings.filters.line
                             ) {
                                 return;
                             }
                             if (
                                 this.settings.filters.weight !== 'all' &&
-                                annotation.fields['Line Weight']?.en?.[0] !== this.settings.filters.weight
+                                annotation.lineWeight !== this.settings.filters.weight
                             ) {
                                 return;
                             }
@@ -863,16 +793,9 @@ export default {
                 this.canvases.forEach(canvas => {
                     if (canvas.annotations && canvas.annotations.length > 0) {
                         canvas.annotations.forEach(annotation => {
-                            if (annotation.fields) {
-                                for (const fieldName in annotation.fields) {
-                                    if (fieldName === 'Line Color') {
-                                        if (annotation.fields[fieldName].en) {
-                                            const color = annotation.fields[fieldName].en[0];
-                                            if (colors.indexOf(color) < 0) {
-                                                colors.push(color);
-                                            }
-                                        }
-                                    }
+                            if (annotation.lineColor) {
+                                if (colors.indexOf(annotation.lineColor) < 0) {
+                                    colors.push(annotation.lineColor);
                                 }
                             }
                         });
@@ -894,16 +817,9 @@ export default {
                 this.canvases.forEach(canvas => {
                     if (canvas.annotations && canvas.annotations.length > 0) {
                         canvas.annotations.forEach(annotation => {
-                            if (annotation.fields) {
-                                for (const fieldName in annotation.fields) {
-                                    if (fieldName === 'Line Weight') {
-                                        if (annotation.fields[fieldName].en) {
-                                            const color = annotation.fields[fieldName].en[0];
-                                            if (weights.indexOf(color) < 0) {
-                                                weights.push(color);
-                                            }
-                                        }
-                                    }
+                            if (annotation.lineWeight) {
+                                if (weights.indexOf(annotation.lineWeight) < 0) {
+                                    weights.push(annotation.lineWeight);
                                 }
                             }
                         });
@@ -1178,18 +1094,6 @@ export default {
                 },
                 light: 100,
                 showInfoPanel: this.defaultInfoPanel,
-                tableColumns: {
-                    Title: true,
-                    Description: true,
-                    Links: true,
-                    Tags: true,
-                    Notes: true,
-                    Attribution: false,
-                    Date: false,
-                    "Line Color": false,
-                    "Line Weight": false,
-                    Comments: false,
-                }
             };
             this.isInFullscreen = false;
             this.hasAddedFullscreenListener = false;
@@ -1247,8 +1151,6 @@ export default {
                     this.manifestStatus = 'loaded';
                     // Emit the manifest loaded event.
                     this.$emit('manifestLoaded', this.manifestLoader.getData());
-                    // Load column visibility.
-                    this.loadTableColumnVisibility();
                     // Load languages.
                     const langOptions = Language.uiLanguages;
                     const langOptionCodes = langOptions.map((lang) => lang.code);
@@ -1280,42 +1182,6 @@ export default {
             }
         },
         /**
-         * Load the table column visibility based on the annotation content.
-         */
-        loadTableColumnVisibility() {
-            const usedColNames = [];
-            // Always set these invisible by default.
-            const excludeColNames = ['Attribution', 'Date', 'Line Color', 'Line Weight'];
-            if (this.canvases.length > 0) {
-                this.canvases.forEach(canvas => {
-                    if (canvas.annotations && canvas.annotations.length > 0) {
-                        canvas.annotations.forEach(annotation => {
-                            if (annotation.fields) {
-                                for (const fieldName in annotation.fields) {
-                                    let colName = fieldName;
-                                    if (fieldName === 'Comment') {
-                                        colName = 'Comments';
-                                    } else if (fieldName === 'Note') {
-                                        colName = 'Notes';
-                                    } else if (fieldName === 'Link') {
-                                        colName = 'Links';
-                                    } else if (fieldName === 'Tag') {
-                                        colName = 'Tags';
-                                    }
-                                    if (usedColNames.indexOf(colName) < 0) {
-                                        usedColNames.push(colName);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            for (const colName in this.settings.tableColumns) {
-                this.settings.tableColumns[colName] = (usedColNames.indexOf(colName) > -1 && excludeColNames.indexOf(colName) < 0);
-            }
-        },
-        /**
          * Activates the image at the given index.
          *
          * @param {number} index
@@ -1341,17 +1207,39 @@ export default {
          *   The language codes.
          */
         getAnnotationLanguageCodes(annotation) {
-            const langCodes = [];
-            if (annotation.fields) {
-                for (const fieldName in annotation.fields) {
-                    for (const langCode in annotation.fields[fieldName]) {
-                        if (langCodes.indexOf(langCode) < 0) {
-                            langCodes.push(langCode);
+            const codes = [];
+            if (annotation.content) {
+                for (const item of annotation.content) {
+                    if (item.type === 'tab' && item.items) {
+                        for (const child of item.items) {
+                            if (child.values) {
+                                for (const lang of Object.keys(child.values)) {
+                                    if (!codes.includes(lang)) {
+                                        codes.push(lang);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (item.values) {
+                            for (const lang of Object.keys(item.values)) {
+                                if (!codes.includes(lang)) {
+                                    codes.push(lang);
+                                }
+                            }
                         }
                     }
                 }
             }
-            return langCodes;
+            // Check title.
+            if (annotation.title) {
+                for (const lang of Object.keys(annotation.title)) {
+                    if (!codes.includes(lang)) {
+                        codes.push(lang);
+                    }
+                }
+            }
+            return codes;
         },
         /**
          * Toggle the fullscreen mode.

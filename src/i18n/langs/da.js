@@ -49,6 +49,7 @@ export default {
         provider: 'Udbyder',
         details: 'Detaljer',
         close: 'Luk',
+        template: 'Skabelon',
     },
     message: {
         invalidImage: 'Manglende/ikke-understøttet billede',

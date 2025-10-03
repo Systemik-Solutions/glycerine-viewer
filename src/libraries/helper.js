@@ -58,21 +58,21 @@ export default class Helper {
     static annotoriousFormatter() {
         return function (annotation) {
             let className = 'rdwb-ano-shape';
-            let lineWeight = 'Medium';
+            let lineWeight = 'medium';
             let lineColor = '#506DAC'
             if (typeof annotation.body[0] !== "undefined") {
                 const annotationData = annotation.body[0].value;
-                if (typeof annotationData.fields?.["Line Color"]?.en !== "undefined") {
-                    lineColor = annotationData.fields["Line Color"].en[0];
+                if (annotationData.lineColor) {
+                    lineColor = annotationData.lineColor;
                 }
-                if (typeof annotationData.fields?.["Line Weight"]?.en !== "undefined") {
-                    lineWeight = annotationData.fields["Line Weight"].en[0];
+                if (annotationData.lineWeight) {
+                    lineWeight = annotationData.lineWeight;
                 }
             }
             let lum = 0;
-            if (lineWeight === 'Light') {
+            if (lineWeight === 'light') {
                 lum = 0.7;
-            } else if (lineWeight === 'Dark') {
+            } else if (lineWeight === 'dark') {
                 lum = -0.5;
             }
             let inlineStyle = `stroke:${Helper.adjustColor(lineColor, lum)};fill:${Helper.adjustColor(lineColor, lum)};fill-opacity:0`;

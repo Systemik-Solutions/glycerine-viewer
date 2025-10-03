@@ -49,6 +49,7 @@ export default {
         provider: 'Nhà cung cấp',
         details: 'Chi tiết',
         close: 'Đóng',
+        template: 'Mẫu',
     },
     message: {
         invalidImage: 'Thiếu/Ảnh không hỗ trợ',

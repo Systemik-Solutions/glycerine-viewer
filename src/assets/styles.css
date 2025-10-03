@@ -70,3 +70,37 @@
 .p-dialog-mask {
     z-index: 1000 !important;
 }
+
+/* Annotation content styles */
+.gv-annotation-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.gv-annotation-content video {
+    max-width: 100%;
+    height: auto;
+}
+
+.gv-annotation-content audio {
+    width: 100%;
+}
+
+.gv-annotation-content table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+}
+
+.gv-annotation-content th,
+.gv-annotation-content td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border: 1px solid #dee2e6;
+}
+
+.gv-annotation-content th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}

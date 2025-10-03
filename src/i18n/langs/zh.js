@@ -49,6 +49,7 @@ export default {
         provider: '提供方',
         details: '詳細資訊',
         close: '關閉',
+        template: '範本',
     },
     message: {
         invalidImage: '缺少/不支援的圖像',

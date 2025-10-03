@@ -49,6 +49,7 @@ export default {
         provider: 'Proveedor',
         details: 'Detalles',
         close: 'Cerrar',
+        template: 'Plantilla',
     },
     message: {
         invalidImage: 'Imagen faltante/no compatible',

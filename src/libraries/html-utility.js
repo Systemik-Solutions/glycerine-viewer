@@ -45,6 +45,30 @@ export default class HtmlUtility {
     }
 
     /**
+     * Sanitize rich HTML.
+     *
+     * This allows a broader range of HTML tags and attributes.
+     *
+     * @param {string} html
+     * @returns {String|Node|*|string}
+     */
+    static sanitizeRichHtml(html) {
+        const config = {
+            ALLOWED_TAGS: [
+                'a', 'b', 'br', 'code', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'small', 'span', 'sub', 'sup',
+                'strong', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 'ul', 'video', 'audio',
+                'source', 'track'
+            ],
+            ALLOWED_ATTR: ['href', 'src', 'alt', 'colspan', 'rowspan', 'controls', 'loop',
+                'muted', 'poster', 'preload', 'type'],
+            ALLOW_DATA_ATTR: false,
+            ALLOWED_URI_REGEXP: /^(?:https?|mailto):\/\/\S*|mailto:\S*$/i,
+        };
+        return DOMPurify.sanitize(html, config);
+    }
+
+    /**
      * Convert newlines to <br /> tags.
      *
      * @param {string} text

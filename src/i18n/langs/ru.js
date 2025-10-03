@@ -49,6 +49,7 @@ export default {
         provider: 'Поставщик',
         details: 'Детали',
         close: 'Закрыть',
+        template: 'Шаблон',
     },
     message: {
         invalidImage: 'Отсутствует/неподдерживаемое изображение',

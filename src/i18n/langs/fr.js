@@ -49,6 +49,7 @@ export default {
         provider: 'Fournisseur',
         details: 'Détails',
         close: 'Fermer',
+        template: 'Modèle',
     },
     message: {
         invalidImage: 'Image manquante/non prise en charge',

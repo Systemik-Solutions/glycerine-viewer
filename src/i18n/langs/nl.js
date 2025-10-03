@@ -49,6 +49,7 @@ export default {
         provider: 'Provider',
         details: 'Details',
         close: 'Sluiten',
+        template: 'Sjabloon',
     },
     message: {
         invalidImage: 'Ontbrekende/niet-ondersteunde afbeelding',

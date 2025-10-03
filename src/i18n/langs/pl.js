@@ -49,6 +49,7 @@ export default {
         provider: 'Dostawca',
         details: 'Szczegóły',
         close: 'Zamknij',
+        template: 'Szablon',
     },
     message: {
         invalidImage: 'Brakujący/nieobsługiwany obraz',

@@ -49,6 +49,7 @@ export default {
         provider: 'Toimittaja',
         details: 'Yksityiskohdat',
         close: 'Sulje',
+        template: 'Malli',
     },
     message: {
         invalidImage: 'Puuttuva/ei tuettu kuva',
