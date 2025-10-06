@@ -133,7 +133,7 @@ export class ManifestParser extends ResourceParser {
                                                 format: 'jpg',
                                             };
                                             const selector = parser.getSelector();
-                                            if (selector && selector.type === 'iiif:ImageApiSelector') {
+                                            if (selector && (selector.type === 'iiif:ImageApiSelector' || selector.type === 'ImageApiSelector')) {
                                                 // Apply the selector parameters.
                                                 for (const param in params) {
                                                     if (typeof selector[param] !== 'undefined') {
