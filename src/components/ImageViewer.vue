@@ -198,13 +198,6 @@ export default {
                 }
                 // Listen for annotation selection.
                 this.annotorious.on('selectAnnotation', (annotation) => {
-                    window.parent.postMessage(
-                        {
-                            event: "Annotation selected",
-                            details: annotation['id'],
-                        },
-                        "*"
-                    );
                     this.selectedAnnotation = annotation.body[0].value;
                     this.showPopup = true;
                 });

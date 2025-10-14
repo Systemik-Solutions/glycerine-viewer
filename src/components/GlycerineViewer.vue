@@ -22,7 +22,13 @@
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
                                              @mouseEnterAnnotation="(annotationId) => { $emit('mouseEnterAnnotation', annotationId) }"
                                              @mouseLeaveAnnotation="(annotationId) => { $emit('mouseLeaveAnnotation', annotationId) }"
-                                             @annotationPopupOpened="(annotationId) => { $emit('annotationPopupOpened', annotationId) }"
+                                             @annotationPopupOpened="annotationId => {
+                                                $emit('annotationPopupOpened', annotationId);
+                                                window.parent.postMessage({
+                                                    event: 'Annotation selected',
+                                                    details: annotationId
+                                                }, '*');
+                                             }"
                                              @annotationPopupClosed="(annotationId) => { $emit('annotationPopupClosed', annotationId) }"
                                 ></ImageViewer>
                             </template>
