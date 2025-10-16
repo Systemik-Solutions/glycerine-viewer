@@ -169,13 +169,10 @@ export class AnnotationParser extends ResourceParser {
     /**
      * Get the renderable content of the annotation.
      *
-     * @returns {Array|null}
+     * @returns {Array}
      */
     getContent() {
         const content = [];
-        if (!this.data.body) {
-            return null;
-        }
         const body = this.parseBody();
         if (this.hasTemplate() && this.#template?.settings?.structure) {
             for (const item of this.#template.settings.structure) {
@@ -258,6 +255,9 @@ export class AnnotationParser extends ResourceParser {
         const tags = {};
         const genericValues = {};
         let tagLinkedSource = null;
+        if (!this.data.body) {
+            return data;
+        }
         if (!Array.isArray(this.data.body)) {
             this.data.body = [this.data.body];
         }
