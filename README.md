@@ -213,6 +213,7 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 - `enable-drop-manifest` (Boolean): Whether to enable the drag-and-drop feature for IIIF manifests. Default is `true`.
 - `toggle-index-panel` (Boolean): This prop is used to toggle the index panel visibility. Default is `false`.
 - `toggle-about-panel` (Boolean): This prop is used to toggle the about panel visibility. Default is `false`.
+- `default-annotation-collection` (String): The default annotation collection `id` to be displayed. Default is `null`.
 
 #### Emits
 

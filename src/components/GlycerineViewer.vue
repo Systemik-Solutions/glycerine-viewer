@@ -432,6 +432,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        // The default annotation collection to be displayed.
+        defaultAnnotationCollection: {
+            type: String
+        },
     },
     emits: [
         // Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance and the canvas data as parameters.
@@ -1174,6 +1178,17 @@ export default {
                             }
                         });
                     }
+                    // Set the default annotation collection.
+                    if (this.defaultAnnotationCollection) {
+                        const annoSets = this.manifestLoader.getParser().getAnnotationSets();
+                        for (const annoSet of annoSets) {
+                            if (annoSet.id === this.defaultAnnotationCollection) {
+                                this.settings.filters.set = annoSet.id;
+                                break;
+                            }
+                        }
+                    }
+
                     // Set the active manifest if it is in a collection.
                     if (this.collectionLoader) {
                         this.collectionActiveManifest = this.manifestLoader.getParser().getID();
