@@ -1,5 +1,5 @@
 <template>
-    <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view"></div>
+    <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view" :class="`ano-layer-fill-${annotationFillOpacity * 100}`"></div>
     <AnnotationPopup v-if="selectedAnnotation" :visible="showPopup" :annotation="selectedAnnotation"
                      :defaultLanguage="defaultLanguage" :cutoutImage="cutoutImage"
                      @open="$emit('annotationPopupOpened', selectedAnnotation.id)" @close="onPopupClose" />
@@ -64,6 +64,11 @@ export default {
             type: Boolean,
             default: false,
         },
+        // The annotation fill opacity (0-1).
+        annotationFillOpacity: {
+            type: Number,
+            default: 0,
+        }
     },
     emits: [
         // Event emitted when the OpenSeadragon viewer is initialized.

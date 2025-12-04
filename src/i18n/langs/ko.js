@@ -51,6 +51,7 @@ export default {
         close: '닫기',
         template: '템플릿',
         displayCutout: '주석 잘라낸 이미지를 표시',
+        fillOpacity: '주석 채우기 불투명도',
     },
     message: {
         invalidImage: '이미지 없음/지원되지 않는 이미지',

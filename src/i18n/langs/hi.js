@@ -51,6 +51,7 @@ export default {
         close: 'बंद करें',
         template: 'टेम्पलेट',
         displayCutout: 'एनोटेशन की कट-आउट छवि दिखाएँ',
+        fillOpacity: 'एनोटेशन भराव की अपारदर्शिता',
     },
     message: {
         invalidImage: 'गायब/असमर्थित चित्र',

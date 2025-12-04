@@ -51,6 +51,7 @@ export default {
         close: 'Close',
         template: 'Template',
         displayCutout: 'Display annotation cutout image',
+        fillOpacity: 'Annotation Fill Opacity',
     },
     message: {
         invalidImage: 'Missing/Unsupported Image',

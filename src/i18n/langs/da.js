@@ -51,6 +51,7 @@ export default {
         close: 'Luk',
         template: 'Skabelon',
         displayCutout: 'Vis udklippet annoteringsbillede',
+        fillOpacity: 'Fyldopacitet for annotering',
     },
     message: {
         invalidImage: 'Manglende/ikke-understøttet billede',

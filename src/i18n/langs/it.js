@@ -51,6 +51,7 @@ export default {
         close: 'Chiudi',
         template: 'Modello',
         displayCutout: 'Mostra l’immagine ritagliata dell’annotazione',
+        fillOpacity: 'Opacità di riempimento dell’annotazione',
     },
     message: {
         invalidImage: 'Immagine mancante/non supportata',

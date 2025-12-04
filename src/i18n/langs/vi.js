@@ -51,6 +51,7 @@ export default {
         close: 'Đóng',
         template: 'Mẫu',
         displayCutout: 'Hiển thị hình ảnh cắt ra của chú thích',
+        fillOpacity: 'Độ mờ phần tô của chú thích',
     },
     message: {
         invalidImage: 'Thiếu/Ảnh không hỗ trợ',

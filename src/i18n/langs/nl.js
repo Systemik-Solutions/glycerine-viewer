@@ -51,6 +51,7 @@ export default {
         close: 'Sluiten',
         template: 'Sjabloon',
         displayCutout: 'Annotatie-uitsnede weergeven',
+        fillOpacity: 'Opvuldekking van annotatie',
     },
     message: {
         invalidImage: 'Ontbrekende/niet-ondersteunde afbeelding',

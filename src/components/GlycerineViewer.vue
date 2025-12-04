@@ -19,6 +19,7 @@
                                              :displayAnnotations="displayAnnotations"
                                              :highlightedAnnotationId="highlightedAnnotationId"
                                              :showCutout="settings.showCutout"
+                                             :annotationFillOpacity="settings.annotationFillOpacity"
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
                                              @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
@@ -186,10 +187,20 @@
                         </div>
                         <div class="w-full">
                             <h4 class="pl-2">{{ $t('ui.display') }}</h4>
-                            <div v-if="displayAnnotations && viewMode === 'image'"  class="field col-12 flex align-items-center gap-4">
+                            <div v-if="displayAnnotations && viewMode === 'image'"  class="field col-12">
                                 <div><i class="pi pi-sun"></i> {{ $t('ui.light') }}</div>
-                                <Slider v-model="settings.light" class="w-10rem" />
-                                <span>{{ settings.light }}%</span>
+                                <div class="flex align-items-center gap-4 pl-2 mt-2">
+                                    <Slider v-model="settings.light" class="w-10rem" />
+                                    <span>{{ settings.light }}%</span>
+                                </div>
+                            </div>
+                            <div v-if="displayAnnotations && viewMode === 'image'"  class="field col-12">
+                                <div><i class="pi pi-circle-fill"></i> {{ $t('ui.fillOpacity') }}</div>
+                                <div class="flex align-items-center gap-4 pl-2 mt-2">
+                                    <Slider v-model="settings.annotationFillOpacity" :min="0" :max="1" :step="0.1" class="w-10rem" />
+                                    <span>{{ settings.annotationFillOpacity * 100 }}%</span>
+                                </div>
+
                             </div>
                             <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
                                 <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
@@ -447,6 +458,11 @@ export default {
         defaultAnnotationCollection: {
             type: String
         },
+        // The annotation fill opacity (0-1).
+        annotationFillOpacity: {
+            type: Number,
+            default: 0,
+        },
     },
     emits: [
         // Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance and the canvas data as parameters.
@@ -518,6 +534,8 @@ export default {
                 showInfoPanel: this.defaultInfoPanel,
                 // Whether to show cutout images in the annotation popups.
                 showCutout: this.defaultShowCutout,
+                // The fill opacity of the annotations.
+                annotationFillOpacity: this.annotationFillOpacity,
             },
             // Whether the viewer is in fullscreen mode.
             isInFullscreen: false,
@@ -1112,6 +1130,7 @@ export default {
                 light: 100,
                 showInfoPanel: this.defaultInfoPanel,
                 showCutout: this.defaultShowCutout,
+                annotationFillOpacity: this.annotationFillOpacity,
             };
             this.isInFullscreen = false;
             this.hasAddedFullscreenListener = false;

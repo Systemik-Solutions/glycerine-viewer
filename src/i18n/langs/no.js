@@ -51,6 +51,7 @@ export default {
         close: 'Lukk',
         template: 'Mal',
         displayCutout: 'Vis utskåret annotasjonsbilde',
+        fillOpacity: 'Fylldekning for annotasjon',
     },
     message: {
         invalidImage: 'Manglende/ikke støttet bilde',

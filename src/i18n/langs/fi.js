@@ -51,6 +51,7 @@ export default {
         close: 'Sulje',
         template: 'Malli',
         displayCutout: 'Näytä annotoitu leikekuva',
+        fillOpacity: 'Annotoinnin täytteen läpinäkyvyys',
     },
     message: {
         invalidImage: 'Puuttuva/ei tuettu kuva',

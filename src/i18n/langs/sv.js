@@ -51,6 +51,7 @@ export default {
         close: 'Stäng',
         template: 'Mall',
         displayCutout: 'Visa beskuren bild av anteckningen',
+        fillOpacity: 'Fyllnadsopacitet för anteckning',
     },
     message: {
         invalidImage: 'Saknad/icke-stödd bild',

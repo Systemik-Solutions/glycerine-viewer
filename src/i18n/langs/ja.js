@@ -51,6 +51,7 @@ export default {
         close: '閉じる',
         template: 'テンプレート',
         displayCutout: '注釈の切り抜き画像を表示',
+        fillOpacity: '注釈の塗りつぶし不透明度',
     },
     message: {
         invalidImage: '画像がない/非対応の画像',

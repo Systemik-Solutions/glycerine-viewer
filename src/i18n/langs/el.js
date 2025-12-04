@@ -51,6 +51,7 @@ export default {
         close: 'Κλείσιμο',
         template: 'Πρότυπο',
         displayCutout: 'Εμφάνιση αποκομμένης εικόνας σχολιασμού',
+        fillOpacity: 'Αδιαφάνεια γεμίσματος σχολιασμού',
     },
     message: {
         invalidImage: 'Εικόνα που λείπει/μη υποστηριζόμενη',

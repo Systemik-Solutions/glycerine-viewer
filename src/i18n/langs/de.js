@@ -51,6 +51,7 @@ export default {
         close: 'Schließen',
         template: 'Vorlage',
         displayCutout: 'Anmerkungsausschnitt anzeigen',
+        fillOpacity: 'Fülldeckkraft der Annotation',
     },
     message: {
         invalidImage: 'Fehlendes/nicht unterstütztes Bild',

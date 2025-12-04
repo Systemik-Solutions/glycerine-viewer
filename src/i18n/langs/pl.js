@@ -51,6 +51,7 @@ export default {
         close: 'Zamknij',
         template: 'Szablon',
         displayCutout: 'Wyświetl wycięty obraz adnotacji',
+        fillOpacity: 'Krycie wypełnienia adnotacji',
     },
     message: {
         invalidImage: 'Brakujący/nieobsługiwany obraz',

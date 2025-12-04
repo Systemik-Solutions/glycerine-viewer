@@ -51,6 +51,7 @@ export default {
         close: '關閉',
         template: '範本',
         displayCutout: '顯示註釋裁剪影像',
+        fillOpacity: '註釋填充不透明度',
     },
     message: {
         invalidImage: '缺少/不支援的圖像',

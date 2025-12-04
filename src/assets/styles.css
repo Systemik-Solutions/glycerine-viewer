@@ -25,6 +25,50 @@
     stroke: #1E3E82;
 }
 
+.ano-layer-fill-0 .a9s-annotation .a9s-inner {
+    fill-opacity: 0;
+}
+
+.ano-layer-fill-10 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.1;
+}
+
+.ano-layer-fill-20 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.2;
+}
+
+.ano-layer-fill-30 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.3;
+}
+
+.ano-layer-fill-40 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.4;
+}
+
+.ano-layer-fill-50 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.5;
+}
+
+.ano-layer-fill-60 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.6;
+}
+
+.ano-layer-fill-70 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.7;
+}
+
+.ano-layer-fill-80 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.8;
+}
+
+.ano-layer-fill-90 .a9s-annotation .a9s-inner {
+    fill-opacity: 0.9;
+}
+
+.ano-layer-fill-100 .a9s-annotation .a9s-inner {
+    fill-opacity: 1;
+}
+
 .a9s-annotation .a9s-inner:hover, .a9s-selection .a9s-inner:hover {
     stroke: #fff000 !important;
 }
