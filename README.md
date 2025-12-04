@@ -202,6 +202,7 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 
 - `manifest`: (Required) The URL of the IIIF manifest or the object of the manifest content.
 - `default-info-panel` (Boolean): The initial visibility of the info panel. Default is `true`.
+- `default-show-cutout` (Boolean): Whether to display the annotation cutout by default. Default is `false`.
 - `show-full-screen-button` (Boolean): The visibility of the full-screen button. Default is `true`.
 - `show-index-button` (Boolean): The visibility of the index button. Default is `true`.
 - `show-annotation-view-button` (Boolean): The visibility of the annotation view button. Default is `true`.
