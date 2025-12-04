@@ -50,6 +50,7 @@ export default {
         details: '세부 사항',
         close: '닫기',
         template: '템플릿',
+        displayCutout: '주석 잘라낸 이미지를 표시',
     },
     message: {
         invalidImage: '이미지 없음/지원되지 않는 이미지',

@@ -50,6 +50,7 @@ export default {
         details: 'Chi tiết',
         close: 'Đóng',
         template: 'Mẫu',
+        displayCutout: 'Hiển thị hình ảnh cắt ra của chú thích',
     },
     message: {
         invalidImage: 'Thiếu/Ảnh không hỗ trợ',

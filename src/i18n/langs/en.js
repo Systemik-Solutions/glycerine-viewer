@@ -50,6 +50,7 @@ export default {
         details: 'Details',
         close: 'Close',
         template: 'Template',
+        displayCutout: 'Display annotation cutout image',
     },
     message: {
         invalidImage: 'Missing/Unsupported Image',

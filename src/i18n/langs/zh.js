@@ -50,6 +50,7 @@ export default {
         details: '詳細資訊',
         close: '關閉',
         template: '範本',
+        displayCutout: '顯示註釋裁剪影像',
     },
     message: {
         invalidImage: '缺少/不支援的圖像',

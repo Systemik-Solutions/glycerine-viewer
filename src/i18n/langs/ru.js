@@ -50,6 +50,7 @@ export default {
         details: 'Детали',
         close: 'Закрыть',
         template: 'Шаблон',
+        displayCutout: 'Показать вырезанное изображение аннотации',
     },
     message: {
         invalidImage: 'Отсутствует/неподдерживаемое изображение',

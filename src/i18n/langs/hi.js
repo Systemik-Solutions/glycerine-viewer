@@ -50,6 +50,7 @@ export default {
         details: 'विवरण',
         close: 'बंद करें',
         template: 'टेम्पलेट',
+        displayCutout: 'एनोटेशन की कट-आउट छवि दिखाएँ',
     },
     message: {
         invalidImage: 'गायब/असमर्थित चित्र',

@@ -50,6 +50,7 @@ export default {
         details: 'Yksityiskohdat',
         close: 'Sulje',
         template: 'Malli',
+        displayCutout: 'Näytä annotoitu leikekuva',
     },
     message: {
         invalidImage: 'Puuttuva/ei tuettu kuva',

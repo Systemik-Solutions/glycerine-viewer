@@ -50,6 +50,7 @@ export default {
         details: 'Szczegóły',
         close: 'Zamknij',
         template: 'Szablon',
+        displayCutout: 'Wyświetl wycięty obraz adnotacji',
     },
     message: {
         invalidImage: 'Brakujący/nieobsługiwany obraz',

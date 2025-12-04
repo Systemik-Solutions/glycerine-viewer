@@ -50,6 +50,7 @@ export default {
         details: 'Detalles',
         close: 'Cerrar',
         template: 'Plantilla',
+        displayCutout: 'Mostrar la imagen recortada de la anotación',
     },
     message: {
         invalidImage: 'Imagen faltante/no compatible',

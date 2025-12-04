@@ -50,6 +50,7 @@ export default {
         details: 'Details',
         close: 'Schließen',
         template: 'Vorlage',
+        displayCutout: 'Anmerkungsausschnitt anzeigen',
     },
     message: {
         invalidImage: 'Fehlendes/nicht unterstütztes Bild',

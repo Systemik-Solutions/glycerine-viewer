@@ -50,6 +50,7 @@ export default {
         details: 'Detaljer',
         close: 'Luk',
         template: 'Skabelon',
+        displayCutout: 'Vis udklippet annoteringsbillede',
     },
     message: {
         invalidImage: 'Manglende/ikke-understøttet billede',

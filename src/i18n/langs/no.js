@@ -50,6 +50,7 @@ export default {
         details: 'Detaljer',
         close: 'Lukk',
         template: 'Mal',
+        displayCutout: 'Vis utskåret annotasjonsbilde',
     },
     message: {
         invalidImage: 'Manglende/ikke støttet bilde',

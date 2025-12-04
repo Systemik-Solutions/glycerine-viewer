@@ -1,17 +1,20 @@
 <template>
     <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view"></div>
     <AnnotationPopup v-if="selectedAnnotation" :visible="showPopup" :annotation="selectedAnnotation"
-                     :defaultLanguage="defaultLanguage"
+                     :defaultLanguage="defaultLanguage" :cutoutImage="cutoutImage"
                      @open="$emit('annotationPopupOpened', selectedAnnotation.id)" @close="onPopupClose" />
 </template>
 
 <script>
+import { toRaw } from 'vue';
 import OpenSeadragon from "openseadragon";
 import Annotorious from '@recogito/annotorious-openseadragon';
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
 import Helper from "@/libraries/helper";
 import AnnotationPopup from "@/components/AnnotationPopup.vue";
 import HtmlUtility from "@/libraries/html-utility.js";
+import ImageLoader from "@/libraries/image-loader";
+import AnnotationCropper from "@/libraries/annotation-cropper";
 
 export default {
     name: "ImageViewer",
@@ -51,6 +54,16 @@ export default {
             type: String,
             default: null,
         },
+        // The source image width used for cropping annotations.
+        srcImageSize: {
+            type: Number,
+            default: 1024,
+        },
+        // Whether to show cutout images in annotation popups.
+        showCutout: {
+            type: Boolean,
+            default: false,
+        },
     },
     emits: [
         // Event emitted when the OpenSeadragon viewer is initialized.
@@ -74,6 +87,8 @@ export default {
             showPopup: false,
             // The selected annotation for the popup.
             selectedAnnotation: null,
+            // The image loader used for cropping annotation images.
+            imageLoader: null,
         }
     },
     computed: {
@@ -98,6 +113,23 @@ export default {
             }
             return webAnnotations;
         },
+        // Images of each annotation which is an object with annotation ID as key and image encoded in Base64 as value.
+        annotationImages() {
+            const annotationImages = {};
+            if (this.imageLoader) {
+                this.annotations.forEach((annotation) => {
+                    annotationImages[annotation.id] = AnnotationCropper.cropAnnotationImage(annotation, toRaw(this.imageLoader));
+                });
+            }
+            return annotationImages;
+        },
+        // The cutout image for the selected annotation.
+        cutoutImage() {
+            if (this.showCutout && this.selectedAnnotation && this.annotationImages[this.selectedAnnotation.id]) {
+                return this.annotationImages[this.selectedAnnotation.id];
+            }
+            return null;
+        }
     },
     watch: {
         // Watch for changes to the annotations to re-load annotations into Annotorious.
@@ -148,6 +180,10 @@ export default {
             annotorious: null,
             HtmlUtility,
         };
+    },
+    created() {
+        // Load the image.
+        this.loadImage(this.image);
     },
     mounted() {
         this.initViewer();
@@ -236,7 +272,26 @@ export default {
             const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
             // Add the background color.
             annotationLayer.style.backgroundColor = `rgba(33,33,33,${1 - this.light / 100}`;
-        }
+        },
+        /**
+         * Loads the image.
+         *
+         * This will load the image in the background and prepare the image for cropping.
+         *
+         * @param {string} image
+         *   The image base URL.
+         */
+        async loadImage(image) {
+            this.imageLoader = null;
+            let imageLoader;
+            if (this.plainImage) {
+                imageLoader = new ImageLoader(image, null, false);
+            } else {
+                imageLoader = new ImageLoader(image, this.srcImageSize);
+            }
+            await imageLoader.load();
+            this.imageLoader = imageLoader;
+        },
     }
 }
 

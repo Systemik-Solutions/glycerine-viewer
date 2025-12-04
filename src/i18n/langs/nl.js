@@ -50,6 +50,7 @@ export default {
         details: 'Details',
         close: 'Sluiten',
         template: 'Sjabloon',
+        displayCutout: 'Annotatie-uitsnede weergeven',
     },
     message: {
         invalidImage: 'Ontbrekende/niet-ondersteunde afbeelding',

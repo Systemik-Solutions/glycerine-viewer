@@ -43,7 +43,7 @@
     </div>
     <AnnotationPopup v-if="selectedAnnotation" :visible="showPopup" :annotation="selectedAnnotation"
                      :defaultLanguage="defaultLanguage"
-                     @close="showPopup = false" />
+                     @close="showPopup = false" :cutoutImage="cutoutImage" />
 </template>
 
 <script>
@@ -76,6 +76,7 @@ export default {
         annotations: {
             type: Array,
         },
+        // The source image width used for cropping annotations.
         srcImageSize: {
             type: Number,
             default: 1024,
@@ -84,6 +85,11 @@ export default {
         defaultLanguage: {
             type: String,
             default: 'en',
+        },
+        // Whether to show cutout images in annotation popups.
+        showCutout: {
+            type: Boolean,
+            default: false,
         },
     },
     data() {
@@ -112,6 +118,13 @@ export default {
                 });
             }
             return annotationImages;
+        },
+        // The cutout image for the selected annotation.
+        cutoutImage() {
+            if (this.showCutout && this.selectedAnnotation && this.annotationImages[this.selectedAnnotation.id]) {
+                return this.annotationImages[this.selectedAnnotation.id];
+            }
+            return null;
         }
     },
     watch: {

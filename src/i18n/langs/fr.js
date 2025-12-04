@@ -50,6 +50,7 @@ export default {
         details: 'Détails',
         close: 'Fermer',
         template: 'Modèle',
+        displayCutout: 'Afficher l’image découpée de l’annotation',
     },
     message: {
         invalidImage: 'Image manquante/non prise en charge',

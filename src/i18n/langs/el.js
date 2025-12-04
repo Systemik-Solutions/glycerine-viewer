@@ -50,6 +50,7 @@ export default {
         details: 'Λεπτομέρειες',
         close: 'Κλείσιμο',
         template: 'Πρότυπο',
+        displayCutout: 'Εμφάνιση αποκομμένης εικόνας σχολιασμού',
     },
     message: {
         invalidImage: 'Εικόνα που λείπει/μη υποστηριζόμενη',

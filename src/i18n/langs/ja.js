@@ -50,6 +50,7 @@ export default {
         details: '詳細',
         close: '閉じる',
         template: 'テンプレート',
+        displayCutout: '注釈の切り抜き画像を表示',
     },
     message: {
         invalidImage: '画像がない/非対応の画像',

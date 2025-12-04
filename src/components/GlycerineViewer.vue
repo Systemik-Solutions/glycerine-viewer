@@ -9,7 +9,8 @@
                                 <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
                                              :plain-image="canvas.image.type === 'image'"
                                              :annotations="annotations[canvas.id]"
-                                             :default-language="annotationDefaultLanguage"></TableViewer>
+                                             :default-language="annotationDefaultLanguage"
+                                             :showCutout="settings.showCutout"></TableViewer>
                                 <ImageViewer v-else :image="canvas.image.url"
                                              :plain-image="canvas.image.type === 'image'"
                                              :annotations="annotations[canvas.id]"
@@ -17,6 +18,7 @@
                                              :default-language="annotationDefaultLanguage"
                                              :displayAnnotations="displayAnnotations"
                                              :highlightedAnnotationId="highlightedAnnotationId"
+                                             :showCutout="settings.showCutout"
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
                                              @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
@@ -192,6 +194,10 @@
                             <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
                                 <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
                                 <InputSwitch v-model="settings.showInfoPanel" />
+                            </div>
+                            <div class="field col-12 flex align-items-center gap-4">
+                                <div><i class="pi pi-image"></i> {{ $t('ui.displayCutout') }}</div>
+                                <InputSwitch v-model="settings.showCutout" />
                             </div>
                         </div>
                     </div>
@@ -378,6 +384,11 @@ export default {
             type: Boolean,
             default: true,
         },
+        // Whether to show the cutout by default.
+        defaultShowCutout: {
+            type: Boolean,
+            default: false,
+        },
         // Whether to show the full screen button.
         showFullScreenButton: {
             type: Boolean,
@@ -505,6 +516,8 @@ export default {
                 light: 100,
                 // Whether to show the info panel.
                 showInfoPanel: this.defaultInfoPanel,
+                // Whether to show cutout images in the annotation popups.
+                showCutout: this.defaultShowCutout,
             },
             // Whether the viewer is in fullscreen mode.
             isInFullscreen: false,
@@ -1098,6 +1111,7 @@ export default {
                 },
                 light: 100,
                 showInfoPanel: this.defaultInfoPanel,
+                showCutout: this.defaultShowCutout,
             };
             this.isInFullscreen = false;
             this.hasAddedFullscreenListener = false;

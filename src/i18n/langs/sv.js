@@ -50,6 +50,7 @@ export default {
         details: 'Detaljer',
         close: 'Stäng',
         template: 'Mall',
+        displayCutout: 'Visa beskuren bild av anteckningen',
     },
     message: {
         invalidImage: 'Saknad/icke-stödd bild',

@@ -16,6 +16,9 @@
                           :options="languages" option-label="name" option-value="code" />
             </div>
         </div>
+        <div v-if="cutoutImage" class="text-right mb-2">
+            <img :src="cutoutImage" alt="Annotation cutout" style="max-width:50%" />
+        </div>
         <AnnotationContent :content="annotation.content" :language="selectedLanguage" />
         <template #footer>
             <div v-if="annotation.templateName" class="mt-4 mb-4 text-sm">{{ $t('ui.template') }}: {{ annotation.templateName }}</div>
@@ -55,7 +58,12 @@ export default {
         defaultLanguage: {
             type: String,
             default: 'en',
-        }
+        },
+        // The cutout image of the annotation.
+        cutoutImage: {
+            type: String,
+            default: null,
+        },
     },
     data() {
         return {
