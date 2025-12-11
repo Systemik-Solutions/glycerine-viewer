@@ -209,6 +209,7 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 - `show-about-pane-button` (Boolean): The visibility of the About button. Default is `true`.
 - `show-setting-pane-button` (Boolean): The visibility of the settings pane button. Default is `true`.
 - `show-collection-pane-button` (Boolean): The visibility of the collection pane button. Default is `true`.
+- `show-play-controls` (Boolean): The visibility of the play controls for annotations. Default is `true`.
 - `show-manifest-url` (Boolean): The visibility of the manifest URL inside the "About" panel. Default is `true`.
 - `display-annotations` (Boolean): Whether to enable the annotation display and related features. Default is `true`.
 - `enable-drop-manifest` (Boolean): Whether to enable the drag-and-drop feature for IIIF manifests. Default is `true`.
@@ -217,6 +218,12 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 - `default-annotation-collection` (String): The default annotation collection `id` to be displayed. Default is `null`.
 - `annotation-fill-opacity` (Number): The fill opacity of the annotations. The value should be between `0` and `1` with
 one decimal place (e.g., `0`, `0.1`, `0.2`, ..., `1`). Default is `0`.
+- `annotation-popup-position` (String): The position of the annotation popup. Possible values are 
+`"top"`, `"bottom"`, `"left"`, `"right"`, `"topleft"`, `"topright"`, `"bottomleft"`, and `"bottomright"`. Default is 
+`"bottomright"`.
+- `play-speed` (Number): The speed of playing annotations. The value should be one of `3000` (fast), `5000` (normal) or 
+`10000` (slow). Default is `5000`.
+- `play-show-popup` (Boolean): Whether to show the annotation popup when playing annotations. Default is `true`.
 
 #### Emits
 

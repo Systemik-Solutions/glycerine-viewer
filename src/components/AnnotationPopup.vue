@@ -1,8 +1,10 @@
 <template>
-    <Dialog v-model:visible="show" modal
-            :header="annotation.title?.[selectedLanguage] ?? ' '" :style="{ width: '50rem' }"
+    <Dialog v-model:visible="show"
+            :header="annotation.title?.[selectedLanguage] ?? ' '"
+            :style="{ width: position === 'center' ? '50rem' : '30rem' }"
             :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
             append-to="self"
+            :position="position"
             :pt="{
                 mask: (options) => ({
                     style: {
@@ -12,7 +14,7 @@
             }">
         <div v-if="languages.length > 0" class="p-fluid formgrid grid">
             <div class="field col-12 flex justify-content-end">
-                <Dropdown id="anoLanguage" class="w-5 lg:w-3" v-model="selectedLanguage" append-to="self"
+                <Dropdown id="anoLanguage" class="w-5" v-model="selectedLanguage" append-to="self"
                           :options="languages" option-label="name" option-value="code" />
             </div>
         </div>
@@ -64,6 +66,11 @@ export default {
             type: String,
             default: null,
         },
+        // The position of the popup.
+        position: {
+            type: String,
+            default: 'bottomright',
+        }
     },
     data() {
         return {

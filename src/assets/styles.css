@@ -81,6 +81,10 @@
     fill-opacity: 0.2 !important;
 }
 
+.a9s-annotation.play-highlight .a9s-inner {
+    stroke: #fff000 !important;
+}
+
 /* Point Annotation styles */
 .rdwb-ano-shape.a9s-annotation.a9s-point .a9s-outer, .rdwb-ano-shape.a9s-annotation.a9s-point .a9s-inner {
     display: inline !important;

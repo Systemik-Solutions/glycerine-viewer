@@ -1,7 +1,7 @@
 <template>
     <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view" :class="`ano-layer-fill-${annotationFillOpacity * 100}`"></div>
     <AnnotationPopup v-if="selectedAnnotation" :visible="showPopup" :annotation="selectedAnnotation"
-                     :defaultLanguage="defaultLanguage" :cutoutImage="cutoutImage"
+                     :defaultLanguage="defaultLanguage" :cutoutImage="cutoutImage" :position="popupPosition"
                      @open="$emit('annotationPopupOpened', selectedAnnotation.id)" @close="onPopupClose" />
 </template>
 
@@ -68,7 +68,27 @@ export default {
         annotationFillOpacity: {
             type: Number,
             default: 0,
-        }
+        },
+        // The current play state for annotations ('playing', 'paused', 'stopped').
+        playState: {
+            type: String,
+            default: 'stopped',
+        },
+        // The play speed (interval) in milliseconds.
+        playSpeed: {
+            type: Number,
+            default: 5000,
+        },
+        // Whether to show the annotation popup during the play.
+        playShowPopup: {
+            type: Boolean,
+            default: true,
+        },
+        // The position of the annotation popup.
+        popupPosition: {
+            type: String,
+            default: 'bottomright',
+        },
     },
     emits: [
         // Event emitted when the OpenSeadragon viewer is initialized.
@@ -94,6 +114,11 @@ export default {
             selectedAnnotation: null,
             // The image loader used for cropping annotation images.
             imageLoader: null,
+            // The annotation autoplay configuration.
+            playConfig: {
+                intervalID: null,
+                currentIndex: -1,
+            },
         }
     },
     computed: {
@@ -174,6 +199,15 @@ export default {
                         highlightedElement.classList.add('highlighted');
                     }
                 }
+            }
+        },
+        playState(newValue, oldValue) {
+            if (newValue === 'playing') {
+                this.playStart();
+            } else if (newValue === 'paused') {
+                this.playPause();
+            } else if (newValue === 'stopped') {
+                this.playStop();
             }
         },
     },
@@ -296,6 +330,59 @@ export default {
             }
             await imageLoader.load();
             this.imageLoader = imageLoader;
+        },
+        /**
+         * Automatically plays annotations.
+         */
+        autoPlayAnnotations() {
+            this.showPopup = false;
+            this.playConfig.currentIndex = (this.playConfig.currentIndex + 1) % this.annotations.length;
+            const annotation = this.annotations[this.playConfig.currentIndex];
+
+            // Clear the "play-highlight" class from all annotations.
+            const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
+            playHighlights.forEach(el => el.classList.remove('play-highlight'));
+
+            // Highlight the current annotation.
+            const annotationElement = this.$refs.container.querySelector(`.a9s-annotation[data-id='${annotation.id}']`);
+            if (annotationElement) {
+                // Add the "play-highlight" class to the annotation element.
+                annotationElement.classList.add('play-highlight');
+            }
+
+            this.annotorious.fitBoundsWithConstraints(annotation.id);
+            this.selectedAnnotation = annotation;
+            if (this.playShowPopup) {
+                this.showPopup = true;
+            }
+        },
+        /**
+         * Starts playing annotations.
+         */
+        playStart() {
+            if (this.annotations.length > 0) {
+                this.autoPlayAnnotations();
+                this.intervalID = setInterval(this.autoPlayAnnotations, this.playSpeed);
+            }
+        },
+        /**
+         * Stops playing annotations.
+         */
+        playStop() {
+            this.showPopup = false;
+            clearInterval(this.intervalID);
+            // Clear the "play-highlight" class from all annotations.
+            const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
+            playHighlights.forEach(el => el.classList.remove('play-highlight'));
+            this.intervalID = null;
+            this.playConfig.currentIndex = -1;
+        },
+        /**
+         * Pauses playing annotations.
+         */
+        playPause() {
+            clearInterval(this.intervalID);
+            this.intervalID = null;
         },
     }
 }

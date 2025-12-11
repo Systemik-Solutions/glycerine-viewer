@@ -20,6 +20,10 @@
                                              :highlightedAnnotationId="highlightedAnnotationId"
                                              :showCutout="settings.showCutout"
                                              :annotationFillOpacity="settings.annotationFillOpacity"
+                                             :playState="playState"
+                                             :playSpeed="settings.playSettings.speed"
+                                             :playShowPopup="settings.playSettings.showPopup"
+                                             :popupPosition="settings.popupPosition.value"
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
                                              @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
@@ -126,6 +130,11 @@
                 <template v-if="showAboutPaneButton">
                     <Button rounded icon="pi pi-info-circle" class="mr-2" :title="$t('ui.about')" @click="showAboutPanel = true" />
                 </template>
+                <template v-if="showPlayControls & displayAnnotations && hasAnnotation && viewMode === 'image'">
+                    <Button v-if="playState === 'playing'" rounded icon="pi pi-pause" class="mr-2" :title="$t('ui.pause')" @click="playState = 'paused'" />
+                    <Button v-else rounded icon="pi pi-play" class="mr-2" :title="$t('ui.playAnnotations')" @click="playState = 'playing'" />
+                    <Button :disabled="playState === 'stopped'" rounded icon="pi pi-stop" class="mr-2" :title="$t('ui.stop')" @click="playState = 'stopped'" />
+                </template>
                 <template v-if="showSettingPaneButton">
                     <Button rounded icon="pi pi-cog" :title="$t('ui.settings')" @click="showSettingsPanel = true" />
                 </template>
@@ -185,7 +194,7 @@
                                           option-label="label" option-value="value" append-to="self" />
                             </div>
                         </div>
-                        <div class="w-full">
+                        <div class="w-full mb-2">
                             <h4 class="pl-2">{{ $t('ui.display') }}</h4>
                             <div v-if="displayAnnotations && viewMode === 'image'"  class="field col-12">
                                 <div><i class="pi pi-sun"></i> {{ $t('ui.light') }}</div>
@@ -194,7 +203,7 @@
                                     <span>{{ settings.light }}%</span>
                                 </div>
                             </div>
-                            <div v-if="displayAnnotations && viewMode === 'image'"  class="field col-12">
+                            <div v-if="displayAnnotations && hasAnnotation && viewMode === 'image'"  class="field col-12">
                                 <div><i class="pi pi-circle-fill"></i> {{ $t('ui.fillOpacity') }}</div>
                                 <div class="flex align-items-center gap-4 pl-2 mt-2">
                                     <Slider v-model="settings.annotationFillOpacity" :min="0" :max="1" :step="0.1" class="w-10rem" />
@@ -202,13 +211,30 @@
                                 </div>
 
                             </div>
-                            <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center gap-4">
+                            <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center justify-content-between gap-4">
                                 <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
                                 <InputSwitch v-model="settings.showInfoPanel" />
                             </div>
-                            <div class="field col-12 flex align-items-center gap-4">
+                            <div v-if="displayAnnotations && hasAnnotation" class="field col-12 flex align-items-center justify-content-between gap-4">
                                 <div><i class="pi pi-image"></i> {{ $t('ui.displayCutout') }}</div>
                                 <InputSwitch v-model="settings.showCutout" />
+                            </div>
+                            <div class="field col-12" v-if="displayAnnotations && hasAnnotation">
+                                <label for="popupPos">{{ $t('ui.popupPosition') }}</label>
+                                <Dropdown id="popupPos" v-model="settings.popupPosition.value" :options="popupPositionOptions"
+                                          option-label="label" option-value="value" append-to="self" />
+                            </div>
+                        </div>
+                        <div v-if="displayAnnotations && hasAnnotation" class="w-full mb-2">
+                            <h4 class="pl-2">{{ $t('ui.playAnnotations') }}</h4>
+                            <div class="field col-12">
+                                <label for="playSpeed">{{ $t('ui.speed') }}</label>
+                                <Dropdown id="playSpeed" v-model="settings.playSettings.speed" :options="speedOptions"
+                                          option-label="label" option-value="value" append-to="self" />
+                            </div>
+                            <div class="field col-12 flex align-items-center justify-content-between gap-4">
+                                <div>{{ $t('ui.showPopup') }}</div>
+                                <InputSwitch v-model="settings.playSettings.showPopup" />
                             </div>
                         </div>
                     </div>
@@ -430,6 +456,11 @@ export default {
             type: Boolean,
             default: true,
         },
+        // Whether to show the play controls for annotations.
+        showPlayControls: {
+            type: Boolean,
+            default: true,
+        },
         // Whether to show the manifest URL in the about panel.
         showManifestUrl: {
             type: Boolean,
@@ -463,6 +494,21 @@ export default {
             type: Number,
             default: 0,
         },
+        // The position of the annotation popup (in image viewer).
+        annotationPopupPosition: {
+            type: String,
+            default: 'bottomright',
+        },
+        // The play speed for annotations (in milliseconds).
+        playSpeed: {
+            type: Number,
+            default: 5000,
+        },
+        // Whether to show the annotation popup when playing annotations.
+        playShowPopup: {
+            type: Boolean,
+            default: true,
+        }
     },
     emits: [
         // Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance and the canvas data as parameters.
@@ -536,6 +582,15 @@ export default {
                 showCutout: this.defaultShowCutout,
                 // The fill opacity of the annotations.
                 annotationFillOpacity: this.annotationFillOpacity,
+                // The position of the annotation popup (in image viewer).
+                popupPosition: {
+                    value: this.annotationPopupPosition,
+                },
+                // The play settings for annotations.
+                playSettings: {
+                    speed: this.playSpeed,
+                    showPopup: this.playShowPopup,
+                },
             },
             // Whether the viewer is in fullscreen mode.
             isInFullscreen: false,
@@ -575,6 +630,8 @@ export default {
             showDropZone: false,
             // User annotation filter. An array of annotation IDs to be made visible. If explicitly set to null, no filter is applied.
             userAnnotationFilter: null,
+            // The audio play state. Can be 'playing', 'paused', or 'stopped'.
+            playState: 'stopped',
         };
     },
     computed: {
@@ -1045,6 +1102,28 @@ export default {
             }
             return expandedNodeKeys;
         },
+        // The popup position options.
+        popupPositionOptions() {
+            return [
+                { label: this.$t('ui.center'), value: 'center'},
+                { label: this.$t('ui.left'), value: 'left' },
+                { label: this.$t('ui.right'), value: 'right' },
+                { label: this.$t('ui.top'), value: 'top' },
+                { label: this.$t('ui.bottom'), value: 'bottom'},
+                { label: this.$t('ui.bottomRight'), value: 'bottomright' },
+                { label: this.$t('ui.bottomLeft'), value: 'bottomleft' },
+                { label: this.$t('ui.topRight'), value: 'topright' },
+                { label: this.$t('ui.topLeft'), value: 'topleft' },
+            ];
+        },
+        // The speed options for playing annotations.
+        speedOptions() {
+            return [
+                { label: this.$t('ui.fast'), value: 3000 },
+                { label: this.$t('ui.normal'), value: 5000 },
+                { label: this.$t('ui.slow'), value: 10000 },
+            ];
+        }
     },
     setup() {
         return {
@@ -1131,6 +1210,13 @@ export default {
                 showInfoPanel: this.defaultInfoPanel,
                 showCutout: this.defaultShowCutout,
                 annotationFillOpacity: this.annotationFillOpacity,
+                popupPosition: {
+                    value: this.annotationPopupPosition,
+                },
+                playSettings: {
+                    speed: this.playSpeed,
+                    showPopup: this.playShowPopup,
+                },
             };
             this.isInFullscreen = false;
             this.hasAddedFullscreenListener = false;
@@ -1157,6 +1243,7 @@ export default {
                 rowsPerPage: 10,
             };
             this.userAnnotationFilter = null;
+            this.playState = 'stopped';
             // Load the manifest data.
             await this.loadManifest();
         },
