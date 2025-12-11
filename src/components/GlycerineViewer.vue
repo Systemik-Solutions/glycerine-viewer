@@ -1174,6 +1174,17 @@ export default {
                 this.$emit('indexPanelClosed');
             }
         },
+        // Watch for navigation index changes.
+        'navigation.activeIndex'(newIndex, oldIndex) {
+            if (newIndex !== oldIndex) {
+                this.playState = 'stopped';
+            }
+        },
+        // Watch for annotations changes.
+        annotations() {
+            // Reset the play state when annotations change.
+            this.playState = 'stopped';
+        }
     },
     methods: {
         /**

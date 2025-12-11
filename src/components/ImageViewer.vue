@@ -180,6 +180,8 @@ export default {
                     }
                 }
             }
+            // Stop playing if annotations changed.
+            this.playStop();
         },
         // Watch for changes to the light to turn on/off the light.
         light(newValue, oldValue) {
@@ -226,6 +228,10 @@ export default {
     },
     mounted() {
         this.initViewer();
+    },
+    unmounted() {
+        // Stop playing annotations if playing.
+        this.playStop();
     },
     methods: {
         /**
@@ -339,15 +345,17 @@ export default {
             this.playConfig.currentIndex = (this.playConfig.currentIndex + 1) % this.annotations.length;
             const annotation = this.annotations[this.playConfig.currentIndex];
 
-            // Clear the "play-highlight" class from all annotations.
-            const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
-            playHighlights.forEach(el => el.classList.remove('play-highlight'));
+            if (this.$refs.container) {
+                // Clear the "play-highlight" class from all annotations.
+                const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
+                playHighlights.forEach(el => el.classList.remove('play-highlight'));
 
-            // Highlight the current annotation.
-            const annotationElement = this.$refs.container.querySelector(`.a9s-annotation[data-id='${annotation.id}']`);
-            if (annotationElement) {
-                // Add the "play-highlight" class to the annotation element.
-                annotationElement.classList.add('play-highlight');
+                // Highlight the current annotation.
+                const annotationElement = this.$refs.container.querySelector(`.a9s-annotation[data-id='${annotation.id}']`);
+                if (annotationElement) {
+                    // Add the "play-highlight" class to the annotation element.
+                    annotationElement.classList.add('play-highlight');
+                }
             }
 
             this.annotorious.fitBoundsWithConstraints(annotation.id);
@@ -370,10 +378,14 @@ export default {
          */
         playStop() {
             this.showPopup = false;
-            clearInterval(this.intervalID);
+            if (this.intervalID) {
+                clearInterval(this.intervalID);
+            }
             // Clear the "play-highlight" class from all annotations.
-            const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
-            playHighlights.forEach(el => el.classList.remove('play-highlight'));
+            if (this.$refs.container) {
+                const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
+                playHighlights.forEach(el => el.classList.remove('play-highlight'));
+            }
             this.intervalID = null;
             this.playConfig.currentIndex = -1;
         },
@@ -381,7 +393,9 @@ export default {
          * Pauses playing annotations.
          */
         playPause() {
-            clearInterval(this.intervalID);
+            if (this.intervalID) {
+                clearInterval(this.intervalID);
+            }
             this.intervalID = null;
         },
     }
