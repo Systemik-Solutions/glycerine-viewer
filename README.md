@@ -216,6 +216,12 @@ The `GlycerineViewer` component is the main component for visualising IIIF image
 - `toggle-index-panel` (Boolean): This prop is used to toggle the index panel visibility. Default is `false`.
 - `toggle-about-panel` (Boolean): This prop is used to toggle the about panel visibility. Default is `false`.
 - `default-annotation-collection` (String): The default annotation collection `id` to be displayed. Default is `null`.
+- `default-annotation-language` (String): The default language code (e.g. `fr`) used to filter annotations. 
+Default is `null`.
+- `default-line-color` (String): The default line color of the annotations in hex format (e.g., `#506DAC` for blue) 
+to filter annotations. Default is `null`.
+- `default-line-weight` (String): The default line weight to filter the annotations. Possible values are `light`,
+`medium`, and `dark`. Default is `null`.
 - `annotation-fill-opacity` (Number): The fill opacity of the annotations. The value should be between `0` and `1` with
 one decimal place (e.g., `0`, `0.1`, `0.2`, ..., `1`). Default is `0`.
 - `annotation-popup-position` (String): The position of the annotation popup. Possible values are 
@@ -224,6 +230,9 @@ one decimal place (e.g., `0`, `0.1`, `0.2`, ..., `1`). Default is `0`.
 - `play-speed` (Number): The speed of playing annotations. The value should be one of `3000` (fast), `5000` (normal) or 
 `10000` (slow). Default is `5000`.
 - `play-show-popup` (Boolean): Whether to show the annotation popup when playing annotations. Default is `true`.
+- `light-level` (Number): The default light level of images. The value should be an integer between `0` and `100`. 
+Default is `100`.
+- `autoplay` (Boolean): Whether to autoplay the annotations after the manifest is loaded. Default is `false`.
 
 #### Emits
 

@@ -489,6 +489,18 @@ export default {
         defaultAnnotationCollection: {
             type: String
         },
+        // The default annotation language to be filtered.
+        defaultAnnotationLanguage: {
+            type: String,
+        },
+        // The default line color to be filtered.
+        defaultLineColor: {
+            type: String
+        },
+        // The default line weight to be filtered.
+        defaultLineWeight: {
+            type: String
+        },
         // The annotation fill opacity (0-1).
         annotationFillOpacity: {
             type: Number,
@@ -508,6 +520,16 @@ export default {
         playShowPopup: {
             type: Boolean,
             default: true,
+        },
+        // The default light level (0-100).
+        lightLevel: {
+            type: Number,
+            default: 100,
+        },
+        // Whether to start playing annotations automatically.
+        autoplay: {
+            type: Boolean,
+            default: false,
         }
     },
     emits: [
@@ -575,7 +597,7 @@ export default {
                     weight: 'all',
                 },
                 // Light level 0-100.
-                light: 100,
+                light: this.lightLevel,
                 // Whether to show the info panel.
                 showInfoPanel: this.defaultInfoPanel,
                 // Whether to show cutout images in the annotation popups.
@@ -1135,9 +1157,14 @@ export default {
             collectionLoader: null,
         };
     },
-    mounted() {
+    async mounted() {
         // Load the manifest data.
-        this.loadManifest();
+        await this.loadManifest();
+        // Autoplay if enabled.
+        if (this.autoplay && this.displayAnnotations && this.hasAnnotation && this.viewMode === 'image') {
+            // Start playing after 3 seconds.
+            setTimeout(() => { this.playState = 'playing'; }, 3000);
+        }
     },
     watch: {
         // Watch the manifest change to reset the viewer.
@@ -1217,7 +1244,7 @@ export default {
                     line: 'all',
                     weight: 'all',
                 },
-                light: 100,
+                light: this.lightLevel,
                 showInfoPanel: this.defaultInfoPanel,
                 showCutout: this.defaultShowCutout,
                 annotationFillOpacity: this.annotationFillOpacity,
@@ -1315,6 +1342,63 @@ export default {
                         for (const annoSet of annoSets) {
                             if (annoSet.id === this.defaultAnnotationCollection) {
                                 this.settings.filters.set = annoSet.id;
+                                break;
+                            }
+                        }
+                    }
+                    // Filter the default annotation language.
+                    if (this.defaultAnnotationLanguage) {
+                        let found = false;
+                        for (const canvas of this.canvases) {
+                            if (canvas.annotations && canvas.annotations.length > 0) {
+                                for (const annotation of canvas.annotations) {
+                                    const annotationLangCodes = this.getAnnotationLanguageCodes(annotation);
+                                    if (annotationLangCodes.includes(this.defaultAnnotationLanguage)) {
+                                        this.settings.filters.language = this.defaultAnnotationLanguage;
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (found) {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Filter the default line color.
+                    if (this.defaultLineColor) {
+                        let found = false;
+                        for (const canvas of this.canvases) {
+                            if (canvas.annotations && canvas.annotations.length > 0) {
+                                for (const annotation of canvas.annotations) {
+                                    if (annotation.lineColor === this.defaultLineColor) {
+                                        this.settings.filters.line = this.defaultLineColor;
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (found) {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Filter the default line weight.
+                    if (this.defaultLineWeight) {
+                        let found = false;
+                        for (const canvas of this.canvases) {
+                            if (canvas.annotations && canvas.annotations.length > 0) {
+                                for (const annotation of canvas.annotations) {
+                                    if (annotation.lineWeight === this.defaultLineWeight) {
+                                        this.settings.filters.weight = this.defaultLineWeight;
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (found) {
                                 break;
                             }
                         }
