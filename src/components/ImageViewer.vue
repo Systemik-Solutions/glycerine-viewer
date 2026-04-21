@@ -282,9 +282,6 @@ export default {
                     this.$emit('mouseLeaveAnnotation', annotation.id);
                 });
 
-                // Find the `.a9s-annotationlayer` element inside the container.
-                const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
-                // Initialize the light level.
                 this.setLightLevel();
             }
             // Emit the canvasLoaded event.
@@ -300,10 +297,8 @@ export default {
             this.$emit('annotationPopupClosed', this.selectedAnnotation.id);
         },
         setLightLevel() {
-            // Find the `.a9s-annotationlayer` element inside the container.
-            const annotationLayer = this.$refs.container.querySelector('.a9s-annotationlayer');
-            // Add the background color.
-            annotationLayer.style.backgroundColor = `rgba(33,33,33,${1 - this.light / 100}`;
+            if (!this.$refs.container) return;
+            this.$refs.container.style.backgroundColor = `rgba(33, 33, 33, ${1 - this.light / 100})`;
         },
         /**
          * Loads the image.
