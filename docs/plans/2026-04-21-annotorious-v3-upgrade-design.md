@@ -8,7 +8,12 @@ Branch: `annotorious-upgrade`
 Replace `@recogito/annotorious-openseadragon@^2.7.15` with `@annotorious/openseadragon@^3.x`
 in the Glycerine Viewer. Preserve existing read-only behavior and visual semantics
 (per-annotation color, hover/selected/highlighted/play-mode styling, light-level tint,
-click-to-open-popup). OpenSeadragon stays at `^3.1.0` unless v3 proves incompatible.
+click-to-open-popup).
+
+**Scope update (2026-04-21):** OpenSeadragon must also be upgraded to `^5.x`.
+`@annotorious/openseadragon@3.8.0` declares `openseadragon >= 4.0.0` as a peer
+dependency, so the previously-hoped-for scenario of keeping OSD at `^3.1.0` is
+not possible. The user has approved bumping OSD as part of this branch.
 
 ## Scope
 
@@ -16,9 +21,11 @@ click-to-open-popup). OpenSeadragon stays at `^3.1.0` unless v3 proves incompati
   `src/components/ImageViewer.vue`, the styling helper in `src/libraries/helper.js`,
   and the v2-specific CSS rules in `src/assets/styles.css`. Both Vite configs
   updated for the package rename. Both builds (`dist/`, `jslib/`) verified.
-- Out of scope: upgrading OpenSeadragon, adding tests (repo has no test runner),
-  any v2 compatibility shim, any public API changes to `GlycerineViewer.vue`
-  props/events.
+  **Now also in scope:** bumping `openseadragon` from `^3.1.0` to `^5.x` because
+  the v3 Annotorious package requires OSD ≥ 4.
+- Out of scope: adding tests (repo has no test runner), any v2 compatibility
+  shim, any public API changes to `GlycerineViewer.vue` props/events. No
+  OSD-specific API rewrites beyond what breaks the viewer against OSD 5.
 
 ## Audit — current v2 footprint
 
@@ -168,9 +175,13 @@ static annotoriousStyle(getState) {
 2. **Annotation body shape through the W3C adapter.** Our annotations put the full
    app payload at W3C `body[0].value`. v3 may internally call this `bodies[0].value`.
    Styler and selection handler both try both keys.
-3. **OSD 3.1 compatibility.** v3 docs do not require a specific OSD major. If the
-   smoke test fails at init, we stop and regroup before bumping OSD — that bump is
-   explicitly out of this design's scope.
+3. **OSD 3.1 compatibility.** RESOLVED 2026-04-21: v3 requires OSD ≥ 4. We are
+   bumping OSD to `^5.x` (latest) as part of this branch. OSD 3 → 5 API changes
+   in our surface area (`OpenSeadragon(config)` factory, `tileSources`, a few
+   display flags, `crossOriginPolicy: false`, `prefixUrl`) are expected to be
+   backwards-compatible, but the dev smoke test (Task 11) now also covers pan/
+   zoom/tile-loading to catch any regression. Watch for: control-button prefix
+   URL changes, deprecated option names, and any `eventSource` API deltas.
 4. **UMD global naming.** The v3 package is ESM-first; the external's UMD global
    mainly matters for ESM consumers doing UMD interop. Setting it to a namespace
    name (`AnnotoriousOSD`) is safe; the `jslib` build bundles the module so this

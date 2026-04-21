@@ -17,39 +17,47 @@
 
 ---
 
-## Task 1: Swap the npm dependency
+## Task 1: Swap the npm dependencies (Annotorious + OpenSeadragon)
+
+**Scope update 2026-04-21:** `@annotorious/openseadragon@3.8.0` requires
+`openseadragon >= 4.0.0` as a peer. OSD is being bumped to `^5.x` (latest) in
+the same commit so the lockfile stays consistent.
 
 **Files:**
-- Modify: `package.json` (dependencies block, lines 41-54)
+- Modify: `package.json` (dependencies block)
 - Modify: `package-lock.json` (auto, via npm)
 
-**Step 1: Remove v2 and install v3**
+**Step 1: Remove v2 Annotorious; install v3 Annotorious + OSD 5**
 
 Run:
 ```bash
 npm uninstall @recogito/annotorious-openseadragon
-npm install @annotorious/openseadragon
+npm install openseadragon@latest @annotorious/openseadragon
 ```
 
-Expected: `package.json` no longer lists `@recogito/annotorious-openseadragon`. It now lists `@annotorious/openseadragon` at `^3.x.y` (whatever the current latest 3.x is).
+Expected: `package.json` no longer lists `@recogito/annotorious-openseadragon`.
+It now lists `@annotorious/openseadragon` at `^3.x.y` and `openseadragon` at
+`^5.x.y` (whichever is latest). No `ERESOLVE` errors.
 
-**Step 2: Verify the resolved version and entry files exist**
+**Step 2: Verify the resolved versions and entry files exist**
 
 Run:
 ```bash
+node -e "const p=require('./package.json'); console.log('osd', p.dependencies.openseadragon); console.log('anno', p.dependencies['@annotorious/openseadragon']);"
 ls node_modules/@annotorious/openseadragon/dist/
 ls node_modules/@annotorious/openseadragon/ | grep -i css
 ```
 
-Expected: a `dist/` directory with the ESM bundle, and a CSS file at `@annotorious/openseadragon/annotorious-openseadragon.css` (confirm the exact path printed — adjust later imports if the path differs).
-
-If the CSS path differs from `@annotorious/openseadragon/annotorious-openseadragon.css`, note the real path — it will be used in Task 3.
+Expected: `osd ^5.x.y`, `anno ^3.x.y`, a `dist/` directory with the ESM bundle,
+and a CSS file — confirm its exact path (likely
+`@annotorious/openseadragon/annotorious-openseadragon.css`). If the CSS path
+differs, note the real path for Task 3.
 
 **Step 3: Commit**
 
 ```bash
 git add package.json package-lock.json
-git commit -m "Swap annotorious-openseadragon v2 for @annotorious/openseadragon v3"
+git commit -m "Swap annotorious-openseadragon v2 for @annotorious/openseadragon v3 (requires OSD 5)"
 ```
 
 ---
