@@ -8,8 +8,8 @@
 <script>
 import { toRaw } from 'vue';
 import OpenSeadragon from "openseadragon";
-import Annotorious from '@recogito/annotorious-openseadragon';
-import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
+import { createOSDAnnotator, W3CImageFormat } from '@annotorious/openseadragon';
+import '@annotorious/openseadragon/annotorious-openseadragon.css';
 import Helper from "@/libraries/helper";
 import AnnotationPopup from "@/components/AnnotationPopup.vue";
 import HtmlUtility from "@/libraries/html-utility.js";
@@ -262,10 +262,14 @@ export default {
             this.$emit('osdInitialized', this.osdViewer);
             if (this.displayAnnotations) {
                 // Initialize Annotorious.
-                this.annotorious = Annotorious(this.osdViewer, {
-                    disableEditor: true,
-                    readOnly: true,
-                    formatters: Helper.annotoriousFormatter(),
+                this.annotorious = createOSDAnnotator(this.osdViewer, {
+                    userSelectAction: 'SELECT',
+                    adapter: W3CImageFormat(this.image),
+                    style: Helper.annotoriousStyle(() => ({
+                        highlightedId: this.highlightedAnnotationId,
+                        playingId: this.currentlyPlayingId,
+                        fillOpacity: this.annotationFillOpacity,
+                    })),
                 });
                 // Load annotations into Annotorious.
                 if (this.webAnnotations.length > 0) {
