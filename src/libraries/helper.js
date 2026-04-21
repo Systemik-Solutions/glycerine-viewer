@@ -51,38 +51,36 @@ export default class Helper {
     }
 
     /**
-     * Create the annotorious formatter function.
+     * Create the Annotorious v3 style function.
      *
-     * @returns {function(*): {className: string}}
+     * @param {function(): {highlightedId: string|null, playingId: string|null, fillOpacity: number}} getState
+     *   Returns the current reactive style inputs each time the styler is invoked.
+     *
+     * @returns {function(annotation, state): object}
      */
-    static annotoriousFormatter() {
-        return function (annotation) {
-            let className = 'rdwb-ano-shape';
-            let lineWeight = 'medium';
-            let lineColor = '#506DAC'
-            if (typeof annotation.body[0] !== "undefined") {
-                const annotationData = annotation.body[0].value;
-                if (annotationData.lineColor) {
-                    lineColor = annotationData.lineColor;
-                }
-                if (annotationData.lineWeight) {
-                    lineWeight = annotationData.lineWeight;
-                }
-            }
-            let lum = 0;
-            if (lineWeight === 'light') {
-                lum = 0.7;
-            } else if (lineWeight === 'dark') {
-                lum = -0.5;
-            }
-            let inlineStyle = `stroke:${Helper.adjustColor(lineColor, lum)};fill:${Helper.adjustColor(lineColor, lum)};`;
-            // Use the fill color instead when it is a point.
-            if (annotation.target?.renderedVia?.name === 'point') {
-                inlineStyle = `fill:${Helper.adjustColor(lineColor, lum)};`;
-            }
+    static annotoriousStyle(getState) {
+        return function (annotation, state) {
+            const { highlightedId, playingId, fillOpacity } = getState();
+            const data = annotation.bodies?.[0]?.value
+                      ?? annotation.body?.[0]?.value ?? {};
+            const lineColor = data.lineColor || '#506DAC';
+            const lineWeight = data.lineWeight || 'medium';
+            const lum = lineWeight === 'light' ? 0.7
+                      : lineWeight === 'dark' ? -0.5 : 0;
+            const stroke = Helper.adjustColor(lineColor, lum);
+
+            const isSelected = !!(state?.selected ?? state?.isSelected);
+            const isHover = !!(state?.hovered ?? state?.isHovered);
+            const isPlaying = annotation.id === playingId;
+            const isHighlighted = annotation.id === highlightedId;
+            const flashing = isSelected || isHover || isPlaying;
+
             return {
-                className: className,
-                style: inlineStyle,
+                fill: stroke,
+                fillOpacity: isHighlighted ? 0.2 : fillOpacity,
+                stroke: flashing ? '#fff000' : stroke,
+                strokeOpacity: 1,
+                strokeWidth: 2,
             };
         };
     }
