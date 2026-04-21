@@ -184,22 +184,6 @@ export default {
         light(newValue, oldValue) {
             this.setLightLevel();
         },
-        // Watch for changes to the highlighted annotation ID.
-        highlightedAnnotationId(newValue, oldValue) {
-            if (this.annotorious) {
-                // Clear all highlights first.
-                const highlightedElements = this.$refs.container.querySelectorAll('.highlighted');
-                highlightedElements.forEach((el) => el.classList.remove('highlighted'));
-                if (newValue) {
-                    // Find the element with "data-id" attribute matching the highlighted annotation ID.
-                    const highlightedElement = this.$refs.container.querySelector(`[data-id="${newValue}"]`);
-                    // Add the "highlighted" class to the element.
-                    if (highlightedElement) {
-                        highlightedElement.classList.add('highlighted');
-                    }
-                }
-            }
-        },
         playState(newValue, oldValue) {
             if (newValue === 'playing') {
                 this.playStart();
