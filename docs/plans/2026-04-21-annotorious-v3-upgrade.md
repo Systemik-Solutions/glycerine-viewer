@@ -20,8 +20,8 @@
 ## Task 1: Swap the npm dependencies (Annotorious + OpenSeadragon)
 
 **Scope update 2026-04-21:** `@annotorious/openseadragon@3.8.0` requires
-`openseadragon >= 4.0.0` as a peer. OSD is being bumped to `^5.x` (latest) in
-the same commit so the lockfile stays consistent.
+`openseadragon >= 4.0.0` as a peer. OSD was bumped to `^6.0.2` (latest) in
+the same commit.
 
 **Files:**
 - Modify: `package.json` (dependencies block)

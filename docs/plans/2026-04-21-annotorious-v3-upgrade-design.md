@@ -10,10 +10,12 @@ in the Glycerine Viewer. Preserve existing read-only behavior and visual semanti
 (per-annotation color, hover/selected/highlighted/play-mode styling, light-level tint,
 click-to-open-popup).
 
-**Scope update (2026-04-21):** OpenSeadragon must also be upgraded to `^5.x`.
-`@annotorious/openseadragon@3.8.0` declares `openseadragon >= 4.0.0` as a peer
-dependency, so the previously-hoped-for scenario of keeping OSD at `^3.1.0` is
-not possible. The user has approved bumping OSD as part of this branch.
+**Scope update (2026-04-21):** OpenSeadragon must also be upgraded — done in
+Task 1 to `^6.0.2` (current latest).
+`@annotorious/openseadragon@3.8.0` declares
+`openseadragon >= ^4.0.0 || ^5.0.0 || ^6.0.0` as a peer dependency, so the
+previously-hoped-for scenario of keeping OSD at `^3.1.0` is not possible. The
+user has approved bumping OSD as part of this branch.
 
 ## Scope
 
@@ -21,7 +23,7 @@ not possible. The user has approved bumping OSD as part of this branch.
   `src/components/ImageViewer.vue`, the styling helper in `src/libraries/helper.js`,
   and the v2-specific CSS rules in `src/assets/styles.css`. Both Vite configs
   updated for the package rename. Both builds (`dist/`, `jslib/`) verified.
-  **Now also in scope:** bumping `openseadragon` from `^3.1.0` to `^5.x` because
+  **Now also in scope:** bumping `openseadragon` from `^3.1.0` to `^6.x` because
   the v3 Annotorious package requires OSD ≥ 4.
 - Out of scope: adding tests (repo has no test runner), any v2 compatibility
   shim, any public API changes to `GlycerineViewer.vue` props/events. No
@@ -175,9 +177,9 @@ static annotoriousStyle(getState) {
 2. **Annotation body shape through the W3C adapter.** Our annotations put the full
    app payload at W3C `body[0].value`. v3 may internally call this `bodies[0].value`.
    Styler and selection handler both try both keys.
-3. **OSD 3.1 compatibility.** RESOLVED 2026-04-21: v3 requires OSD ≥ 4. We are
-   bumping OSD to `^5.x` (latest) as part of this branch. OSD 3 → 5 API changes
-   in our surface area (`OpenSeadragon(config)` factory, `tileSources`, a few
+3. **OSD 3.1 compatibility.** RESOLVED 2026-04-21: v3 requires OSD ≥ 4.
+   Installed OSD `^6.0.2` (latest) as part of Task 1. OSD 3 → 6 API changes in
+   our surface area (`OpenSeadragon(config)` factory, `tileSources`, a few
    display flags, `crossOriginPolicy: false`, `prefixUrl`) are expected to be
    backwards-compatible, but the dev smoke test (Task 11) now also covers pan/
    zoom/tile-loading to catch any regression. Watch for: control-button prefix
