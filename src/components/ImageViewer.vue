@@ -282,9 +282,15 @@ export default {
                     this.$emit('annotationsLoaded', rawAnnotations);
                 }
                 // Listen for annotation selection.
-                this.annotorious.on('selectAnnotation', (annotation) => {
-                    this.selectedAnnotation = annotation.body[0].value;
-                    this.showPopup = true;
+                this.annotorious.on('selectionChanged', (annotations) => {
+                    const annotation = annotations?.[0];
+                    if (!annotation) {
+                        this.showPopup = false;
+                        return;
+                    }
+                    const body = annotation.bodies?.[0] ?? annotation.body?.[0];
+                    this.selectedAnnotation = body?.value ?? null;
+                    this.showPopup = !!this.selectedAnnotation;
                 });
 
                 // Listen for annotation hover on.
