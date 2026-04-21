@@ -1,5 +1,5 @@
 <template>
-    <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view" :class="`ano-layer-fill-${annotationFillOpacity * 100}`"></div>
+    <div ref="container" class="w-full h-full bg-gray-900 anno-viewer-view"></div>
     <AnnotationPopup v-if="selectedAnnotation" :visible="showPopup" :annotation="selectedAnnotation"
                      :defaultLanguage="defaultLanguage" :cutoutImage="cutoutImage" :position="popupPosition"
                      @open="$emit('annotationPopupOpened', selectedAnnotation.id)" @close="onPopupClose" />
