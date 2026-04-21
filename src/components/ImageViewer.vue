@@ -220,8 +220,12 @@ export default {
          */
         initViewer() {
             // Initialize the OpenSeadragon viewer.
+            // Force the canvas drawer: OSD 6's default WebGL drawer competes
+            // with Annotorious v3's Pixi renderer for a WebGL context, which
+            // breaks annotation re-renders on hover/select on some GPUs.
             const osdConfig = {
                 element: this.$refs.container,
+                drawer: 'canvas',
                 visibilityRatio: 1,
                 crossOriginPolicy: false,
                 prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
