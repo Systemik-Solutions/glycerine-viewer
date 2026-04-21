@@ -293,15 +293,11 @@ export default {
                     this.showPopup = !!this.selectedAnnotation;
                 });
 
-                // Listen for annotation hover on.
-                this.annotorious.on('mouseEnterAnnotation', (annotation, element) => {
-                    // Emit the mouseEnterAnnotation event with the annotation ID.
+                this.annotorious.on('mouseEnterAnnotation', (annotation) => {
                     this.$emit('mouseEnterAnnotation', annotation.id);
                 });
 
-                // Listen for annotation hover off.
-                this.annotorious.on('mouseLeaveAnnotation', (annotation, element) => {
-                    // Emit the mouseLeaveAnnotation event with the annotation ID.
+                this.annotorious.on('mouseLeaveAnnotation', (annotation) => {
                     this.$emit('mouseLeaveAnnotation', annotation.id);
                 });
 
