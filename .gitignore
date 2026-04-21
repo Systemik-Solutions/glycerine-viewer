@@ -31,3 +31,8 @@ coverage
 
 package-lock.json
 /jslib
+
+# Claude
+
+.claude
+CLAUDE.md
