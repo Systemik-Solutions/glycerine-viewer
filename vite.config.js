@@ -27,7 +27,7 @@ export default defineConfig({
         rollupOptions: {
             external: [
                 'vue',
-                '@recogito/annotorious-openseadragon',
+                '@annotorious/openseadragon',
                 'axios',
                 'moment',
                 'openseadragon',
@@ -46,7 +46,7 @@ export default defineConfig({
                     axios: 'axios',
                     moment: 'moment',
                     openseadragon: 'OpenSeadragon',
-                    '@recogito/annotorious-openseadragon': 'Annotorious',
+                    '@annotorious/openseadragon': 'AnnotoriousOSD',
                 },
             },
         },
