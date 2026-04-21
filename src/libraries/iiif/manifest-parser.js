@@ -306,6 +306,18 @@ export class ManifestParser extends ResourceParser {
                     /(<path[^>]+d=['"])([^>]+)(['"])/g, (match, p1, p2, p3) => {
                         return p1 + p2.replace(/,/g, ' ') + p3;
                 });
+                // Annotorious v3 accepts <polygon>, <ellipse>, <rect> — no <circle>.
+                // Convert any <circle cx cy r /> to the equivalent <ellipse cx cy rx=r ry=r />.
+                target.selector.value = target.selector.value.replace(
+                    /<circle\s+([^>]*?)\s*\/?>/g,
+                    (match, attrs) => {
+                        const cx = attrs.match(/cx\s*=\s*["']([^"']+)["']/)?.[1];
+                        const cy = attrs.match(/cy\s*=\s*["']([^"']+)["']/)?.[1];
+                        const r = attrs.match(/\br\s*=\s*["']([^"']+)["']/)?.[1];
+                        if (cx == null || cy == null || r == null) return match;
+                        return `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r}"/>`;
+                    }
+                );
             }
             return target;
         }
