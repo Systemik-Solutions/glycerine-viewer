@@ -108,17 +108,14 @@ export default {
     ],
     data() {
         return {
-            // Whether to show the popup.
             showPopup: false,
-            // The selected annotation for the popup.
             selectedAnnotation: null,
-            // The image loader used for cropping annotation images.
             imageLoader: null,
-            // The annotation autoplay configuration.
             playConfig: {
                 intervalID: null,
                 currentIndex: -1,
             },
+            currentlyPlayingId: null,
         }
     },
     computed: {
@@ -350,21 +347,8 @@ export default {
             this.showPopup = false;
             this.playConfig.currentIndex = (this.playConfig.currentIndex + 1) % this.annotations.length;
             const annotation = this.annotations[this.playConfig.currentIndex];
-
-            if (this.$refs.container) {
-                // Clear the "play-highlight" class from all annotations.
-                const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
-                playHighlights.forEach(el => el.classList.remove('play-highlight'));
-
-                // Highlight the current annotation.
-                const annotationElement = this.$refs.container.querySelector(`.a9s-annotation[data-id='${annotation.id}']`);
-                if (annotationElement) {
-                    // Add the "play-highlight" class to the annotation element.
-                    annotationElement.classList.add('play-highlight');
-                }
-            }
-
-            this.annotorious.fitBoundsWithConstraints(annotation.id);
+            this.currentlyPlayingId = annotation.id;
+            this.annotorious.fitBounds(annotation.id);
             this.selectedAnnotation = annotation;
             if (this.playShowPopup) {
                 this.showPopup = true;
@@ -387,11 +371,7 @@ export default {
             if (this.intervalID) {
                 clearInterval(this.intervalID);
             }
-            // Clear the "play-highlight" class from all annotations.
-            if (this.$refs.container) {
-                const playHighlights = this.$refs.container.querySelectorAll('.play-highlight');
-                playHighlights.forEach(el => el.classList.remove('play-highlight'));
-            }
+            this.currentlyPlayingId = null;
             this.intervalID = null;
             this.playConfig.currentIndex = -1;
         },
