@@ -193,6 +193,12 @@ export default {
                 this.playStop();
             }
         },
+        // Annotorious v3 only invokes the style function on its own state
+        // transitions (hover/select). Re-applying setStyle forces it to
+        // redraw when the fill opacity prop changes.
+        annotationFillOpacity() {
+            this.refreshAnnotationStyle();
+        },
     },
     setup() {
         return {
@@ -254,11 +260,7 @@ export default {
                 this.annotorious = createOSDAnnotator(this.osdViewer, {
                     userSelectAction: 'SELECT',
                     adapter: W3CImageFormat(this.image),
-                    style: Helper.annotoriousStyle(() => ({
-                        highlightedId: this.highlightedAnnotationId,
-                        playingId: this.currentlyPlayingId,
-                        fillOpacity: this.annotationFillOpacity,
-                    })),
+                    style: this.buildAnnotationStyle(),
                 });
                 // Load annotations into Annotorious.
                 if (this.webAnnotations.length > 0) {
@@ -301,6 +303,18 @@ export default {
             this.showPopup = false;
             // Emit the annotationPopupClosed event with the current popup data.
             this.$emit('annotationPopupClosed', this.selectedAnnotation.id);
+        },
+        buildAnnotationStyle() {
+            return Helper.annotoriousStyle(() => ({
+                highlightedId: this.highlightedAnnotationId,
+                playingId: this.currentlyPlayingId,
+                fillOpacity: this.annotationFillOpacity,
+            }));
+        },
+        refreshAnnotationStyle() {
+            if (this.annotorious) {
+                this.annotorious.setStyle(this.buildAnnotationStyle());
+            }
         },
         setLightLevel() {
             if (!this.$refs.container) return;
