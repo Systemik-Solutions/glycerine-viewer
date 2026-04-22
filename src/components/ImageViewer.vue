@@ -378,7 +378,7 @@ export default {
             this.playConfig.currentIndex = (this.playConfig.currentIndex + 1) % this.annotations.length;
             const annotation = this.annotations[this.playConfig.currentIndex];
             this.currentlyPlayingId = annotation.id;
-            this.annotorious.fitBounds(annotation.id);
+            this.annotorious.fitBoundsWithConstraints(annotation.id);
             this.selectedAnnotation = annotation;
             if (this.playShowPopup) {
                 this.showPopup = true;
