@@ -307,9 +307,11 @@ export class ManifestParser extends ResourceParser {
                         return p1 + p2.replace(/,/g, ' ') + p3;
                 });
                 // Annotorious v3 accepts <polygon>, <ellipse>, <rect> — no <circle>.
-                // Convert any <circle cx cy r /> to the equivalent <ellipse cx cy rx=r ry=r />.
+                // Convert any <circle cx cy r /> (or <circle ...></circle>) to the
+                // equivalent <ellipse cx cy rx=r ry=r />. The pattern also absorbs an
+                // optional closing tag so the result stays well-formed XML.
                 target.selector.value = target.selector.value.replace(
-                    /<circle\s+([^>]*?)\s*\/?>/g,
+                    /<circle\s+([^>]*?)\s*\/?>\s*(?:<\/circle\s*>)?/g,
                     (match, attrs) => {
                         const cx = attrs.match(/cx\s*=\s*["']([^"']+)["']/)?.[1];
                         const cy = attrs.match(/cy\s*=\s*["']([^"']+)["']/)?.[1];
