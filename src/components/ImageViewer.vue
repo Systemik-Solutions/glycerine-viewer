@@ -199,6 +199,17 @@ export default {
         annotationFillOpacity() {
             this.refreshAnnotationStyle();
         },
+        // Same reason: the play-mode outline (yellow stroke) is driven by
+        // currentlyPlayingId inside the style closure, so a change here
+        // won't repaint unless we re-apply setStyle.
+        currentlyPlayingId() {
+            this.refreshAnnotationStyle();
+        },
+        // Same reason: the highlight fill opacity is driven by
+        // highlightedAnnotationId inside the style closure.
+        highlightedAnnotationId() {
+            this.refreshAnnotationStyle();
+        },
     },
     setup() {
         return {
