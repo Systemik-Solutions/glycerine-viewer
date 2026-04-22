@@ -245,6 +245,10 @@ export default {
             this.osdViewer = OpenSeadragon(osdConfig);
             // Emit the osdInitialized event.
             this.$emit('osdInitialized', this.osdViewer);
+            // Apply the light-level to the OSD image canvas. Annotorious
+            // layers are siblings inside .openseadragon-container, so the
+            // filter dims the image only and leaves annotations unaffected.
+            this.setLightLevel();
             if (this.displayAnnotations) {
                 // Initialize Annotorious.
                 this.annotorious = createOSDAnnotator(this.osdViewer, {
@@ -285,8 +289,6 @@ export default {
                 this.annotorious.on('mouseLeaveAnnotation', (annotation) => {
                     this.$emit('mouseLeaveAnnotation', annotation.id);
                 });
-
-                this.setLightLevel();
             }
             // Emit the canvasLoaded event.
             this.$emit('canvasLoaded');
@@ -302,7 +304,16 @@ export default {
         },
         setLightLevel() {
             if (!this.$refs.container) return;
-            this.$refs.container.style.backgroundColor = `rgba(33, 33, 33, ${1 - this.light / 100})`;
+            // Annotorious v3 mounts .a9s-gl-canvas and its SVG layers as
+            // siblings of OSD's tile canvas inside .openseadragon-canvas, so
+            // target the tile canvas specifically — not its parent.
+            const tileCanvases = this.$refs.container.querySelectorAll(
+                '.openseadragon-canvas > canvas:not(.a9s-gl-canvas)'
+            );
+            const filter = `brightness(${this.light / 100})`;
+            tileCanvases.forEach(canvas => {
+                canvas.style.filter = filter;
+            });
         },
         /**
          * Loads the image.
