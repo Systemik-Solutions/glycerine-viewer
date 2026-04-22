@@ -291,6 +291,17 @@ export default {
                 this.annotorious.on('mouseLeaveAnnotation', (annotation) => {
                     this.$emit('mouseLeaveAnnotation', annotation.id);
                 });
+
+                // Suppress OSD's click-to-zoom when the click lands on an
+                // annotation. v2's SVG overlay absorbed those clicks via
+                // pointer-events; v3 renders to a WebGL canvas that listens
+                // through OSD's own canvas-press/release, so OSD still raises
+                // canvas-click and zooms by 2x unless we opt out.
+                this.osdViewer.addHandler('canvas-click', (event) => {
+                    if (this.annotorious?.state?.hover?.current) {
+                        event.preventDefaultAction = true;
+                    }
+                });
             }
             // Emit the canvasLoaded event.
             this.$emit('canvasLoaded');
