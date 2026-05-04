@@ -104,6 +104,10 @@ export default {
     emits: [
         // Event emitted when the OpenSeadragon viewer is initialized.
         'osdInitialized',
+        // Event emitted before the OSD viewer is constructed. The
+        // payload is a `hooks` object whose `waitFor` array accepts
+        // Promises; OSD initialization is awaited until they resolve.
+        'beforeCanvasLoad',
         // Event emitted when the canvas is loaded.
         'canvasLoaded',
         // Event emitted when annotations are loaded. The list of raw annotation data is passed as the first argument.
