@@ -221,6 +221,32 @@ export default {
         highlightedAnnotationId() {
             this.refreshAnnotationStyle();
         },
+        // Switching crossOriginPolicy at runtime: OSD reads the policy
+        // from the viewer instance when scheduling tile fetches, so we
+        // mutate the live property and reload the tile source. Already-
+        // cached tiles cannot be "re-tainted" in place, hence the close
+        // + open. We preserve the current viewport bounds and re-apply
+        // annotations from the live, upstream-filtered list so the user
+        // stays exactly where they were with the same filter state.
+        crossOriginPolicy(newValue) {
+            if (!this.osdViewer) {
+                return;
+            }
+            this.playStop();
+            const bounds = this.osdViewer.viewport.getBounds(true);
+            this.osdViewer.crossOriginPolicy = newValue;
+            const onOpen = () => {
+                this.osdViewer.removeHandler('open', onOpen);
+                this.osdViewer.viewport.fitBounds(bounds, true);
+                if (this.annotorious && this.webAnnotations.length > 0) {
+                    this.annotorious.setAnnotations(this.webAnnotations);
+                    this.refreshAnnotationStyle();
+                }
+            };
+            this.osdViewer.addHandler('open', onOpen);
+            this.osdViewer.close();
+            this.osdViewer.open(this.buildTileSources());
+        },
     },
     setup() {
         return {
