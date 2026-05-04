@@ -26,6 +26,7 @@
                                              :popupPosition="settings.popupPosition.value"
                                              :crossOriginPolicy="crossOriginPolicy"
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
+                                             @beforeCanvasLoad="(hooks) => { $emit('beforeCanvasLoad', canvas.id, hooks) }"
                                              @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
                                              @mouseEnterAnnotation="(annotationId) => { $emit('mouseEnterAnnotation', annotationId) }"
@@ -548,6 +549,11 @@ export default {
         'osdInitialized',
         // Emitted when the manifest is loaded successfully. It passes the manifest data as a parameter.
         'manifestLoaded',
+        // Emitted before a canvas is loaded into the OSD viewer. Passes
+        // the canvas id and a `hooks` object. Push a Promise into
+        // `hooks.waitFor` to make OSD initialization wait for async setup
+        // (e.g., a HEAD request to pick the right crossOriginPolicy).
+        'beforeCanvasLoad',
         // Emitted when a canvas is loaded. It passes the canvas id as a parameter.
         'canvasLoaded',
         // Emitted when the annotations of a canvas are loaded. It passes the list of annotations and the canvas id as parameters.
