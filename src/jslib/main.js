@@ -69,6 +69,7 @@ export default class GlycerineViewer {
             autoplay: this.options.autoplay,
             onOsdInitialized: this.options.onOsdInitialized,
             onManifestLoaded: this.options.onManifestLoaded,
+            onBeforeCanvasLoad: this.options.onBeforeCanvasLoad,
             onCanvasLoaded: this.options.onCanvasLoaded,
             onCanvasAnnotationsLoaded: this.options.onCanvasAnnotationsLoaded,
             onMouseEnterAnnotation: this.options.onMouseEnterAnnotation,
