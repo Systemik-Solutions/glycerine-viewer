@@ -244,6 +244,22 @@ export default {
     },
     methods: {
         /**
+         * Builds the OSD tileSources value from the current image prop.
+         * Used by both initViewer() and the crossOriginPolicy watcher.
+         *
+         * @returns {Object|Array<string>}
+         */
+        buildTileSources() {
+            if (this.plainImage) {
+                return {
+                    type: 'image',
+                    url: this.image,
+                    buildPyramid: false,
+                };
+            }
+            return [this.image + '/info.json'];
+        },
+        /**
          * Initializes the viewer.
          */
         initViewer() {
@@ -255,21 +271,13 @@ export default {
                 element: this.$refs.container,
                 drawer: 'canvas',
                 visibilityRatio: 1,
-                crossOriginPolicy: false,
+                crossOriginPolicy: this.crossOriginPolicy,
                 prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
                 showZoomControl: false,
                 showHomeControl: false,
                 showFullPageControl: false,
             };
-            if (this.plainImage) {
-                osdConfig.tileSources = {
-                    type: 'image',
-                    url:  this.image,
-                    buildPyramid: false,
-                };
-            } else {
-                osdConfig.tileSources = [this.image + '/info.json'];
-            }
+            osdConfig.tileSources = this.buildTileSources();
             this.osdViewer = OpenSeadragon(osdConfig);
             // Emit the osdInitialized event.
             this.$emit('osdInitialized', this.osdViewer);
