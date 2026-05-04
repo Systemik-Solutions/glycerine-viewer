@@ -24,6 +24,7 @@
                                              :playSpeed="settings.playSettings.speed"
                                              :playShowPopup="settings.playSettings.showPopup"
                                              :popupPosition="settings.popupPosition.value"
+                                             :crossOriginPolicy="crossOriginPolicy"
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
                                              @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
@@ -505,6 +506,16 @@ export default {
         annotationFillOpacity: {
             type: Number,
             default: 0,
+        },
+        // OpenSeadragon crossOriginPolicy. Accepts 'Anonymous',
+        // 'use-credentials', or false. Changes are forwarded to the
+        // active ImageViewer and trigger a tile-source reload.
+        crossOriginPolicy: {
+            type: [String, Boolean],
+            default: false,
+            validator(value) {
+                return value === false || value === 'Anonymous' || value === 'use-credentials';
+            },
         },
         // The position of the annotation popup (in image viewer).
         annotationPopupPosition: {
