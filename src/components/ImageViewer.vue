@@ -89,6 +89,17 @@ export default {
             type: String,
             default: 'bottomright',
         },
+        // Sets OpenSeadragon's crossOriginPolicy. Accepts 'Anonymous',
+        // 'use-credentials', or false. Changing at runtime triggers a
+        // soft reload of the tile source so already-cached tiles are
+        // re-fetched under the new policy.
+        crossOriginPolicy: {
+            type: [String, Boolean],
+            default: false,
+            validator(value) {
+                return value === false || value === 'Anonymous' || value === 'use-credentials';
+            },
+        },
     },
     emits: [
         // Event emitted when the OpenSeadragon viewer is initialized.
