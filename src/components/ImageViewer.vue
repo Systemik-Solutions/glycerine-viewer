@@ -292,7 +292,26 @@ export default {
         /**
          * Initializes the viewer.
          */
-        initViewer() {
+        async initViewer() {
+            // Give consumers a chance to do async setup before OSD is
+            // constructed (e.g., probe Access-Control-Allow-Origin so
+            // crossOriginPolicy can be picked correctly per canvas).
+            // Consumers push Promises into hooks.waitFor; we await
+            // them all, then read the (possibly updated) prop value.
+            const hooks = { waitFor: [] };
+            this.$emit('beforeCanvasLoad', hooks);
+            if (hooks.waitFor.length > 0) {
+                try {
+                    await Promise.all(hooks.waitFor);
+                    await this.$nextTick();
+                } catch (err) {
+                    console.warn(
+                        '[GlycerineViewer] beforeCanvasLoad handler rejected; ' +
+                        'proceeding with current crossOriginPolicy',
+                        err,
+                    );
+                }
+            }
             // Initialize the OpenSeadragon viewer.
             // Force the canvas drawer: OSD 6's default WebGL drawer competes
             // with Annotorious v3's Pixi renderer for a WebGL context, which
