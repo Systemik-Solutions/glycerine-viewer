@@ -243,6 +243,11 @@ while preserving viewport and annotations.
 - `osd-initialized`: Emitted when the OpenSeadragon viewer is initialized. It passes the OpenSeadragon viewer instance
 and the canvas data as parameters.
 - `manifest-loaded`: Emitted when the manifest is loaded successfully. It passes the manifest data as a parameter.
+- `before-canvas-load`: Emitted before the OpenSeadragon viewer is constructed for a canvas. It passes the canvas
+id and a `hooks` object. Push a Promise into `hooks.waitFor` to make OSD initialization wait for asynchronous setup —
+for example, a HEAD request to inspect `Access-Control-Allow-Origin` and set the `cross-origin-policy` prop before the
+first tile fetch. Multiple Promises can be pushed; OSD waits for all of them via `Promise.all`. If a Promise rejects,
+a warning is logged and the viewer continues with the current `cross-origin-policy`.
 - `canvas-loaded`: Emitted when a canvas is loaded. It passes the canvas id as a parameter.
 - `canvas-annotations-loaded`: Emitted when the annotations of a canvas are loaded. It passes the list of annotations 
 and the canvas id as parameters.
