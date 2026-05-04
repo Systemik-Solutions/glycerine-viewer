@@ -62,6 +62,7 @@ export default class GlycerineViewer {
             defaultLineWeight: this.options.defaultLineWeight,
             annotationFillOpacity: this.options.annotationFillOpacity,
             annotationPopupPosition: this.options.annotationPopupPosition,
+            crossOriginPolicy: this.options.crossOriginPolicy,
             playSpeed: this.options.playSpeed,
             playShowPopup: this.options.playShowPopup,
             lightLevel: this.options.lightLevel,
