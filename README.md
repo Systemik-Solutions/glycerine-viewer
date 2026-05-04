@@ -233,6 +233,10 @@ one decimal place (e.g., `0`, `0.1`, `0.2`, ..., `1`). Default is `0`.
 - `light-level` (Number): The default light level of images. The value should be an integer between `0` and `100`. 
 Default is `100`.
 - `autoplay` (Boolean): Whether to autoplay the annotations after the manifest is loaded. Default is `false`.
+- `cross-origin-policy` (String|Boolean): Sets OpenSeadragon's `crossOriginPolicy`. 
+  Accepts `'Anonymous'`, `'use-credentials'`, or `false`. Default is `false`. Changing
+  the value at runtime causes the viewer to re-fetch tiles under the new policy
+  while preserving viewport and annotations.
 
 #### Emits
 
