@@ -311,6 +311,12 @@ export default {
                         err,
                     );
                 }
+                // The component may have unmounted while we awaited the
+                // consumer's hooks (e.g., the user navigated away mid-probe).
+                // Bail out before OSD tries to mount on a torn-down container.
+                if (!this.$refs.container) {
+                    return;
+                }
             }
             // Initialize the OpenSeadragon viewer.
             // Force the canvas drawer: OSD 6's default WebGL drawer competes
