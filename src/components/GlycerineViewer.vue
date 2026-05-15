@@ -25,9 +25,10 @@
                                              :playShowPopup="settings.playSettings.showPopup"
                                              :popupPosition="settings.popupPosition.value"
                                              :crossOriginPolicy="crossOriginPolicy"
+                                             :startAnnotation="pendingStartAnnotationId"
                                              @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
                                              @beforeCanvasLoad="(hooks) => { $emit('beforeCanvasLoad', canvas.id, hooks) }"
-                                             @canvasLoaded="() => { $emit('canvasLoaded', canvas.id) }"
+                                             @canvasLoaded="() => { pendingStartAnnotationId = null; $emit('canvasLoaded', canvas.id) }"
                                              @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
                                              @mouseEnterAnnotation="(annotationId) => { $emit('mouseEnterAnnotation', annotationId) }"
                                              @mouseLeaveAnnotation="(annotationId) => { $emit('mouseLeaveAnnotation', annotationId) }"
@@ -503,6 +504,18 @@ export default {
         defaultLineWeight: {
             type: String
         },
+        // The id of the canvas to display initially. Overrides the manifest's
+        // `start` property. Ignored when invalid or when startAnnotation is set.
+        startCanvas: {
+            type: String,
+        },
+        // The id of the annotation to focus initially. The viewer opens that
+        // annotation's canvas and pans/zooms to it after the canvas is ready.
+        // Ignored when invalid, when display-annotations is false, or when
+        // the active filters would exclude it. Takes priority over startCanvas.
+        startAnnotation: {
+            type: String,
+        },
         // The annotation fill opacity (0-1).
         annotationFillOpacity: {
             type: Number,
@@ -669,6 +682,8 @@ export default {
             showDropZone: false,
             // User annotation filter. An array of annotation IDs to be made visible. If explicitly set to null, no filter is applied.
             userAnnotationFilter: null,
+            // The id of the annotation to focus on initial canvas load. Cleared once the canvas has loaded so re-navigation does not re-zoom.
+            pendingStartAnnotationId: null,
             // The audio play state. Can be 'playing', 'paused', or 'stopped'.
             playState: 'stopped',
         };
@@ -1344,14 +1359,31 @@ export default {
                     });
                     // Set default language.
                     this.settings.language.default = this.$i18n.locale;
-                    // Set the start index.
-                    const startCanvas = this.manifestLoader.getParser().getStartCanvas();
-                    if (startCanvas) {
-                        this.manifestLoader.getParser().getCanvases().forEach((canvas, index) => {
-                            if (canvas.id === startCanvas) {
-                                this.navigation.activeIndex = index;
+                    // Resolve the initial canvas. Priority: startAnnotation
+                    // (when display-annotations is enabled and the id resolves
+                    // to a known annotation) > startCanvas > manifest's `start`.
+                    let initialCanvasId = this.manifestLoader.getParser().getStartCanvas();
+                    let resolvedStartAnnotation = null;
+                    if (this.displayAnnotations && this.startAnnotation) {
+                        for (const canvas of this.canvases) {
+                            const hit = (canvas.annotations ?? []).find(a => a.id === this.startAnnotation);
+                            if (hit) {
+                                resolvedStartAnnotation = hit;
+                                initialCanvasId = canvas.id;
+                                break;
                             }
-                        });
+                        }
+                    }
+                    if (!resolvedStartAnnotation && this.startCanvas) {
+                        if (this.canvases.some(c => c.id === this.startCanvas)) {
+                            initialCanvasId = this.startCanvas;
+                        }
+                    }
+                    if (initialCanvasId) {
+                        const idx = this.canvases.findIndex(c => c.id === initialCanvasId);
+                        if (idx >= 0) {
+                            this.navigation.activeIndex = idx;
+                        }
                     }
                     // Set the default annotation collection.
                     if (this.defaultAnnotationCollection) {
@@ -1419,6 +1451,34 @@ export default {
                                 break;
                             }
                         }
+                    }
+
+                    // Honour the resolved start annotation only when the active
+                    // default filters would not exclude it. Defaults win.
+                    if (resolvedStartAnnotation) {
+                        const filters = this.settings.filters;
+                        let kept = true;
+                        if (
+                            filters.set === 'none' ||
+                            (filters.set !== 'all' && resolvedStartAnnotation.group !== filters.set)
+                        ) {
+                            kept = false;
+                        }
+                        if (kept && filters.language !== 'all') {
+                            const langCodes = this.getAnnotationLanguageCodes(resolvedStartAnnotation);
+                            if (langCodes.indexOf(filters.language) < 0) {
+                                kept = false;
+                            }
+                        }
+                        if (kept && filters.line !== 'all' && resolvedStartAnnotation.lineColor !== filters.line) {
+                            kept = false;
+                        }
+                        if (kept && filters.weight !== 'all' && resolvedStartAnnotation.lineWeight !== filters.weight) {
+                            kept = false;
+                        }
+                        this.pendingStartAnnotationId = kept ? resolvedStartAnnotation.id : null;
+                    } else {
+                        this.pendingStartAnnotationId = null;
                     }
 
                     // Set the active manifest if it is in a collection.

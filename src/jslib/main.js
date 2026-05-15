@@ -60,6 +60,8 @@ export default class GlycerineViewer {
             defaultAnnotationLanguage: this.options.defaultAnnotationLanguage,
             defaultLineColor: this.options.defaultLineColor,
             defaultLineWeight: this.options.defaultLineWeight,
+            startCanvas: this.options.startCanvas,
+            startAnnotation: this.options.startAnnotation,
             annotationFillOpacity: this.options.annotationFillOpacity,
             annotationPopupPosition: this.options.annotationPopupPosition,
             crossOriginPolicy: this.options.crossOriginPolicy,

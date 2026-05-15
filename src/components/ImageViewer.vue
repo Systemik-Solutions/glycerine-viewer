@@ -100,6 +100,12 @@ export default {
                 return value === false || value === 'Anonymous' || value === 'use-credentials';
             },
         },
+        // The id of an annotation to pan/zoom to once OSD and Annotorious
+        // are ready. Ignored when displayAnnotations is false.
+        startAnnotation: {
+            type: String,
+            default: null,
+        },
     },
     emits: [
         // Event emitted when the OpenSeadragon viewer is initialized.
@@ -356,6 +362,15 @@ export default {
                         rawAnnotations.push(annotation.data);
                     }
                     this.$emit('annotationsLoaded', rawAnnotations);
+                    // Pan/zoom to the start annotation when requested. Defer
+                    // until OSD has opened the tile source so the viewport is
+                    // sized — fitBoundsWithConstraints needs a real viewport.
+                    if (this.startAnnotation) {
+                        const startId = this.startAnnotation;
+                        this.osdViewer.addOnceHandler('open', () => {
+                            this.annotorious?.fitBoundsWithConstraints(startId);
+                        });
+                    }
                 }
                 // Listen for annotation selection.
                 this.annotorious.on('selectionChanged', (annotations) => {

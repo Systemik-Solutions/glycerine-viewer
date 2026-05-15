@@ -222,6 +222,15 @@ Default is `null`.
 to filter annotations. Default is `null`.
 - `default-line-weight` (String): The default line weight to filter the annotations. Possible values are `light`,
 `medium`, and `dark`. Default is `null`.
+- `start-canvas` (String): The `id` of the canvas to display initially. Overrides the manifest's `start`
+property. When the id is not found in the loaded manifest, the prop is ignored and the default initial canvas
+is shown. Default is `null`.
+- `start-annotation` (String): The `id` of an annotation to focus initially. The viewer opens that
+annotation's canvas and pans/zooms to it once the canvas and annotations are ready. Takes priority over
+`start-canvas`. Ignored when `display-annotations` is `false`, when the id is not found in the loaded
+manifest, or when the active default filters (`default-annotation-collection`, `default-annotation-language`,
+`default-line-color`, `default-line-weight`) would exclude the annotation from the filtered list. Default
+is `null`.
 - `annotation-fill-opacity` (Number): The fill opacity of the annotations. The value should be between `0` and `1` with
 one decimal place (e.g., `0`, `0.1`, `0.2`, ..., `1`). Default is `0`.
 - `annotation-popup-position` (String): The position of the annotation popup. Possible values are 
