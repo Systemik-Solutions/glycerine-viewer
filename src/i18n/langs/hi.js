@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'टिप्पणियाँ चलाएँ',
         pause: 'रोकें',
         stop: 'बंद करें',
+        previous: 'पिछला',
+        next: 'अगला',
         speed: 'गति',
         fast: 'तेज़',
         normal: 'सामान्य',

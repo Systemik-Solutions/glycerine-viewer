@@ -11,7 +11,7 @@
                                              :annotations="annotations[canvas.id]"
                                              :default-language="annotationDefaultLanguage"
                                              :showCutout="settings.showCutout"></TableViewer>
-                                <ImageViewer v-else :image="canvas.image.url"
+                                <ImageViewer v-else ref="imageViewer" :image="canvas.image.url"
                                              :plain-image="canvas.image.type === 'image'"
                                              :annotations="annotations[canvas.id]"
                                              :light="settings.light"
@@ -34,6 +34,7 @@
                                              @mouseLeaveAnnotation="(annotationId) => { $emit('mouseLeaveAnnotation', annotationId) }"
                                              @annotationPopupOpened="(annotationId) => { $emit('annotationPopupOpened', annotationId) }"
                                              @annotationPopupClosed="(annotationId) => { $emit('annotationPopupClosed', annotationId) }"
+                                             @playIndexChanged="onPlayIndexChanged"
                                 ></ImageViewer>
                             </template>
                             <template v-else-if="canvas.audio">
@@ -134,8 +135,10 @@
                     <Button rounded icon="pi pi-info-circle" class="mr-2" :title="$t('ui.about')" @click="showAboutPanel = true" />
                 </template>
                 <template v-if="showPlayControls & displayAnnotations && hasAnnotation && viewMode === 'image'">
+                    <Button :disabled="playState === 'stopped' || currentPlayIndex <= 0" rounded icon="pi pi-fast-backward" class="mr-2" :title="$t('ui.previous')" @click="playPreviousAnnotation" />
                     <Button v-if="playState === 'playing'" rounded icon="pi pi-pause" class="mr-2" :title="$t('ui.pause')" @click="playState = 'paused'" />
                     <Button v-else rounded icon="pi pi-play" class="mr-2" :title="$t('ui.playAnnotations')" @click="playState = 'playing'" />
+                    <Button :disabled="playState === 'stopped'" rounded icon="pi pi-fast-forward" class="mr-2" :title="$t('ui.next')" @click="playNextAnnotation" />
                     <Button :disabled="playState === 'stopped'" rounded icon="pi pi-stop" class="mr-2" :title="$t('ui.stop')" @click="playState = 'stopped'" />
                 </template>
                 <template v-if="showSettingPaneButton">
@@ -686,6 +689,7 @@ export default {
             pendingStartAnnotationId: null,
             // The audio play state. Can be 'playing', 'paused', or 'stopped'.
             playState: 'stopped',
+            currentPlayIndex: -1,
         };
     },
     computed: {
@@ -1246,6 +1250,28 @@ export default {
         }
     },
     methods: {
+        /**
+         * Tracks the currently-playing annotation index reported by the active ImageViewer.
+         */
+        onPlayIndexChanged(index) {
+            this.currentPlayIndex = index;
+        },
+        /**
+         * Resolves the active ImageViewer instance. The ref lives inside a v-for so $refs.imageViewer is an array.
+         */
+        getActiveImageViewer() {
+            const ref = this.$refs.imageViewer;
+            if (Array.isArray(ref)) {
+                return ref[0] ?? null;
+            }
+            return ref ?? null;
+        },
+        playPreviousAnnotation() {
+            this.getActiveImageViewer()?.playPrevious();
+        },
+        playNextAnnotation() {
+            this.getActiveImageViewer()?.playNext();
+        },
         /**
          * Resets the viewer.
          *

@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'Воспроизвести аннотации',
         pause: 'Пауза',
         stop: 'Стоп',
+        previous: 'Предыдущий',
+        next: 'Следующий',
         speed: 'Скорость',
         fast: 'Быстро',
         normal: 'Нормально',

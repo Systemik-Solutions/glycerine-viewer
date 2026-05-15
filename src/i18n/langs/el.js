@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'Αναπαραγωγή σχολιασμών',
         pause: 'Παύση',
         stop: 'Διακοπή',
+        previous: 'Προηγούμενο',
+        next: 'Επόμενο',
         speed: 'Ταχύτητα',
         fast: 'Γρήγορο',
         normal: 'Κανονικό',

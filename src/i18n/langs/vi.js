@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'Phát chú thích',
         pause: 'Tạm dừng',
         stop: 'Dừng',
+        previous: 'Trước',
+        next: 'Tiếp',
         speed: 'Tốc độ',
         fast: 'Nhanh',
         normal: 'Bình thường',

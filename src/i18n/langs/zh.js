@@ -55,6 +55,8 @@ export default {
         playAnnotations: '播放註釋',
         pause: '暫停',
         stop: '停止',
+        previous: '上一個',
+        next: '下一個',
         speed: '速度',
         fast: '快速',
         normal: '正常',

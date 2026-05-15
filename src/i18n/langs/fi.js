@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'Toista annotoinnit',
         pause: 'Tauko',
         stop: 'Pysäytä',
+        previous: 'Edellinen',
+        next: 'Seuraava',
         speed: 'Nopeus',
         fast: 'Nopea',
         normal: 'Normaali',

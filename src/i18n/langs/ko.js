@@ -55,6 +55,8 @@ export default {
         playAnnotations: '주석 재생',
         pause: '일시 정지',
         stop: '정지',
+        previous: '이전',
+        next: '다음',
         speed: '속도',
         fast: '빠르게',
         normal: '보통',

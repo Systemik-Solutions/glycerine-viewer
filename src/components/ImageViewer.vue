@@ -126,6 +126,8 @@ export default {
         'annotationPopupOpened',
         // Emitted when an annotation popup is closed. It passes the annotation id as a parameter.
         'annotationPopupClosed',
+        // Emitted when the currently-playing annotation index changes. Passes the new index (-1 when stopped).
+        'playIndexChanged',
     ],
     data() {
         return {
@@ -460,18 +462,26 @@ export default {
             this.imageLoader = imageLoader;
         },
         /**
-         * Automatically plays annotations.
+         * Shows the annotation at the given index. Shared by auto-play and manual prev/next.
          */
-        autoPlayAnnotations() {
+        showAnnotationAtIndex(index) {
             this.showPopup = false;
-            this.playConfig.currentIndex = (this.playConfig.currentIndex + 1) % this.annotations.length;
-            const annotation = this.annotations[this.playConfig.currentIndex];
+            this.playConfig.currentIndex = index;
+            const annotation = this.annotations[index];
             this.currentlyPlayingId = annotation.id;
             this.annotorious.fitBoundsWithConstraints(annotation.id);
             this.selectedAnnotation = annotation;
             if (this.playShowPopup) {
                 this.showPopup = true;
             }
+            this.$emit('playIndexChanged', index);
+        },
+        /**
+         * Automatically plays annotations.
+         */
+        autoPlayAnnotations() {
+            const next = (this.playConfig.currentIndex + 1) % this.annotations.length;
+            this.showAnnotationAtIndex(next);
         },
         /**
          * Starts playing annotations.
@@ -493,6 +503,7 @@ export default {
             this.currentlyPlayingId = null;
             this.intervalID = null;
             this.playConfig.currentIndex = -1;
+            this.$emit('playIndexChanged', -1);
         },
         /**
          * Pauses playing annotations.
@@ -502,6 +513,38 @@ export default {
                 clearInterval(this.intervalID);
             }
             this.intervalID = null;
+        },
+        /**
+         * Jumps to the next annotation. Wraps to the first when past the end.
+         * Re-arms the autoplay timer when currently playing so the new annotation gets a full playSpeed window.
+         */
+        playNext() {
+            if (!this.annotations.length) {
+                return;
+            }
+            const next = (this.playConfig.currentIndex + 1) % this.annotations.length;
+            this.showAnnotationAtIndex(next);
+            if (this.intervalID) {
+                clearInterval(this.intervalID);
+                this.intervalID = setInterval(this.autoPlayAnnotations, this.playSpeed);
+            }
+        },
+        /**
+         * Jumps to the previous annotation. No-op at index 0 (caller disables the button there).
+         */
+        playPrevious() {
+            if (!this.annotations.length) {
+                return;
+            }
+            const prev = this.playConfig.currentIndex - 1;
+            if (prev < 0) {
+                return;
+            }
+            this.showAnnotationAtIndex(prev);
+            if (this.intervalID) {
+                clearInterval(this.intervalID);
+                this.intervalID = setInterval(this.autoPlayAnnotations, this.playSpeed);
+            }
         },
     }
 }

@@ -55,6 +55,8 @@ export default {
         playAnnotations: '注釈を再生',
         pause: '一時停止',
         stop: '停止',
+        previous: '前へ',
+        next: '次へ',
         speed: '速度',
         fast: '速い',
         normal: '標準',

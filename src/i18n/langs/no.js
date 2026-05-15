@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'Spill av annotasjoner',
         pause: 'Pause',
         stop: 'Stopp',
+        previous: 'Forrige',
+        next: 'Neste',
         speed: 'Hastighet',
         fast: 'Rask',
         normal: 'Normal',

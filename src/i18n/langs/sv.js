@@ -55,6 +55,8 @@ export default {
         playAnnotations: 'Spela upp anteckningar',
         pause: 'Pausa',
         stop: 'Stopp',
+        previous: 'Föregående',
+        next: 'Nästa',
         speed: 'Hastighet',
         fast: 'Snabb',
         normal: 'Normal',
