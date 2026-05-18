@@ -147,6 +147,14 @@ export default {
             } else {
                 this.$emit('close');
             }
+        },
+        // During playback the popup stays mounted while `annotation` swaps,
+        // so neither the `visible` nor `show` watcher fires and the previously
+        // selected language carries over — yielding blank content when the
+        // new annotation has no values in that language. Re-run setLanguage
+        // so the fallback (default → en → first available) is applied.
+        annotation() {
+            this.setLanguage();
         }
     },
     mounted() {
