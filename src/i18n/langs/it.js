@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Tutte le annotazioni',
         noAnnotations: 'Nessuna annotazione',
         annotationSet: 'Insieme di annotazioni',
+        annotationSetFilter: 'Filtro insieme di annotazioni',
         about: 'Informazioni',
         settings: 'Impostazioni',
         preference: 'Preferenza',

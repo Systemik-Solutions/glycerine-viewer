@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Tất cả chú thích',
         noAnnotations: 'Không có chú thích',
         annotationSet: 'Bộ chú thích',
+        annotationSetFilter: 'Bộ lọc nhóm chú thích',
         about: 'Giới thiệu',
         settings: 'Cài đặt',
         preference: 'Tùy chọn',

@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Όλες οι σημειώσεις',
         noAnnotations: 'Δεν υπάρχουν σημειώσεις',
         annotationSet: 'Σύνολο σημειώσεων',
+        annotationSetFilter: 'Φίλτρο συνόλου σημειώσεων',
         about: 'Σχετικά',
         settings: 'Ρυθμίσεις',
         preference: 'Προτίμηση',

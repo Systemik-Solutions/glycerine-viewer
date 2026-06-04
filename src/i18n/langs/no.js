@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Alle merknader',
         noAnnotations: 'Ingen merknader',
         annotationSet: 'Merknadssett',
+        annotationSetFilter: 'Merknadssettfilter',
         about: 'Om',
         settings: 'Innstillinger',
         preference: 'Preferanse',

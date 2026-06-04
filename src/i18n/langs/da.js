@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Alle annotationer',
         noAnnotations: 'Ingen annotationer',
         annotationSet: 'Annotationssæt',
+        annotationSetFilter: 'Annotationssætfilter',
         about: 'Om',
         settings: 'Indstillinger',
         preference: 'Præference',

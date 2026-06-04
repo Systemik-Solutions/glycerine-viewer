@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'सभी टिप्पणियाँ',
         noAnnotations: 'कोई टिप्पणियाँ नहीं',
         annotationSet: 'टिप्पणी समूह',
+        annotationSetFilter: 'टिप्पणी समूह फ़िल्टर',
         about: 'के बारे में',
         settings: 'सेटिंग्स',
         preference: 'प्राथमिकता',

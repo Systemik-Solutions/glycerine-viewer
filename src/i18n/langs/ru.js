@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Все аннотации',
         noAnnotations: 'Нет аннотаций',
         annotationSet: 'Набор аннотаций',
+        annotationSetFilter: 'Фильтр набора аннотаций',
         about: 'О программе',
         settings: 'Настройки',
         preference: 'Предпочтения',

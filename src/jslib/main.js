@@ -44,6 +44,7 @@ export default class GlycerineViewer {
             manifest: this.options.manifest,
             defaultInfoPanel: this.options.defaultInfoPanel,
             defaultShowCutout: this.options.defaultShowCutout,
+            defaultAnnotationSetFilter: this.options.defaultAnnotationSetFilter,
             showFullScreenButton: this.options.showFullScreenButton,
             showIndexButton: this.options.showIndexButton,
             showAnnotationViewButton: this.options.showAnnotationViewButton,

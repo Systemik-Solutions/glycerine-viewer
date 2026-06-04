@@ -146,7 +146,7 @@
                 </template>
             </div>
             <AnnotationSetFilter
-                v-if="displayAnnotations && hasAnnotation && viewMode === 'image'"
+                v-if="displayAnnotations && hasAnnotation && viewMode === 'image' && settings.showAnnotationSetFilter"
                 v-model="settings.filters.set"
                 :options="filterSetOptions"
             />
@@ -225,6 +225,10 @@
                             <div v-if="viewMode === 'image'" class="field col-12 flex align-items-center justify-content-between gap-4">
                                 <div><i class="pi pi-info-circle"></i> {{ $t('ui.informationPanel') }}</div>
                                 <InputSwitch v-model="settings.showInfoPanel" />
+                            </div>
+                            <div v-if="displayAnnotations && hasAnnotation" class="field col-12 flex align-items-center justify-content-between gap-4">
+                                <div><i class="pi pi-clone"></i> {{ $t('ui.annotationSetFilter') }}</div>
+                                <InputSwitch v-model="settings.showAnnotationSetFilter" />
                             </div>
                             <div v-if="displayAnnotations && hasAnnotation" class="field col-12 flex align-items-center justify-content-between gap-4">
                                 <div><i class="pi pi-image"></i> {{ $t('ui.displayCutout') }}</div>
@@ -438,6 +442,11 @@ export default {
             type: Boolean,
             default: false,
         },
+        // The default state of the annotation set filter.
+        defaultAnnotationSetFilter: {
+            type: Boolean,
+            default: true,
+        },
         // Whether to show the full screen button.
         showFullScreenButton: {
             type: Boolean,
@@ -639,6 +648,8 @@ export default {
                 light: this.lightLevel,
                 // Whether to show the info panel.
                 showInfoPanel: this.defaultInfoPanel,
+                // Whether to show the annotation set filter pill.
+                showAnnotationSetFilter: this.defaultAnnotationSetFilter,
                 // Whether to show cutout images in the annotation popups.
                 showCutout: this.defaultShowCutout,
                 // The fill opacity of the annotations.
@@ -1310,6 +1321,7 @@ export default {
                 },
                 light: this.lightLevel,
                 showInfoPanel: this.defaultInfoPanel,
+                showAnnotationSetFilter: this.defaultAnnotationSetFilter,
                 showCutout: this.defaultShowCutout,
                 annotationFillOpacity: this.annotationFillOpacity,
                 popupPosition: {

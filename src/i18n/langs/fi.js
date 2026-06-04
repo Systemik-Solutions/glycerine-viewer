@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Kaikki merkinnät',
         noAnnotations: 'Ei merkintöjä',
         annotationSet: 'Merkintäjoukko',
+        annotationSetFilter: 'Merkintäjoukon suodatin',
         about: 'Tietoja',
         settings: 'Asetukset',
         preference: 'Mieltymys',

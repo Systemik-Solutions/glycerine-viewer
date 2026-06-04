@@ -12,6 +12,7 @@ export default {
         allAnnotations: '모든 주석',
         noAnnotations: '주석 없음',
         annotationSet: '주석 세트',
+        annotationSetFilter: '주석 세트 필터',
         about: '소개',
         settings: '설정',
         preference: '기본 설정',

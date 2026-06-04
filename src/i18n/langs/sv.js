@@ -12,6 +12,7 @@ export default {
         allAnnotations: 'Alla kommentarer',
         noAnnotations: 'Inga kommentarer',
         annotationSet: 'Kommentaruppsättning',
+        annotationSetFilter: 'Filter för kommentaruppsättning',
         about: 'Om',
         settings: 'Inställningar',
         preference: 'Preferens',
