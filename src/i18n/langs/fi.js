@@ -11,6 +11,7 @@ export default {
         annotations: 'Merkinnät',
         allAnnotations: 'Kaikki merkinnät',
         noAnnotations: 'Ei merkintöjä',
+        annotationSet: 'Annotation Set',
         about: 'Tietoja',
         settings: 'Asetukset',
         preference: 'Mieltymys',

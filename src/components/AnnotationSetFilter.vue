@@ -2,12 +2,13 @@
     <div
         class="gv-anno-set-filter"
         :class="{ 'gv-anno-set-filter--hidden': !visible }"
+        :title="$t('ui.annotationSet')"
         @mouseenter="onHoverStart"
         @mouseleave="onHoverEnd"
         @focusin="onFocusStart"
         @focusout="onFocusEnd"
     >
-        <i class="pi pi-clone gv-anno-set-filter__icon"></i>
+        <i class="pi pi-clone gv-anno-set-filter__icon" aria-hidden="true"></i>
         <Dropdown
             :modelValue="modelValue"
             :options="options"
@@ -15,6 +16,7 @@
             option-value="value"
             append-to="self"
             class="gv-anno-set-filter__dropdown"
+            :aria-label="$t('ui.annotationSet')"
             @update:modelValue="$emit('update:modelValue', $event)"
             @show="onPanelShow"
             @hide="onPanelHide"

@@ -11,6 +11,7 @@ export default {
         annotations: 'टिप्पणियाँ',
         allAnnotations: 'सभी टिप्पणियाँ',
         noAnnotations: 'कोई टिप्पणियाँ नहीं',
+        annotationSet: 'Annotation Set',
         about: 'के बारे में',
         settings: 'सेटिंग्स',
         preference: 'प्राथमिकता',

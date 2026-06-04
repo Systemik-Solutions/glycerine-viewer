@@ -11,6 +11,7 @@ export default {
         annotations: '標註集',
         allAnnotations: '所有標註',
         noAnnotations: '無標註',
+        annotationSet: 'Annotation Set',
         about: '關於',
         settings: '設定',
         preference: '偏好',

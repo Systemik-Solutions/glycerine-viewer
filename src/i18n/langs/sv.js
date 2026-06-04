@@ -11,6 +11,7 @@ export default {
         annotations: 'Kommentarer',
         allAnnotations: 'Alla kommentarer',
         noAnnotations: 'Inga kommentarer',
+        annotationSet: 'Annotation Set',
         about: 'Om',
         settings: 'Inställningar',
         preference: 'Preferens',
