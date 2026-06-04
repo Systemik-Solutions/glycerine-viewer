@@ -11,7 +11,7 @@ export default {
         annotations: '注釈',
         allAnnotations: 'すべての注釈',
         noAnnotations: '注釈はありません',
-        annotationSet: 'Annotation Set',
+        annotationSet: '注釈セット',
         about: 'について',
         settings: '設定',
         preference: '設定',

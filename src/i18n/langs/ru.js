@@ -11,7 +11,7 @@ export default {
         annotations: 'Аннотации',
         allAnnotations: 'Все аннотации',
         noAnnotations: 'Нет аннотаций',
-        annotationSet: 'Annotation Set',
+        annotationSet: 'Набор аннотаций',
         about: 'О программе',
         settings: 'Настройки',
         preference: 'Предпочтения',

@@ -11,7 +11,7 @@ export default {
         annotations: 'Σημειώσεις',
         allAnnotations: 'Όλες οι σημειώσεις',
         noAnnotations: 'Δεν υπάρχουν σημειώσεις',
-        annotationSet: 'Annotation Set',
+        annotationSet: 'Σύνολο σημειώσεων',
         about: 'Σχετικά',
         settings: 'Ρυθμίσεις',
         preference: 'Προτίμηση',

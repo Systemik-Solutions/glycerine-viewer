@@ -11,7 +11,7 @@ export default {
         annotations: 'Annotationen',
         allAnnotations: 'Alle Annotationen',
         noAnnotations: 'Keine Annotationen',
-        annotationSet: 'Annotation Set',
+        annotationSet: 'Annotationssatz',
         about: 'Über',
         settings: 'Einstellungen',
         preference: 'Präferenz',
