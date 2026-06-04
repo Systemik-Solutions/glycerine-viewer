@@ -145,6 +145,11 @@
                     <Button rounded icon="pi pi-cog" :title="$t('ui.settings')" @click="showSettingsPanel = true" />
                 </template>
             </div>
+            <AnnotationSetFilter
+                v-if="displayAnnotations && hasAnnotation && viewMode === 'image'"
+                v-model="settings.filters.set"
+                :options="filterSetOptions"
+            />
             <Transition name="slide">
                 <div v-if="showSettingsPanel" class="gv-sidebar">
                     <div class="text-right">
@@ -406,6 +411,7 @@ import TableViewer from "@/components/TableViewer.vue";
 import AudioViewer from "@/components/AudioViewer.vue";
 import VideoViewer from "@/components/VideoViewer.vue";
 import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
+import AnnotationSetFilter from "@/components/AnnotationSetFilter.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
@@ -415,7 +421,7 @@ export default {
     name: "GlycerineViewer",
     components: {
         AudioViewer, VideoViewer,
-        TableViewer, ImageViewer, ResourceInfoCard, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
+        TableViewer, ImageViewer, ResourceInfoCard, AnnotationSetFilter, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
