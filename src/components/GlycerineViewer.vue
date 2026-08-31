@@ -374,7 +374,7 @@
             </Transition>
         </div>
         <div v-else class="w-full h-full bg-gray-900 overflow-hidden flex flex-column align-items-center justify-content-center gap-4">
-            <img :class="{ 'gv-start-logo': true, animation: manifestIsLoading }" :src="logoPath" alt="Glycerine" />
+            <GlycerineLogo class="gv-start-logo" :animated="manifestIsLoading" />
             <div v-if="manifestHadErrors">
                 <Message v-for="error in manifestErrors" style="max-width: 400px" severity="error" :closable="false">
                     {{ error }}
@@ -390,8 +390,6 @@
 </template>
 
 <script>
-import logoPath from '@/assets/logo.png';
-
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
@@ -416,6 +414,7 @@ import AudioViewer from "@/components/AudioViewer.vue";
 import VideoViewer from "@/components/VideoViewer.vue";
 import ResourceInfoCard from "@/components/ResourceInfoCard.vue";
 import AnnotationSetFilter from "@/components/AnnotationSetFilter.vue";
+import GlycerineLogo from "@/components/GlycerineLogo.vue";
 import Language from "@/libraries/languages";
 import HtmlUtility from "@/libraries/html-utility.js";
 import Helper from "@/libraries/helper.js";
@@ -425,7 +424,7 @@ export default {
     name: "GlycerineViewer",
     components: {
         AudioViewer, VideoViewer,
-        TableViewer, ImageViewer, ResourceInfoCard, AnnotationSetFilter, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
+        TableViewer, ImageViewer, ResourceInfoCard, AnnotationSetFilter, GlycerineLogo, Button, Dropdown, InputSwitch, Checkbox, Message, Listbox, Chip, TabView, TabPanel, DataTable, Column, InputText, Tree, Slider},
     props: {
         // The IIIF manifest. Can be the URL of the manifest or the manifest object.
         manifest: {
@@ -1203,7 +1202,6 @@ export default {
     setup() {
         return {
             version: __APP_VERSION__,
-            logoPath,
             HtmlUtility,
             Helper,
             manifestLoader: null,
@@ -1955,22 +1953,8 @@ export default {
 
 /* Start up */
 .gv-start-logo {
-    max-width: 200px;
-    filter: grayscale(1);
-}
-
-.gv-start-logo.animation {
-    transition: filter .23s ease-in-out;
-    animation: pulse 4s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        filter: grayscale(1);
-    }
-    100% {
-        filter: grayscale(0);
-    }
+    width: 200px;
+    color: #f1f1ed;
 }
 
 /* Index */
