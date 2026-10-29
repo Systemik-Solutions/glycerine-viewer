@@ -24,7 +24,7 @@ export class ManifestParser extends ResourceParser {
      *
      * @returns {*[]}
      *   A list of canvases. Each element contains the canvas `id`, `parser`, `label`, `description`, `image`, `thumbnail`,
-     *   and `annotations`.
+     *   `annotations`, and optionally `accompanyingCanvas` with its own `id` and `image` or `audio`.
      */
     getCanvases(prefLangCode = null) {
         const canvases = [];
@@ -52,6 +52,10 @@ export class ManifestParser extends ResourceParser {
                             canvas.image = image;
                         }
                     }
+                    const accompanyingCanvas = this.getAccompanyingCanvas(item, image);
+                    if (accompanyingCanvas) {
+                        canvas.accompanyingCanvas = accompanyingCanvas;
+                    }
                     const thumbnail = this.getCanvasThumbnail(item);
                     if (thumbnail) {
                         canvas.thumbnail = thumbnail;
@@ -68,6 +72,42 @@ export class ManifestParser extends ResourceParser {
     }
 
     /**
+     * Get an embedded companion for an image/Sound canvas pair. Main media and
+     * companion media remain separate, and companions are never traversed recursively.
+     *
+     * @param {Object} canvas
+     * @param {Object|null} mainMedia
+     * @returns {Object|null} The companion ID and its image or audio descriptor.
+     */
+    getAccompanyingCanvas(canvas, mainMedia = this.getCanvasImage(canvas)) {
+        const companion = canvas.accompanyingCanvas;
+        if (
+            !companion || companion.type !== 'Canvas' ||
+            typeof companion.id !== 'string' || !companion.id ||
+            !Array.isArray(companion.items) || !mainMedia ||
+            !['image', 'iiif', 'audio'].includes(mainMedia.type)
+        ) {
+            return null;
+        }
+        // A malformed optional companion must not prevent displaying the main canvas.
+        try {
+            const media = this.getCanvasImage(companion);
+            if (!media || typeof media.url !== 'string' || !media.url) {
+                return null;
+            }
+            if (mainMedia.type === 'audio' && ['image', 'iiif'].includes(media.type)) {
+                return { id: companion.id, image: media };
+            }
+            if (['image', 'iiif'].includes(mainMedia.type) && media.type === 'audio') {
+                return { id: companion.id, audio: media };
+            }
+        } catch {
+            return null;
+        }
+        return null;
+    }
+
+    /**
      * Get the image object from the canvas.
      *
      * @param {Object} canvas
@@ -79,15 +119,22 @@ export class ManifestParser extends ResourceParser {
         let image = null;
         if (Array.isArray(canvas.items)) {
             canvas.items.forEach(anoPage => {
-                if (anoPage.type === 'AnnotationPage') {
+                if (anoPage?.type === 'AnnotationPage') {
                     if (Array.isArray(anoPage.items)) {
                         anoPage.items.forEach(anno => {
                             if (
-                                anno.type === 'Annotation' &&
+                                anno?.type === 'Annotation' &&
+                                typeof anno.motivation === 'string' &&
                                 anno.motivation.toLowerCase() === 'painting' &&
-                                typeof anno.body !== 'undefined'
+                                anno.body && typeof anno.body === 'object' && !Array.isArray(anno.body)
                             ) {
                                 const parser = ResourceParserFactory.create(anno.body);
+                                if (
+                                    (parser instanceof ImageParser || parser instanceof VideoParser || parser instanceof AudioParser) &&
+                                    (typeof parser.getID() !== 'string' || !parser.getID())
+                                ) {
+                                    return;
+                                }
                                 if (parser instanceof ImageParser) {
                                     if (parser.isIIIF()) {
                                         image = {
@@ -119,7 +166,7 @@ export class ManifestParser extends ResourceParser {
                                 }else if (parser instanceof SpecificResourceParser) {
                                     // Handle when image is a specific resource with selector.
                                     const source = parser.getSource();
-                                    if (source && source.type === 'Image') {
+                                    if (source && source.type === 'Image' && typeof source.id === 'string' && source.id) {
                                         const imageParser = ResourceParserFactory.create(source);
                                         let imageIIIFUrl = imageParser.getIIIFUrl();
                                         let imageUrl;
@@ -175,6 +222,16 @@ export class ManifestParser extends ResourceParser {
             return decodeURI(thumbnail);
         }
         const image = this.getCanvasImage(canvas);
+        if (image?.type === 'audio') {
+            const companion = this.getAccompanyingCanvas(canvas, image);
+            if (companion?.image) {
+                // Do not recurse into accompanyingCanvas or fetch external resources.
+                const media = companion.image;
+                return media.type === 'iiif'
+                    ? `${media.url}/full/${media.isLevel0 ? 'max' : '80,'}/0/default.jpg`
+                    : media.url;
+            }
+        }
         if (image !== null) {
             if (image.type === 'iiif') {
                 if (image.isLevel0) {

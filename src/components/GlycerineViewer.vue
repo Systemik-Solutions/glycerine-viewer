@@ -3,39 +3,42 @@
         <div ref="gViewer" v-if="manifestHasLoaded" v-bind="$attrs" class="w-full h-full relative overflow-hidden">
             <div class="gv-gallery flex flex-column justify-content-end h-full">
                 <div class="gv-gallery-views w-full flex-grow-1" style="min-height:0">
-                    <template v-for="(canvas, index) in canvases">
-                        <div class="h-full" v-if="navigation.activeIndex === index">
-                            <template v-if="canvas.image">
-                                <TableViewer v-if="viewMode === 'table'" :image="canvas.image.url"
-                                             :plain-image="canvas.image.type === 'image'"
-                                             :annotations="annotations[canvas.id]"
-                                             :default-language="annotationDefaultLanguage"
-                                             :showCutout="settings.showCutout"></TableViewer>
-                                <ImageViewer v-else ref="imageViewer" :image="canvas.image.url"
-                                             :plain-image="canvas.image.type === 'image'"
-                                             :annotations="annotations[canvas.id]"
-                                             :light="settings.light"
-                                             :default-language="annotationDefaultLanguage"
-                                             :displayAnnotations="displayAnnotations"
-                                             :highlightedAnnotationId="highlightedAnnotationId"
-                                             :showCutout="settings.showCutout"
-                                             :annotationFillOpacity="settings.annotationFillOpacity"
-                                             :playState="playState"
-                                             :playSpeed="settings.playSettings.speed"
-                                             :playShowPopup="settings.playSettings.showPopup"
-                                             :popupPosition="settings.popupPosition.value"
-                                             :crossOriginPolicy="crossOriginPolicy"
-                                             :startAnnotation="pendingStartAnnotationId"
-                                             @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
-                                             @beforeCanvasLoad="(hooks) => { $emit('beforeCanvasLoad', canvas.id, hooks) }"
-                                             @canvasLoaded="() => { pendingStartAnnotationId = null; $emit('canvasLoaded', canvas.id) }"
-                                             @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
-                                             @mouseEnterAnnotation="(annotationId) => { $emit('mouseEnterAnnotation', annotationId) }"
-                                             @mouseLeaveAnnotation="(annotationId) => { $emit('mouseLeaveAnnotation', annotationId) }"
-                                             @annotationPopupOpened="(annotationId) => { $emit('annotationPopupOpened', annotationId) }"
-                                             @annotationPopupClosed="(annotationId) => { $emit('annotationPopupClosed', annotationId) }"
-                                             @playIndexChanged="onPlayIndexChanged"
-                                ></ImageViewer>
+                    <template v-for="({ canvas, image, audio }, index) in canvasViews" :key="canvas.id">
+                        <div class="h-full flex flex-column" v-if="navigation.activeIndex === index">
+                            <template v-if="image">
+                                <div class="flex-1" style="min-height:0">
+                                    <TableViewer v-if="viewMode === 'table'" :image="image.url"
+                                                 :plain-image="image.type === 'image'"
+                                                 :annotations="canvas.image ? annotations[canvas.id] : []"
+                                                 :default-language="annotationDefaultLanguage"
+                                                 :showCutout="settings.showCutout"></TableViewer>
+                                    <ImageViewer v-else ref="imageViewer" :image="image.url"
+                                                 :plain-image="image.type === 'image'"
+                                                 :annotations="canvas.image ? annotations[canvas.id] : []"
+                                                 :light="settings.light"
+                                                 :default-language="annotationDefaultLanguage"
+                                                 :displayAnnotations="displayAnnotations"
+                                                 :highlightedAnnotationId="highlightedAnnotationId"
+                                                 :showCutout="settings.showCutout"
+                                                 :annotationFillOpacity="settings.annotationFillOpacity"
+                                                 :playState="playState"
+                                                 :playSpeed="settings.playSettings.speed"
+                                                 :playShowPopup="settings.playSettings.showPopup"
+                                                 :popupPosition="settings.popupPosition.value"
+                                                 :crossOriginPolicy="crossOriginPolicy"
+                                                 :startAnnotation="pendingStartAnnotationId"
+                                                 @osdInitialized="(osd) => { $emit('osdInitialized', osd, canvas) }"
+                                                 @beforeCanvasLoad="(hooks) => { $emit('beforeCanvasLoad', canvas.id, hooks) }"
+                                                 @canvasLoaded="() => { pendingStartAnnotationId = null; $emit('canvasLoaded', canvas.id) }"
+                                                 @annotationsLoaded="(rawAnnotations) => { $emit('canvasAnnotationsLoaded', rawAnnotations, canvas.id) }"
+                                                 @mouseEnterAnnotation="(annotationId) => { $emit('mouseEnterAnnotation', annotationId) }"
+                                                 @mouseLeaveAnnotation="(annotationId) => { $emit('mouseLeaveAnnotation', annotationId) }"
+                                                 @annotationPopupOpened="(annotationId) => { $emit('annotationPopupOpened', annotationId) }"
+                                                 @annotationPopupClosed="(annotationId) => { $emit('annotationPopupClosed', annotationId) }"
+                                                 @playIndexChanged="onPlayIndexChanged"
+                                    ></ImageViewer>
+                                </div>
+                                <AudioViewer v-if="audio" class="flex-shrink-0" compact :source="audio.url" :format="audio.format" />
                             </template>
                             <template v-else-if="canvas.audio">
                                 <AudioViewer :source="canvas.audio.url" :format="canvas.audio.format" />
@@ -728,6 +731,14 @@ export default {
                 canvases = this.manifestLoader.getParser().getCanvases();
             }
             return canvases;
+        },
+        // Resolve the image/audio pair without replacing the main canvas descriptor.
+        canvasViews() {
+            return this.canvases.map(canvas => ({
+                canvas,
+                image: canvas.image || canvas.accompanyingCanvas?.image,
+                audio: canvas.audio || canvas.accompanyingCanvas?.audio,
+            }));
         },
         // Manifest information.
         manifestInfo() {
