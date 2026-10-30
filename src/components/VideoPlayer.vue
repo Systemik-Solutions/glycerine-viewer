@@ -6,6 +6,7 @@
 
 <script>
 import videojs from 'video.js';
+import { markRaw } from 'vue';
 export default {
     name: "VideoPlayer",
     props: {
@@ -28,12 +29,13 @@ export default {
         }
     },
     mounted() {
-        this.player = videojs(this.$refs.videoPlayer, this.options);
+        this.player = markRaw(videojs(this.$refs.videoPlayer, this.options));
     },
-    beforeDestroy() {
-        if (this.player) {
+    beforeUnmount() {
+        if (this.player && !this.player.isDisposed()) {
             this.player.dispose();
         }
+        this.player = null;
     }
 }
 </script>
